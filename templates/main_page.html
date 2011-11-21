@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Wordout</title>
+    </head>
+    <body>
+        <h1>Welcome</h1>
+        {% if user.username %}
+            <div>{{user.username}}<a href="/logout">logout</a></div>
+        {% else %}
+            <div>anonymous user</div>
+        {% endif %}
+    </body>
+</html>
