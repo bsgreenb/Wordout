@@ -17,6 +17,9 @@ def logout_page(request):
     return HttpResponseRedirect('/')
 
 def register_page(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/')
+
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -24,10 +27,10 @@ def register_page(request):
                     username=form.cleaned_data['username'],
                     password=form.cleaned_data['password1'],
                     email=form.cleaned_data['email']
-                    )
+                     )
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)
             return HttpResponseRedirect('/')
-    else:
-        form = RegistrationForm()
+    
+    form = RegistrationForm()
     return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
