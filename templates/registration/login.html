@@ -8,6 +8,7 @@
             {% csrf_token %}
             {{form.as_p}}
             <input type="submit" value="login" />
+            <a href="/password_reset">forgot password</a>
             <input type="hidden" name="next" value="{% if next %}{{next}}{% else%}/{%endif%}" />
         </form>
     </body>

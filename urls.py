@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
-from django.contrib.auth.views import login, logout
+from django.contrib.auth.views import login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete
+
 from wordout.views import *
 from django.contrib import admin
 admin.autodiscover()
@@ -17,5 +18,9 @@ urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
+    (r'^password_reset/$', password_reset),
+    (r'^password_reset/done/$', password_reset_done),
+    (r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', password_reset_confirm),
+    (r'^reset/done/$', password_reset_complete),
     url(r'^admin/', include(admin.site.urls)),
 )
