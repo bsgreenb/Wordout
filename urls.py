@@ -15,13 +15,12 @@ urlpatterns = patterns('',
     (r'^accounts/login/$', anonymous_required(login)),
     (r'^logout/$', logout_page),
     (r'^register/$', anonymous_required(register_page)),
-    # Examples:
-    # url(r'^$', 'django_wordout.views.home', name='home'),
-    # url(r'^django_wordout/', include('django_wordout.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     
+
+
+
+
+
 
     #django plugin for change password and reset password
     (r'^password/change/$', password_change),
