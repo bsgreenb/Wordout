@@ -1,4 +1,4 @@
-from wordout import models
+from wordout.models import *
 from django import forms
 import re
 from django.contrib.auth.models import User
@@ -12,13 +12,19 @@ class NumericIdenForm(forms.Form):
     start = forms.IntegerField()
     end = forms.IntegerField()
     redirect_link = forms.URLField(verify_exists=True)
+
+    def __init__(self, user=None, *args, **kwargs):
+        super(NumericIdenForm, self).__init__(*args, **kwargs)
+        self._user = user
+
     def clean_start(self):
         #make sure the start is 1 bigger than the last numeric identifier
         if 'start' in self.cleaned_data:
             start = self.cleaned_data['start']
             try:
-                last = int(Identifier.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0])
-            except Identifier.IndexError:
+                last = Identifiers.objects.filter(customer = self._user, identifier_type = 1).order_by('-created')[0]
+                last = int(last.identifier)
+            except IndexError:
                 last = 0
             if last < start:
                 return start

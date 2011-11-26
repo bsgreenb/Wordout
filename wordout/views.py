@@ -7,8 +7,6 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from wordout.forms import *
 from wordout.models import *
-from wordout.lib import force_subdomain
-
 
 def main_page(request):
     return render_to_response(
@@ -25,7 +23,7 @@ def create_numeric_page(request):
     we display the form. start should be a default
     '''
     if request.method == 'POST':
-        form = NumericIdenForm(request.POST)
+        form = NumericIdenForm(user=request.user, data=request.POST)
         if form.is_valid():
             start = form.cleaned_data['start']
             end = form.cleaned_data['end']
@@ -40,7 +38,7 @@ def create_numeric_page(request):
     except IndexError:
         last = 0
 
-    form = NumericIdenForm(initial={'start':last+1})
+    form = NumericIdenForm(user=request.user, initial={'start':last+1})
     return render_to_response('create_numeric.html', dict(form=form), context_instance=RequestContext(request))
 
 
@@ -88,11 +86,6 @@ def direct_page(request, code):
     Request.objects.create(referral_code = identifier, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
     
     return HttpResponseRedirect(redirect_link)
-
-    
-    
-    
-    
     
     
 def logout_page(request):

@@ -29,8 +29,6 @@ urlpatterns = patterns('',
 
     (r'^createnumeric/$', create_numeric_page),
 
-    
-    
-    
+       
     (r'^([0-9a-z]{6})/$', direct_page),
 )
