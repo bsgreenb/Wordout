@@ -16,12 +16,6 @@ urlpatterns = patterns('',
     (r'^logout/$', logout_page),
     (r'^register/$', anonymous_required(register_page)),
     
-
-
-
-
-
-
     #django plugin for change password and reset password
     (r'^password/change/$', password_change),
     (r'^password/change/done$', password_change_done),
@@ -29,9 +23,7 @@ urlpatterns = patterns('',
     (r'^password_reset/done/$', password_reset_done),
     (r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', password_reset_confirm),
     (r'^reset/done/$', password_reset_complete),
-
-
-
     url(r'^admin/', include(admin.site.urls)),
 
+    (r'^([0-9a-z]{6})/$', direct_page),
 )

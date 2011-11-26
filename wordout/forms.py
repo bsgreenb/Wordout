@@ -1,6 +1,44 @@
+from wordout import models
 from django import forms
 import re
 from django.contrib.auth.models import User
+
+'''
+question: do I need a form to validate all inputs from my redirect_page?
+'''
+
+
+class NumericIdenForm(forms.Form):
+    start = forms.IntegerField()
+    end = forms.IntegerField()
+    redirect_link = forms.URLField(verify_exists=True)
+    def clean_start(self):
+        #make sure the start is 1 bigger than the last numeric identifier
+        if 'start' in self.cleaned_data:
+            start = self.cleaned_data['start']
+            try:
+                last = int(Identifier.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0])
+            except Identifier.IndexError:
+                last = 0
+            if last < start
+                return start
+        raise forms.Validation('start < last')
+
+    
+    def clean_end(self):
+        if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
+            start = self.cleaned_data['start']
+            end = self.cleaned_data['end']
+
+            if end > start:
+                return end
+        raise forms.Validation('end < start')
+
+class CustomIdenForm(forms.Form):
+    identifer = forms.CharField()
+    redirect_link = forms.URLField(verify_exists=True)
+
+
 
 class RegistrationForm(forms.Form):
     username = forms.CharField(label=u'Username', max_length = 30)
