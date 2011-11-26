@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.template import RequestContext
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.decorators import login_required
 from wordout.forms import *
 from wordout.models import *
 from wordout.lib import force_subdomain
@@ -14,6 +15,35 @@ def main_page(request):
             'main_page.html',
             dict(user=request.user)
         )
+
+
+@login_required
+def create_numeric_page(request):
+    '''
+    if the request is post, i go into form, validate it and the customer will save those identifiers and redirect into the main page
+    if not, 
+    we display the form. start should be a default
+    '''
+    if request.method == 'POST':
+        form = NumericIdenForm(request.POST)
+        if form.is_valid():
+            start = form.cleaned_data['start']
+            end = form.cleaned_data['end']
+            redirect_link = form.cleaned_data['redirect_link']
+            customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
+            customer.numeric_ident_save(start, end, redirect_link)
+            return HttpResponseRedirect('/')
+    
+    try:
+        last = Identifiers.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0]
+        last = int(last.identifier)
+    except IndexError:
+        last = 0
+
+    form = NumericIdenForm(initial={'start':last+1})
+    return render_to_response('create_numeric.html', dict(form=form), context_instance=RequestContext(request))
+
+
 
 def direct_page(request, code):
     '''

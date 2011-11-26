@@ -25,5 +25,12 @@ urlpatterns = patterns('',
     (r'^reset/done/$', password_reset_complete),
     url(r'^admin/', include(admin.site.urls)),
 
+    #those two create identifier page should be in module instead of page and use ajax to send query
+
+    (r'^createnumeric/$', create_numeric_page),
+
+    
+    
+    
     (r'^([0-9a-z]{6})/$', direct_page),
 )

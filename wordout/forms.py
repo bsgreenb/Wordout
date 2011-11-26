@@ -20,9 +20,9 @@ class NumericIdenForm(forms.Form):
                 last = int(Identifier.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0])
             except Identifier.IndexError:
                 last = 0
-            if last < start
+            if last < start:
                 return start
-        raise forms.Validation('start < last')
+        raise forms.ValidationError('start < last')
     
     def clean_end(self):
         if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
@@ -31,21 +31,20 @@ class NumericIdenForm(forms.Form):
 
             if end > start:
                 return end
-        raise forms.Validation('end < start')
+        raise forms.ValidationError('end < start')
 
 class CustomIdenForm(forms.Form):
     identifer = forms.CharField()
     redirect_link = forms.URLField(verify_exists=True)
     
-    def clean_identifier:
+    def clean_identifier(self):
         if 'identifier' in self.cleaned_data:
             identifier = self.cleaned_data['identifier']
             try:
                 Identifier.objects.get(customer = request.user, identifier_type = 2, identifier = identifier)
-            except: Identifier.DoesNotExist:
+            except Identifier.DoesNotExist:
                 return identifier
-        raise forms.Validation('the identifier is taken')
-
+        raise forms.ValidationError('the identifier is taken')
 
 
 class RegistrationForm(forms.Form):
