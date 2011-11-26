@@ -23,7 +23,6 @@ class NumericIdenForm(forms.Form):
             if last < start
                 return start
         raise forms.Validation('start < last')
-
     
     def clean_end(self):
         if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
@@ -37,6 +36,15 @@ class NumericIdenForm(forms.Form):
 class CustomIdenForm(forms.Form):
     identifer = forms.CharField()
     redirect_link = forms.URLField(verify_exists=True)
+    
+    def clean_identifier:
+        if 'identifier' in self.cleaned_data:
+            identifier = self.cleaned_data['identifier']
+            try:
+                Identifier.objects.get(customer = request.user, identifier_type = 2, identifier = identifier)
+            except: Identifier.DoesNotExist:
+                return identifier
+        raise forms.Validation('the identifier is taken')
 
 
 
