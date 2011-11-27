@@ -9,10 +9,17 @@ from wordout.forms import *
 from wordout.models import *
 
 def main_page(request):
-    return render_to_response(
-            'main_page.html',
-            dict(user=request.user)
-        )
+    #just test sql
+    if request.user.is_authenticated():
+        customer = Customer.objects.get(user = request.user)
+        ls = customer.display_identifiers()[0]
+        HttpResponse(ls)
+    else:
+
+        return render_to_response(
+                'main_page.html',
+                dict(user=request.user)
+            )
 
 
 @login_required
@@ -31,17 +38,31 @@ def create_numeric_page(request):
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
             customer.numeric_ident_save(start, end, redirect_link)
             return HttpResponseRedirect('/')
-    
-    try:
-        last = Identifiers.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0]
-        last = int(last.identifier)
-    except IndexError:
-        last = 0
+    else:
+        try:
+            last = Identifiers.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0]
+            last = int(last.identifier)
+        except IndexError:
+            last = 0
 
-    form = NumericIdenForm(user=request.user, initial={'start':last+1})
+        form = NumericIdenForm(user=request.user, initial={'start':last+1})
+    
     return render_to_response('create_numeric.html', dict(form=form), context_instance=RequestContext(request))
 
-
+@login_required
+def create_custom_page(request):
+    if request.method == 'POST':
+        form = CustomIdenForm(user = request.user, data = request.POST)
+        if form.is_valid():
+            identifier = form.cleaned_data['identifier']
+            redirect_link = form.cleaned_data['redirect_link']
+            customer = Customer.objects.get(user=request.user)
+            customer.custom_ident_save(identifier, redirect_link)
+            return HttpResponseRedirect('/')
+    else:
+        form = CustomIdenForm(user=request.user)
+    
+    return render_to_response('create_custom.html', dict(form=form), context_instance=RequestContext(request))
 
 def direct_page(request, code):
     '''
@@ -102,6 +123,9 @@ def register_page(request):
                     password=form.cleaned_data['password1'],
                     email=form.cleaned_data['email']
                      )
+            #this is not the best practice. I forced extra query here.  change on version 2
+            Customer.objects.create(user = user)
+            
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)
             return HttpResponseRedirect('/')

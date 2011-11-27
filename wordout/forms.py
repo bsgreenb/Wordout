@@ -40,15 +40,19 @@ class NumericIdenForm(forms.Form):
         raise forms.ValidationError('end < start')
 
 class CustomIdenForm(forms.Form):
-    identifer = forms.CharField()
+    identifier = forms.CharField()
     redirect_link = forms.URLField(verify_exists=True)
     
+    def __init__(self, user=None, *args, **kwargs):
+        super(CustomIdenForm, self).__init__(*args, **kwargs)
+        self._user = user
+
     def clean_identifier(self):
         if 'identifier' in self.cleaned_data:
             identifier = self.cleaned_data['identifier']
             try:
-                Identifier.objects.get(customer = request.user, identifier_type = 2, identifier = identifier)
-            except Identifier.DoesNotExist:
+                Identifiers.objects.get(customer = self._user, identifier_type = 2, identifier = identifier)
+            except Identifiers.DoesNotExist:
                 return identifier
         raise forms.ValidationError('the identifier is taken')
 

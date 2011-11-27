@@ -97,7 +97,22 @@ class Customer(models.Model):
             except Identifiers.DoesNotExist:
                 loop = False
                 Identifiers.objects.create(customer = self, identifier = identifier, identifier_type = 2, code = code, redirect_link = redirect_link)
-
+    
+    def display_identifiers(self):
+        '''
+        I need write raw sql to get the query.
+        '''
+        identifier_list = Identifiers.objects.raw('''
+        SELECT 
+        wordout_identifiers.identifier, wordout_identifiers.code, wordout_identifiers.redirect_link, wordout_identifiers.enabled, count(wordout_request.id) as clicks 
+        FROM wordout_identifiers 
+        LEFT JOIN wordout_request 
+        ON (wordout_identifiers.id = wordout_request.referral_code AND wordout_identifiers.redirect_link = wordout_request.redirect_link)
+        WHERE wordout_identifiers.customer = %s 
+        GROUP BY wordout_identifiers.identifier
+        ORDER BY clicks DESC
+        ''', [self.id])
+        return identifier_list
 
 class Identifiers(models.Model):
     customer = models.ForeignKey(Customer)
