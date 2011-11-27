@@ -104,11 +104,11 @@ class Customer(models.Model):
         '''
         identifier_list = Identifiers.objects.raw('''
         SELECT 
-        wordout_identifiers.identifier, wordout_identifiers.code, wordout_identifiers.redirect_link, wordout_identifiers.enabled, count(wordout_request.id) as clicks 
+        wordout_identifiers.id, wordout_identifiers.identifier, wordout_identifiers.code, wordout_identifiers.redirect_link_id, wordout_identifiers.enabled, count(wordout_request.id) as clicks 
         FROM wordout_identifiers 
         LEFT JOIN wordout_request 
-        ON (wordout_identifiers.id = wordout_request.referral_code AND wordout_identifiers.redirect_link = wordout_request.redirect_link)
-        WHERE wordout_identifiers.customer = %s 
+        ON (wordout_identifiers.id = wordout_request.referral_code_id AND wordout_identifiers.redirect_link_id = wordout_request.redirect_link_id)
+        WHERE wordout_identifiers.customer_id = %s 
         GROUP BY wordout_identifiers.identifier
         ORDER BY clicks DESC
         ''', [self.id])

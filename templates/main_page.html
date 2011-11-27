@@ -9,5 +9,12 @@
         {% else %}
             <div>anonymous user</div>
         {% endif %}
+        
+        {% if ls %}
+        <div>{{ls.identifier}}{{ls.clicks}}{{ls.redirect_link_id}}{{ls.code}}
+            </div>
+        {% endif %}
+
+
     </body>
 </html>

@@ -13,7 +13,7 @@ def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
         ls = customer.display_identifiers()[0]
-        HttpResponse(ls)
+        return render_to_response('main_page.html', dict(user=request.user, ls=ls))
     else:
 
         return render_to_response(
