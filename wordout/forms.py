@@ -56,6 +56,13 @@ class CustomIdenForm(forms.Form):
                 return identifier
         raise forms.ValidationError('the identifier is taken')
 
+class EditIdentForm(forms.Form):
+    redirect_link = forms.URLField(verify_exists=True)
+
+    def __init__(self, user=None, *args, **kwargs):
+        super(EditIdentForm, self).__init__(*args, **kwargs)
+        self._user = user
+
 
 class RegistrationForm(forms.Form):
     username = forms.CharField(label=u'Username', max_length = 30)

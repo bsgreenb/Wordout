@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from urlparse import urlparse
 from lib import *
-
+from django.db.models import Count, Sum
 
 
 IDENTIFIER_TYPE = (
@@ -98,21 +98,39 @@ class Customer(models.Model):
                 loop = False
                 Identifiers.objects.create(customer = self, identifier = identifier, identifier_type = 2, code = code, redirect_link = redirect_link)
     
-    def display_identifiers(self):
+    def change_all_redirect_link(self, new_redirect_link, ident_type=None):
+        new_redirect_link, created = get_or_create_link(new_redirect_link)
+        ls = Identifiers.objects
+        
+        if ident_type:
+            ls = ls.filter(identifier_type = ident_type)
+        
+        ls = ls.update(redirect_link = new_redirect_link)
+
+    def display_identifiers(self, least_click=None, start=None, end=None, ident_type=None):
         '''
         I need write raw sql to get the query.
+        this query has problem. I need identifier_redirect_link linking to request_direct_link.  figure out later
         '''
-        identifier_list = Identifiers.objects.raw('''
-        SELECT 
-        wordout_identifiers.id, wordout_identifiers.identifier, wordout_identifiers.code, wordout_identifiers.redirect_link_id, wordout_identifiers.enabled, count(wordout_request.id) as clicks 
-        FROM wordout_identifiers 
-        LEFT JOIN wordout_request 
-        ON (wordout_identifiers.id = wordout_request.referral_code_id AND wordout_identifiers.redirect_link_id = wordout_request.redirect_link_id)
-        WHERE wordout_identifiers.customer_id = %s 
-        GROUP BY wordout_identifiers.identifier
-        ORDER BY clicks DESC
-        ''', [self.id])
-        return identifier_list
+        
+        ls = Identifiers.objects.filter(customer = self)
+        
+        if start and end:
+            ls = ls.filter(request__created__gte=start, request__created__lte=end)
+
+        ls = ls.annotate(num = Count('request'))
+        
+        if least_click:
+            ls = ls.filter(num__gte=least_click)
+        
+        if ident_type in (1, 2):
+            ls = ls.filter(identifier_type = ident_type)
+
+        ls = ls.order_by('-num')
+
+        sum_clicks = ls.aggregate(sum_clicks=Sum('num'))['sum_clicks']
+        
+        return (ls, sum_clicks)
 
 class Identifiers(models.Model):
     customer = models.ForeignKey(Customer)

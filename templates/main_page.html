@@ -9,10 +9,17 @@
         {% else %}
             <div>anonymous user</div>
         {% endif %}
-        
+
+        {% if sum_clicks %}
+            <div>{{sum_clicks}}</div>
+        {% endif %}
+
+
         {% if ls %}
-        <div>{{ls.identifier}}{{ls.clicks}}{{ls.redirect_link_id}}{{ls.code}}
+            {% for l in ls%}
+            <div>identifier: {{l.identifier}}||clicks: {{l.num}}||redirect_link: {{l.redirect_link}}||code: {{l.code}}||enable: {{l.enabled}}
             </div>
+            {% endfor %}
         {% endif %}
 
 

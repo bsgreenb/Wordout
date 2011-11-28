@@ -8,7 +8,7 @@ class IdentifiersAdmin(admin.ModelAdmin):
     list_display = ('customer', 'identifier', 'code', 'redirect_link', 'identifier_type')
 
 class RequestAdmin(admin.ModelAdmin):
-    list_display = ('referral_code', 'redirect_link', 'referrer','IP')
+    list_display = ('referral_code', 'redirect_link', 'referrer','IP', 'created')
 
 admin.site.register(Customer)
 admin.site.register(HOST)

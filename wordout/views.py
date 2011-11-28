@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render_to_response
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
@@ -12,8 +13,13 @@ def main_page(request):
     #just test sql
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
-        ls = customer.display_identifiers()[0]
-        return render_to_response('main_page.html', dict(user=request.user, ls=ls))
+        #a = datetime(2011, 11, 23)
+        #b = datetime(2011, 11, 26)
+        #least_click = 1
+        #ident_type = 2
+        #three filter variables for display_identifiers()
+        ls, sum_clicks = customer.display_identifiers()
+        return render_to_response('main_page.html', dict(user=request.user, ls=ls, sum_clicks = sum_clicks))
     else:
 
         return render_to_response(
@@ -63,6 +69,27 @@ def create_custom_page(request):
         form = CustomIdenForm(user=request.user)
     
     return render_to_response('create_custom.html', dict(form=form), context_instance=RequestContext(request))
+
+@login_required
+def edit_identifier_page(request):
+    if request.method == 'POST':
+        form = EditIdentForm(user = request.user, data = request.POST)
+        if form.is_valid():
+            
+            if request.POST.get('ident_type', '') and request.POST['ident_type'] in (1, 2):
+                ident_type = request.POST['ident_type']
+            else:
+                ident_type = None
+            redirect_link = form.cleaned_data['redirect_link']
+            customer = Customer.objects.get(user=request.user)
+            customer.change_all_redirect_link(redirect_link, ident_type)
+
+            return HttpResponseRedirect('/')
+    else:
+        form = EditIdentForm(user = request.user)
+
+    return render_to_response('edit_ident.html', dict(form=form), context_instance=RequestContext(request))
+
 
 def direct_page(request, code):
     '''
