@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <title>Referrer</title>
+    </head>
+
+    <body>
+        <h1>Referrer Summary</h1>
+        {% if ls %}
+            {% for l in ls%}
+            <div>{{l.host_name}} || {{l.clicks}} || {{l.path_loc}}</div>
+            {% endfor %}
+        {% endif %}
+
+    </body>
+</html>
