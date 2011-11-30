@@ -90,6 +90,22 @@ def edit_identifier_page(request):
 
     return render_to_response('edit_ident.html', dict(form=form), context_instance=RequestContext(request))
 
+@login_required
+def referrer_page(request):
+    customer = Customer.objects.get(user=request.user)
+    #figure out the best way to add start and end variables
+    ls = customer.display_referrer()
+    
+    return render_to_response('referrer.html', dict(ls=ls), context_instance=RequestContext(request))
+
+def path_page(request, host_id):
+    customer = Customer.objects.get(user=request.user)
+    
+    ls = customer.display_path(host_id)
+    
+    #should be ajax and attach elements to each host
+    return render_to_response('referrer.html', dict(ls=ls), context_instance=RequestContext(request))
+
 
 def direct_page(request, code):
     '''

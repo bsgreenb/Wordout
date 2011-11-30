@@ -34,6 +34,12 @@ class NumericIdenForm(forms.Form):
         if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
             start = self.cleaned_data['start']
             end = self.cleaned_data['end']
+            
+            #limit the number of identifiers. current is 1000
+            total = Identifiers.objects.filter(customer = self._user).count()
+            num_created = end - start + 1
+            if (total + num_created) > 1000:
+                raise forms.ValidationError('limit is 1000')
 
             if end > start:
                 return end
@@ -49,11 +55,20 @@ class CustomIdenForm(forms.Form):
 
     def clean_identifier(self):
         if 'identifier' in self.cleaned_data:
+            
+            #limit the number of identifiers
+            total = Identifiers.objects.filter(customer = self._user).count()
+            if total >= 1000:
+                raise forms.ValidationError('limit is 1000')
+
             identifier = self.cleaned_data['identifier']
             try:
                 Identifiers.objects.get(customer = self._user, identifier_type = 2, identifier = identifier)
             except Identifiers.DoesNotExist:
                 return identifier
+
+
+
         raise forms.ValidationError('the identifier is taken')
 
 class EditIdentForm(forms.Form):
