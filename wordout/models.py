@@ -76,6 +76,10 @@ class Customer(models.Model):
     def numeric_ident_save(self, start, end, redirect_link):
         redirect_link, created = get_or_create_link(redirect_link)
 
+        #return the data for ajax call
+
+        data = {}
+
         for i in range(start, end+1):
             loop = True
             while loop == True:
@@ -85,6 +89,11 @@ class Customer(models.Model):
                 except Identifiers.DoesNotExist:
                     loop = False
                     Identifiers.objects.create(customer = self, identifier = i, identifier_type = 1, code = code, redirect_link = redirect_link)
+                    data['identifier'] = i
+                    data['code'] = code
+                    data['redirect_link'] = redirect_link
+
+        return data
 
     def custom_ident_save(self, identifier, redirect_link):
        

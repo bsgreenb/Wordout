@@ -19,7 +19,19 @@ def main_page(request):
         #ident_type = 2
         #three filter variables for display_identifiers()
         ls, sum_clicks = customer.display_identifiers()
-        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks),context_instance=RequestContext(request))
+
+
+        #get default start value for create numeric identifiers
+        try:
+            last = Identifiers.objects.filter(customer = customer, identifiers_type = 1).order_by('-created')[0]
+            last = int(last.identifier)
+        except: IndexError:
+            last = 0
+        
+        default_start = last + 1
+
+
+        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start),context_instance=RequestContext(request))
     else:
 
         return render_to_response(
@@ -36,10 +48,6 @@ def show_referrer_by_ident(request, ident_id):
 
     return render_to_response('referrer.html', dict(ls = ls),context_instance=RequestContext(request))
 
-
-
-
-
 @login_required
 def create_numeric_page(request):
     '''
@@ -54,7 +62,7 @@ def create_numeric_page(request):
             end = form.cleaned_data['end']
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
-            customer.numeric_ident_save(start, end, redirect_link)
+            data = customer.numeric_ident_save(start, end, redirect_link)
             return HttpResponseRedirect('/')
     else:
         try:

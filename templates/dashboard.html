@@ -81,23 +81,23 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 		<form>
 			<fieldset>
 				<div class="clearfix">
-					<label for="id_start">Start number: </label>
+					<label for="numeric_start">Start number: </label>
 					<div class="input">
-						<input id="id_start" class="large" type="text" value="501" name="start" disabled="disabled">
+						<input id="numeric_start" type="text" value="{{default_start}}" name="start" disabled="disabled">
 					</div>
 				</div>
 			
 				<div class="clearfix">
-					<label for="id_end">End number: </label>
+					<label for="numeric_end">End number: </label>
 					<div class="input">
-						<input id="id_end" class="large" type="text" name="end">
+						<input id="numeric_end" type="text" name="end">
 					</div>
 				</div>
 				
 				<div class="clearfix">
-					<label for="id_redirect_link">Redirect link: </label>
+					<label for="numeric_redirect_link">Redirect link: </label>
 					<div class="input">
-						<input id="id_redirect_link" type="text" name="redirect_link">
+						<input id="numeric_redirect_link" type="text" name="redirect_link">
 					</div>
 				</div>
 			</fieldset>
@@ -105,7 +105,7 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 	</div>
 
 	<div class="modal-footer">
-		<button class="btn primary" href="#">Save</button>
+		<button class="btn primary" href="#" id="numeric_save">Save</button>
 	</div>
 </div>
 
