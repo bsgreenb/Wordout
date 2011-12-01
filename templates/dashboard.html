@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block js %}
+
+<script src="static/js/plugin/jquery.tablesorter.min.js"></script>
+<script src="static/js/plugin/bootstrap-modal.js"></script>
+<script>
+
+$(function() {
+$("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
+});
+
+</script>
+
+{% endblock %}
+
+
+{% block right-table %}
+
+
+
+<span>total clicks: {{sum_clicks}}</span><!-- data range can go there -->
+
+<p class="pull-right">
+	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">+ numeric identifier</button>
+	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="custom-modal-from-dom">+ custom identifier</button>
+	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">edit redirect link</button>
+</p>
+
+
+
+{% if ls %}
+<table id="sortTableExample" class="zebra-striped">
+	<thead>
+		
+		<tr>
+			<th class="header">Identifier</th>
+			<th class="yellow header headerSortDown">Clicks</th>
+			<th class="blue header">Link</th>
+			<th class="green header">Enable</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for l in ls%}
+			<tr>
+				<td>{{ l.identifier }}</td>
+				<td>{{ l.num }} <span class="label notice" id="{{l.id}}">detail</span></td>
+				<td>
+					<div>wordout.me/{{ l.code }}</div>
+					<div>{{ l.redirect_link }}</div>
+				</td>
+				<td>{{ l.enabled }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<!--
+<div class="pagination">
+	<ul>
+			<li class="prev disabled"><a href="#">&larr; Previous</a></li>
+			<li class="active"><a href="#">1</a></li>
+			<li><a href="#">2</a></li>
+			<li><a href="#">3</a></li>
+			<li><a href="#">4</a></li>
+			<li><a href="#">5</a></li>
+			<li class="next"><a href="#">Next &rarr;</a></li>
+		</ul>
+</div>
+-->
+{% else %}
+<div>Create referral code for your users </div>
+{% endif %}
+
+<div id="numeric-modal-from-dom" class="modal hide fade" style="display: block;">
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Generate numeric identifiers</h3>
+	</div>
+	
+	<div class="modal-body">
+		<form>
+			<fieldset>
+				<div class="clearfix">
+					<label for="id_start">Start number: </label>
+					<div class="input">
+						<input id="id_start" class="large" type="text" value="501" name="start" disabled="disabled">
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label for="id_end">End number: </label>
+					<div class="input">
+						<input id="id_end" class="large" type="text" name="end">
+					</div>
+				</div>
+				
+				<div class="clearfix">
+					<label for="id_redirect_link">Redirect link: </label>
+					<div class="input">
+						<input id="id_redirect_link" type="text" name="redirect_link">
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+
+	<div class="modal-footer">
+		<button class="btn primary" href="#">Save</button>
+	</div>
+</div>
+
+<div id="custom-modal-from-dom" class="modal hide fade" style="display: block;">
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Create custom identifiers</h3>
+	</div>
+	
+	<div class="modal-body">
+		
+			<form>
+				<fieldset>
+					<div class="clearfix">
+						<label for="id_identifier">Identifier:</label>
+						<div class="input">
+							<input id="id_identifier" type="text" name="identifier">
+						</div>
+					</div>
+
+					<div class="clearfix">
+						<label for="id_redirect_link">Redirect link:</label>
+						<div class="input">
+							<input id="id_redirect_link" type="text" name="redirect_link">
+						</div>
+					</div>
+						
+				</fieldset>
+			</form>
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn primary" href="#">Save</button>
+	</div>
+</div>
+
+<div id="edit-modal-from-dom" class="modal hide fade" style="display: block;">
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Edit all redirect links</h3>
+	</div>
+	<div class="modal-body">
+		<form>
+			
+			<fieldset>
+				<div class="clearfix">
+					<label for="id_redirect_link">Redirect link:</label>
+					<div class="input">
+						<input id="id_redirect_link" type="text" name="redirect_link">
+					</div>
+				</div>
+					
+			</fieldset>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button class="btn primary" href="#">Save</button>
+	</div>
+</div>
+
+
+
+{% endblock %}
+
+	

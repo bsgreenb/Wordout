@@ -128,12 +128,30 @@ class Customer(models.Model):
         
         return (ls, sum_clicks)
     
-    def display_request_for_identifier(self, identfier_id, start=None, end=None):
-
-        ls = Full_Link.objects.filter(
-    
-    def display_referrer(self, start=None, end=None):
+    def display_referrer_for_identifier(self, identifier_id, start=None, end=None):
         
+        ls = Request.objects.raw('''
+        SELECT wordout_request.id, wordout_request.referrer_id, wordout_request.created, count(wordout_request.id) as clicks, wordout_host.host_name, wordout_path.path_loc
+        FROM wordout_request
+        LEFT JOIN wordout_full_link
+            ON wordout_full_link.id = wordout_request.referrer_id
+        LEFT JOIN wordout_host
+            ON wordout_full_link.host_id = wordout_host.id
+        LEFT JOIN wordout_path
+            ON wordout_full_link.path_id = wordout_path.id
+        LEFT JOIN wordout_identifiers
+            ON wordout_identifiers.id = wordout_request.referral_code_id
+        WHERE wordout_identifiers.customer_id = %s AND wordout_identifiers.id = %s
+        GROUP BY wordout_request.referrer_id
+        ''', [self.id, identifier_id])
+                
+        if start and end:
+            ls = ls.filter(request__created__gte=start, request__created__lte=end)
+       
+        return ls
+
+
+    def display_referrer(self, start=None, end=None):        
         ls = HOST.objects.raw('''
         SELECT wordout_host.id, wordout_host.host_name, COUNT(distinct wordout_request.id) as clicks, wordout_request.created
         FROM wordout_host

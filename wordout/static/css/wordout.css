@@ -1,0 +1,14 @@
+body {
+    padding-top: 60px; 
+}
+
+.span4, .span12{
+	min-height: 500px;
+}
+
+.total-clicks{
+    margin-right: 80px;
+    font-size: 21px;
+    font-weight: bold;
+}
+      

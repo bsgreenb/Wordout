@@ -7,9 +7,6 @@ admin.autodiscover()
 from wordout.custom_decorator import anonymous_required
 from django.contrib.auth.decorators import login_required
 
-
-
-
 urlpatterns = patterns('',
     (r'^$', main_page),
     (r'^accounts/login/$', anonymous_required(login)),
@@ -28,6 +25,7 @@ urlpatterns = patterns('',
     #those two create identifier page should be in module instead of page and use ajax to send query
 
     (r'^createnumeric/$', create_numeric_page),
+    (r'^identifier/([0-9]+)/$', show_referrer_by_ident),
     (r'^createcustom/$', create_custom_page),
     (r'^editident/$', edit_identifier_page),      
     (r'^referrer/$', referrer_page),

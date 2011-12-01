@@ -19,13 +19,25 @@ def main_page(request):
         #ident_type = 2
         #three filter variables for display_identifiers()
         ls, sum_clicks = customer.display_identifiers()
-        return render_to_response('main_page.html', dict(user=request.user, ls=ls, sum_clicks = sum_clicks))
+        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks),context_instance=RequestContext(request))
     else:
 
         return render_to_response(
                 'main_page.html',
-                dict(user=request.user)
-            )
+                context_instance=RequestContext(request))
+
+@login_required
+
+def show_referrer_by_ident(request, ident_id):
+    
+    customer = Customer.objects.get(user = request.user)
+
+    ls = customer.display_referrer_for_identifier(ident_id)
+
+    return render_to_response('referrer.html', dict(ls = ls),context_instance=RequestContext(request))
+
+
+
 
 
 @login_required

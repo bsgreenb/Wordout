@@ -1,15 +1,51 @@
-<html>
-    <head>
-        <title>Referrer</title>
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        <h1>Referrer Summary</h1>
-        {% if ls %}
-            {% for l in ls%}
-            <div>{{l.host_name}} || {{l.clicks}} || {{l.path_loc}}</div>
-            {% endfor %}
-        {% endif %}
+{% block js %}
 
-    </body>
-</html>
+<script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
+<script src="/static/js/plugin/bootstrap-modal.js"></script>
+<script>
+
+$(function() {
+$("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
+});
+
+</script>
+
+{% endblock %}
+
+
+{% block left-nav %}
+		<ul class="pills">
+			<li><a href="/">Identifier Summary</a></li>
+			<li class="active"><a href="/referrer">Referrer Summary</a></li>
+		</ul>
+{% endblock left-nav %}
+
+
+
+{% block right-table %}
+
+{% if ls %}
+<table id="sortTableExample" class="zebra-striped">
+	<thead>
+		
+		<tr>
+			<th class="header">Host</th>
+			<th class="yellow header headerSortDown">Clicks</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for l in ls%}
+			<tr>
+				<td>{{ l.host_name }} <span class="label notice">detail</span></td>
+				<td>{{ l.clicks }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<div>start your journey by creating the referral code</div>
+{% endif %}
+
+{% endblock %}
