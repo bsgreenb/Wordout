@@ -1,0 +1,9 @@
+form.py
+- why adding verify_exitto URLfieldwill give me error 
+
+
+
+
+main.html
+- better location and design on the "total clcicks"
+- table sort on identifiers is based on stringbut int

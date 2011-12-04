@@ -162,12 +162,14 @@ $("table#sortTableExample").tablesorter({});
 
 
 <div id="edit-modal-from-dom" class="modal hide fade" style="display: block;">
+	<form method="POST" action="/editident/">
+	{% csrf_token %}
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
 		<h3>Edit all redirect links</h3>
 	</div>
 	<div class="modal-body">
-		<form>
+		
 			
 			<fieldset>
 				<div class="clearfix">
@@ -178,11 +180,12 @@ $("table#sortTableExample").tablesorter({});
 				</div>
 					
 			</fieldset>
-		</form>
+		
 	</div>
 	<div class="modal-footer">
-		<button class="btn primary" href="#">Save</button>
+		<input class="btn primary" href="#" id="edit_save" value="Save" type="submit">
 	</div>
+	</form>
 </div>
 
 

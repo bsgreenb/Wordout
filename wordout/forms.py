@@ -11,7 +11,7 @@ question: do I need a form to validate all inputs from my redirect_page?
 class NumericIdenForm(forms.Form):
     start = forms.IntegerField()
     end = forms.IntegerField()
-    redirect_link = forms.URLField(verify_exists=True)
+    redirect_link = forms.URLField()
 
     def __init__(self, user=None, *args, **kwargs):
         super(NumericIdenForm, self).__init__(*args, **kwargs)
@@ -47,7 +47,7 @@ class NumericIdenForm(forms.Form):
 
 class CustomIdenForm(forms.Form):
     identifier = forms.CharField()
-    redirect_link = forms.URLField(verify_exists=True)
+    redirect_link = forms.URLField()
     
     def __init__(self, user=None, *args, **kwargs):
         super(CustomIdenForm, self).__init__(*args, **kwargs)
@@ -70,7 +70,7 @@ class CustomIdenForm(forms.Form):
         raise forms.ValidationError('the identifier is taken')
 
 class EditIdentForm(forms.Form):
-    redirect_link = forms.URLField(verify_exists=True)
+    redirect_link = forms.URLField()
 
     def __init__(self, user=None, *args, **kwargs):
         super(EditIdentForm, self).__init__(*args, **kwargs)

@@ -68,9 +68,10 @@ def create_numeric_page(request):
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
             data = customer.numeric_ident_save(start, end, redirect_link)
         else:
+            o = o 
             #should give error msg
-            request.session['error'] = form['error']
-    
+            #request.session['error'] = form['error']
+            #return render_to_response('test.html',dict(form = form),context_instance=RequestContext(request))
     return HttpResponseRedirect('/')
 
 @login_required
@@ -83,12 +84,11 @@ def create_custom_page(request):
             customer = Customer.objects.get(user=request.user)
             customer.custom_ident_save(identifier, redirect_link)
             #success goes here
-            return HttpResponseRedirect('/')
         else:
-            #error goes here
-            return HttpResponse(form.as_p)
-    else:
-        return HttpResponse('bbb')
+            o = o 
+            #return render_to_response('test.html',dict(form = form),context_instance=RequestContext(request))
+
+    return HttpResponseRedirect('/')
 
 @login_required
 def edit_identifier_page(request):
@@ -100,15 +100,16 @@ def edit_identifier_page(request):
                 ident_type = request.POST['ident_type']
             else:
                 ident_type = None
+
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
             customer.change_all_redirect_link(redirect_link, ident_type)
 
-            return HttpResponseRedirect('/')
     else:
-        form = EditIdentForm(user = request.user)
+        o = o 
+        #error message goes here
 
-    return render_to_response('edit_ident.html', dict(form=form), context_instance=RequestContext(request))
+    return HttpResponseRedirect('/')
 
 @login_required
 def referrer_page(request):
