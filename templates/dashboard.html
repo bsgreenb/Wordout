@@ -7,7 +7,7 @@
 <script>
 
 $(function() {
-$("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
+$("table#sortTableExample").tablesorter({});
 });
 
 </script>
@@ -17,6 +17,11 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 
 {% block right-table %}
 
+
+{% if error %}
+<!-- need loop through ul here -->
+<div>{{ error.0.0}}</div>
+{% endif %}
 
 
 <span>total clicks: {{sum_clicks}}</span><!-- data range can go there -->
@@ -71,19 +76,24 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 <div>Create referral code for your users </div>
 {% endif %}
 
+<!------------------------------- -->
+
+
 <div id="numeric-modal-from-dom" class="modal hide fade" style="display: block;">
+	
+	<form method="POST" action="/createnumeric/">
+		{% csrf_token %}
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
 		<h3>Generate numeric identifiers</h3>
 	</div>
 	
 	<div class="modal-body">
-		<form>
 			<fieldset>
 				<div class="clearfix">
 					<label for="numeric_start">Start number: </label>
 					<div class="input">
-						<input id="numeric_start" type="text" value="{{default_start}}" name="start" disabled="disabled">
+						<input id="numeric_start" type="text" value="{{default_start}}" name="start" readonly="readonly">
 					</div>
 				</div>
 			
@@ -101,15 +111,20 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 					</div>
 				</div>
 			</fieldset>
-		</form>
+		
 	</div>
 
 	<div class="modal-footer">
-		<button class="btn primary" href="#" id="numeric_save">Save</button>
+		<input class="btn primary" href="#" id="numeric_save" value="Save" type="submit">
 	</div>
+	</form>
 </div>
 
+<!------------------------------- -->
+
 <div id="custom-modal-from-dom" class="modal hide fade" style="display: block;">
+	<form method="POST" action="/createcustom/">
+	{% csrf_token %}
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
 		<h3>Create custom identifiers</h3>
@@ -117,7 +132,7 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 	
 	<div class="modal-body">
 		
-			<form>
+			
 				<fieldset>
 					<div class="clearfix">
 						<label for="id_identifier">Identifier:</label>
@@ -134,13 +149,17 @@ $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 					</div>
 						
 				</fieldset>
-			</form>
+			
 	</div>
 	
 	<div class="modal-footer">
-		<button class="btn primary" href="#">Save</button>
+		<input class="btn primary" href="#" id="cusmtom_save" value="Save" type="submit">
 	</div>
+	</form>
 </div>
+
+<!------------------------------- -->
+
 
 <div id="edit-modal-from-dom" class="modal hide fade" style="display: block;">
 	<div class="modal-header">

@@ -23,15 +23,20 @@ def main_page(request):
 
         #get default start value for create numeric identifiers
         try:
-            last = Identifiers.objects.filter(customer = customer, identifiers_type = 1).order_by('-created')[0]
+            last = Identifiers.objects.filter(customer = customer, identifier_type = 1).order_by('-created')[0]
             last = int(last.identifier)
-        except: IndexError:
+        except IndexError:
             last = 0
         
         default_start = last + 1
 
+        if request.session.get('error', ''):
+            error = request.session['error']
+            del request.session['error']
+        else:
+            error = ''
 
-        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start),context_instance=RequestContext(request))
+        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, error = error),context_instance=RequestContext(request))
     else:
 
         return render_to_response(
@@ -39,7 +44,6 @@ def main_page(request):
                 context_instance=RequestContext(request))
 
 @login_required
-
 def show_referrer_by_ident(request, ident_id):
     
     customer = Customer.objects.get(user = request.user)
@@ -63,17 +67,11 @@ def create_numeric_page(request):
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
             data = customer.numeric_ident_save(start, end, redirect_link)
-            return HttpResponseRedirect('/')
-    else:
-        try:
-            last = Identifiers.objects.filter(customer = request.user, identifier_type = 1).order_by('-created')[0]
-            last = int(last.identifier)
-        except IndexError:
-            last = 0
-
-        form = NumericIdenForm(user=request.user, initial={'start':last+1})
+        else:
+            #should give error msg
+            request.session['error'] = form['error']
     
-    return render_to_response('create_numeric.html', dict(form=form), context_instance=RequestContext(request))
+    return HttpResponseRedirect('/')
 
 @login_required
 def create_custom_page(request):
@@ -84,11 +82,13 @@ def create_custom_page(request):
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
             customer.custom_ident_save(identifier, redirect_link)
+            #success goes here
             return HttpResponseRedirect('/')
+        else:
+            #error goes here
+            return HttpResponse(form.as_p)
     else:
-        form = CustomIdenForm(user=request.user)
-    
-    return render_to_response('create_custom.html', dict(form=form), context_instance=RequestContext(request))
+        return HttpResponse('bbb')
 
 @login_required
 def edit_identifier_page(request):

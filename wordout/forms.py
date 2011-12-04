@@ -67,8 +67,6 @@ class CustomIdenForm(forms.Form):
             except Identifiers.DoesNotExist:
                 return identifier
 
-
-
         raise forms.ValidationError('the identifier is taken')
 
 class EditIdentForm(forms.Form):
