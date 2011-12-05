@@ -116,7 +116,6 @@ def referrer_page(request):
     customer = Customer.objects.get(user=request.user)
     #figure out the best way to add start and end variables
     ls = customer.display_referrer()
-    
     return render_to_response('referrer.html', dict(ls=ls), context_instance=RequestContext(request))
 
 @login_required

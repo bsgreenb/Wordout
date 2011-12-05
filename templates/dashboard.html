@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block title %}Summary by Identifier{% endblock %}
+
+
+
 {% block js %}
 
 <script src="static/js/plugin/jquery.tablesorter.min.js"></script>
@@ -15,6 +19,29 @@ $("table#sortTableExample, table#clickDetail").tablesorter({});
 {% endblock %}
 
 
+{% block css %}
+h1{
+	width: 600px;
+	margin: auto;
+	margin-top: 150px;
+}
+
+h3{
+	clear: both;
+}
+
+{% endblock %}
+
+{% block left-nav %}
+		<ul class="pills">
+			<li class="active"><a href="/">Summary by Identifier</a></li>
+			<li><a href="/referrer">Summary by Referrer</a></li>
+			<li><a href="/password/change/">Change Password</a></li>
+		</ul>
+{% endblock left-nav %}
+
+
+
 {% block right-table %}
 
 
@@ -24,9 +51,8 @@ $("table#sortTableExample, table#clickDetail").tablesorter({});
 {% endif %}
 
 
-<!--<span>total clicks: {{sum_clicks}}</span> -->
 
-<p class="pull-right">
+<p class="pull-left">
 	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">+ numeric identifier</button>
 	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="custom-modal-from-dom">+ custom identifier</button>
 	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">edit redirect link</button>
@@ -35,6 +61,10 @@ $("table#sortTableExample, table#clickDetail").tablesorter({});
 
 
 {% if ls %}
+
+
+<h3>Total Clicks: {{sum_clicks}}</h3>
+
 <table id="sortTableExample" class="zebra-striped">
 	<thead>
 		
@@ -73,7 +103,7 @@ $("table#sortTableExample, table#clickDetail").tablesorter({});
 </div>
 -->
 {% else %}
-<div>Create referral code for your users </div>
+<h1>Create referral code for your users!</h1>
 {% endif %}
 
 <!------------------------------- -->

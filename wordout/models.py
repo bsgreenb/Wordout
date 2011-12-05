@@ -110,7 +110,7 @@ class Customer(models.Model):
 
     def display_identifiers(self, least_click=None, start=None, end=None, ident_type=None):
         
-        ls = Identifiers.objects.filter(customer = self)
+        ls = Identifiers.objects.select_related().filter(customer = self)
         
         if start and end:
             ls = ls.filter(request__created__gte=start, request__created__lte=end)
