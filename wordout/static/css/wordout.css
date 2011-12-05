@@ -6,9 +6,7 @@ body {
 	min-height: 500px;
 }
 
-.total-clicks{
-    margin-right: 80px;
-    font-size: 21px;
-    font-weight: bold;
+ul.errorlist{
+	list-style: none;
+	margin-bottom: 8px;
 }
-      

@@ -1,3 +1,10 @@
+backend
+- should have backend that the user can login with email
+
+- pick right color for the ul.errorlist
+- start and end should use range
+- have success message at password/change/done
+
 form.py
 - why adding verify_exitto URLfieldwill give me error 
 

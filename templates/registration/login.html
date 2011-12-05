@@ -1,15 +1,47 @@
-<html>
-    <head>
-        <title>User Login</title>
-    </head>
-    <body>
+{% extends 'base.html' %}
+
+{% block title %}User Login{% endblock %}
+
+{% block css %}
+<style type="text/css">
+
+label{
+	width: 75px;
+	padding-right: 5px;
+}
+
+ul.errorlist{
+	margin-left: 80px;
+}
+</style>
+
+
+{% endblock %}
+
+{% block header %}
+
+<div class="topbar">
+  <div class="fill">
+    <div class="container">
+      <a class="brand" href="#">Wordout.me</a>
+
+	</div>
+</div>
+</div>
+
+{% endblock%}
+
+{% block content %}
         <h1>User Login</h1>
         <form method="post" action=".">
             {% csrf_token %}
             {{form.as_p}}
-            <input type="submit" value="login" />
-            <a href="/password_reset">forgot password</a>
-            <input type="hidden" name="next" value="{% if next %}{{next}}{% else%}/{%endif%}" />
+			<p>
+				<label for="id_submit"></label>
+    			<input type="submit" value="login" class="btn primary"/>
+            	<a href="/password_reset">forgot password</a>
+
+	            <input type="hidden" name="next" value="{% if next %}{{next}}{% else%}/{%endif%}" />
+			</p>
         </form>
-    </body>
-</html>
+{% endblock %}

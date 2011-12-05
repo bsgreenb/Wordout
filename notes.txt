@@ -1,0 +1,4 @@
+- the user clicks detail, it will trigger an ajax get to query identifier/[ident_id]. 
+- it's going to return a json response from httpresponse
+- the javascript will load this response and put it into a modal. 
+- the modal will show

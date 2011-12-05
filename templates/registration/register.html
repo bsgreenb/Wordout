@@ -1,13 +1,44 @@
-<html>
-    <head>
-        <title> Registration </title>
-    </head>
+{% extends 'base.html' %}
 
-    <body>
+{% block title %}User Registration{% endblock %}
+
+{% block css %}
+<style type="text/css">
+
+label{
+	padding-right: 5px;
+}
+
+ul.errorlist{
+	margin-left: 135px;
+}
+
+</style>
+
+{% endblock %}
+
+{% block header %}
+
+<div class="topbar">
+  <div class="fill">
+    <div class="container">
+      <a class="brand" href="#">Wordout.me</a>
+
+	</div>
+</div>
+</div>
+
+{% endblock %}
+
+
+{% block content %}
+	<h1>User Registration</h1>
         <form method="post" action=".">
             {% csrf_token %}
             {{form.as_p}}
-            <input type="submit" value="register" />
+            <p>
+				<label id="id_register"></label>
+				<input type="submit" value="register" class="btn primary"/>
+			</p>
         </form>
-    </body>
-</html>
+{% endblock content %}

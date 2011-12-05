@@ -7,7 +7,7 @@
 <script>
 
 $(function() {
-$("table#sortTableExample").tablesorter({});
+$("table#sortTableExample, table#clickDetail").tablesorter({});
 });
 
 </script>
@@ -24,7 +24,7 @@ $("table#sortTableExample").tablesorter({});
 {% endif %}
 
 
-<span>total clicks: {{sum_clicks}}</span><!-- data range can go there -->
+<!--<span>total clicks: {{sum_clicks}}</span> -->
 
 <p class="pull-right">
 	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">+ numeric identifier</button>
@@ -51,7 +51,7 @@ $("table#sortTableExample").tablesorter({});
 				<td>{{ l.identifier }}</td>
 				<td>{{ l.num }} <span class="label notice" id="{{l.id}}">detail</span></td>
 				<td>
-					<div>wordout.me/{{ l.code }}</div>
+					<div><a href="wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
 					<div>{{ l.redirect_link }}</div>
 				</td>
 				<td>{{ l.enabled }}</td>
@@ -186,6 +186,41 @@ $("table#sortTableExample").tablesorter({});
 		<input class="btn primary" href="#" id="edit_save" value="Save" type="submit">
 	</div>
 	</form>
+</div>
+
+
+<!-- this modal is to hold the ajax request -->
+
+<div id="edit-modal-from-dom" class="modal hide fade" style="display: block;">
+
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Clicks Detail</h3>
+	</div>
+	<div class="modal-body">
+		
+			<div>Clicks come from the following referrers.</div>
+			<table id="clickDetail" class="zebra-striped">
+				<thead>
+
+					<tr>
+						<th class="header">Referrer</th>
+						<th class="yellow header headerSortDown">Clicks</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+					<!--ajax result goes here -->
+					
+					
+					
+				</tbody>
+			</table>
+		
+	</div>
+	<div class="modal-footer">
+		<button class="btn primary" href="#" id="clickdetail_cancel">Cancel</button>
+	</div>
 </div>
 
 

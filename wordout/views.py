@@ -119,6 +119,7 @@ def referrer_page(request):
     
     return render_to_response('referrer.html', dict(ls=ls), context_instance=RequestContext(request))
 
+@login_required
 def path_page(request, host_id):
     customer = Customer.objects.get(user=request.user)
     

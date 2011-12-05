@@ -4,36 +4,46 @@
     <title>{% block title %}{% endblock %}</title>
 	<link href="/static/css/main.css" type="text/css" title="default" rel="stylesheet" media="screen, projection">
 	<link href="/static/css/wordout.css" type="text/css" title="default" rel="stylesheet" media="screen, projection">
+	
+	{% block css %}
+	
+	{% endblock %}
+	
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
-	{% block js%}{% endblock %}
+	
+	{% block js%}
+	
+	
+	{% endblock %}
 	
 </head>
 <body>
+	{% block header%}
 			<div class="topbar">
 		      <div class="fill">
 		        <div class="container">
-		          <a class="brand" href="#">Wordout.me</a>
+		          <a class="brand" href="/">Wordout.me</a>
 				
 				{% if user.is_authenticated %}
 					<ul class="nav">
-					     <li class="active"><a href="#">Dashboard</a></li>
+					     <li {% block dash_active %} class="active" {%endblock%}><a href="/">Dashboard</a></li>
 					</ul>
 					<p class="pull-right">Logged in as <a href="#">{{ user.username }}</a> | <a href="logout">logout</a></p>
 				{% else %}
 		          <form method="post" action="accounts/login/" class="pull-right">
 							{% csrf_token %}
-				            <input class="input-small" type="text" placeholder="Username" name="username">
+				            <input class="input-medium" type="text" placeholder="Username or Email" name="username">
 
-				            <input class="input-small" type="password" placeholder="Password" name="password">
-				            <button class="btn" type="submit">Sign in</button>
-							<a href="register">register</a> | 
-							<a href="password_set">forget password</a>
+				            <input class="input-medium" type="password" placeholder="Password" name="password">
+				            <button class="btn" type="submit">Sign in</button> | 
+							<a href="register">Sign up</a>
 				  </form>
 				{% endif %}	
 				
 		        </div>
 		      </div>
 		    </div>
+	{% endblock %}
 			
 		  	<div class="container">
 				{% block content %}
@@ -46,6 +56,7 @@
 										<ul class="pills">
 											<li class="active"><a href="/">Identifier Summary</a></li>
 											<li><a href="referrer">Referrer Summary</a></li>
+											<li><a href="password/change">Change Password</a></li>
 										</ul>
 								{% endblock left-nav %}
 							</div>
