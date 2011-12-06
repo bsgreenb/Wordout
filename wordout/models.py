@@ -113,7 +113,7 @@ class Customer(models.Model):
         ls = Identifiers.objects.select_related().filter(customer = self)
         
         if start and end:
-            ls = ls.filter(request__created__gte=start, request__created__lte=end)
+            ls = ls.filter(request__created__range=(start, end))
 
         ls = ls.annotate(num = Count('request'))
         
@@ -148,7 +148,7 @@ class Customer(models.Model):
         ''', (self.id, identifier_id))
                 
         if start and end:
-            ls = ls.filter(request__created__gte=start, request__created__lte=end)
+            ls = ls.filter(request__created__range=(start, end))
        
         return ls
 
@@ -169,7 +169,7 @@ class Customer(models.Model):
         ''', [self.id])
         
         if start and end:
-            ls = ls.filter(request__created__gte=start, request__created__lte=end)
+            ls = ls.filter(request__created__range=(start, end))
 
         return ls
     
@@ -192,7 +192,7 @@ class Customer(models.Model):
         ''', (self.id, host_id))
         
         if start and end:
-            ls = ls.filter(request__created__gte=start, request__created__lte=end)
+            ls = ls.filter(request__created__range=(start, end))
         return ls
 
 class Identifiers(models.Model):

@@ -32,16 +32,15 @@ def main_page(request):
         
         default_start = last + 1
 
-        if request.session.get('error', ''):
-            error = request.session['error']
-            del request.session['error']
+        if request.session.get('form', ''):
+            form = request.session['form']
+            del request.session['form']
         else:
-            error = ''
+            form = ''
 
-        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, error = error),context_instance=RequestContext(request))
-    else:
+        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, form=form),context_instance=RequestContext(request))
 
-        return render_to_response(
+    return render_to_response(
                 'main_page.html',
                 context_instance=RequestContext(request))
 
@@ -49,13 +48,9 @@ def main_page(request):
 
 @login_required
 def show_referrer_by_ident(request, ident_id):
-
     customer = Customer.objects.get(user = request.user)
-
     ls = customer.display_referrer_for_identifier(ident_id)
-    
     results = generate_json_for_detail(ls)
-
     return HttpResponse(results, 'application/javascript')
 
 
@@ -76,10 +71,7 @@ def create_numeric_page(request):
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
             data = customer.numeric_ident_save(start, end, redirect_link)
         else:
-            o = o 
-            #should give error msg
-            #request.session['error'] = form['error']
-            #return render_to_response('test.html',dict(form = form),context_instance=RequestContext(request))
+            request.session['form'] = form
     return HttpResponseRedirect('/')
 
 @login_required
@@ -91,11 +83,8 @@ def create_custom_page(request):
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
             customer.custom_ident_save(identifier, redirect_link)
-            #success goes here
         else:
-            o = o 
-            #return render_to_response('test.html',dict(form = form),context_instance=RequestContext(request))
-
+            request.session['form'] = form
     return HttpResponseRedirect('/')
 
 @login_required
@@ -112,11 +101,8 @@ def edit_identifier_page(request):
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
             customer.change_all_redirect_link(redirect_link, ident_type)
-
-    else:
-        o = o 
-        #error message goes here
-
+        else:
+            request.session['form'] = form
     return HttpResponseRedirect('/')
 
 @login_required

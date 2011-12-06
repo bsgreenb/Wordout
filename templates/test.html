@@ -1,1 +1,3 @@
-{{form.as_p}}
+{% for field in a %}
+    <li>{{ field.errors|striptags }}</li>
+{% endfor %}

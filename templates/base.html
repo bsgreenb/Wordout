@@ -56,15 +56,36 @@
 							<div class="span4">
 								{% block left-nav %}
 										<ul class="pills">
-											<li class="active"><a href="/">Identifier Summary</a></li>
-											<li><a href="/referrer">Referrer Summary</a></li>
+											<li class="active"><a href="/">Summary by Identifier</a></li>
+											<li><a href="/referrer">Summary by Referrer</a></li>
 											<li><a href="/password/change/">Change Password</a></li>
 										</ul>
 								{% endblock left-nav %}
 							</div>
 							
 							<div class="span12">
+								
+								{% if form.errors %}
+									<div class="alert-message block-message error">
+										<a class="close" href="#">×</a>
+										<p>
+											<strong>You got an error!</strong>
+										</p>
+										<ul>
+										{% for field in form %}
+											{% if field.errors %}
+												<li>{{field.name}}: {{ field.errors|striptags }}</li>
+											{% endif %}
+										{% endfor %}
+										</ul>
+									</div>
+								{% endif %}
+								
+								
+								
 								{% block right-table %}
+							
+								
 								
 								
 								
