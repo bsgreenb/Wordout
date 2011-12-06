@@ -148,3 +148,7 @@ LOGGING = {
 }
 
 LOGIN_REDIRECT_URL = '/'
+
+AUTHENTICATION_BACKENDS = (
+        'django_wordout.wordout.backends.EmailOrUsernameModelBackend',
+        'django.contrib.auth.backends.ModelBackend')

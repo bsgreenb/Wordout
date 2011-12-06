@@ -144,7 +144,8 @@ class Customer(models.Model):
             ON wordout_identifiers.id = wordout_request.referral_code_id
         WHERE wordout_identifiers.customer_id = %s AND wordout_identifiers.id = %s
         GROUP BY wordout_request.referrer_id
-        ''', [self.id, identifier_id])
+        ORDER BY clicks DESC
+        ''', (self.id, identifier_id))
                 
         if start and end:
             ls = ls.filter(request__created__gte=start, request__created__lte=end)
@@ -175,20 +176,20 @@ class Customer(models.Model):
     def display_path(self, host_id, start=None, end=None):
 
         ls = Path.objects.raw('''
-        SELECT wordout_path.id, wordout_path.path_loc, wordout_host.host_name, wordout_host.id as host_id, COUNT(distinct wordout_request.id) as clicks, wordout_request.created
+        SELECT wordout_path.id, wordout_path.path_loc, wordout_host.host_name, wordout_host.id, COUNT(distinct wordout_request.id) as clicks, wordout_request.created
         FROM wordout_path
         LEFT JOIN wordout_full_link
             ON wordout_full_link.path_id = wordout_path.id
         LEFT JOIN wordout_host
-            ON wordout_full_link.host_id = host_id
+            ON wordout_full_link.host_id = wordout_host.id
         LEFT JOIN wordout_request
             ON wordout_full_link.id = wordout_request.referrer_id
         LEFT JOIN wordout_identifiers
             ON wordout_request.referral_code_id = wordout_identifiers.id
-        WHERE wordout_identifiers.customer_id = %s AND host_id = %s
+        WHERE wordout_identifiers.customer_id = %s AND wordout_host.id = %s
         GROUP BY wordout_path.id
         ORDER BY clicks DESC
-        ''', [self.id, host_id])
+        ''', (self.id, host_id))
         
         if start and end:
             ls = ls.filter(request__created__gte=start, request__created__lte=end)

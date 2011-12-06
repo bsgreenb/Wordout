@@ -7,11 +7,18 @@
 
 <script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
+<script src="/static/js/lib.js"></script>
 <script>
 
 $(function() {
 $("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
 });
+
+$(document).ready(function(){
+	load_data_to_modal('referrer');
+})
+
+
 
 </script>
 
@@ -27,7 +34,7 @@ h1{
 {% block left-nav %}
 		<ul class="pills">
 			<li><a href="/">Summary by Identifier</a></li>
-			<li class="active"><a href="/referrer">Summary by Referrer</a></li>
+			<li class="active"><a href="/referrer/">Summary by Referrer</a></li>
 			<li><a href="/password/change/">Change Password</a></li>
 		</ul>
 {% endblock left-nav %}
@@ -48,12 +55,46 @@ h1{
 	<tbody>
 		{% for l in ls%}
 			<tr>
-				<td>{{ l.host_name }} <span class="label notice">detail</span></td>
+				<td>{{ l.host_name }} <span class="label notice" id="{{l.id}}">detail</span></td>
 				<td>{{ l.clicks }}</td>
 			</tr>
 		{% endfor %}
 	</tbody>
 </table>
+
+<div id="detail-modal-from-dom" class="modal hide fade" style="display: block;">
+
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Clicks come from the following paths</h3>
+	</div>
+	<div class="modal-body">
+		
+			<table id="clickDetail" class="zebra-striped">
+				<thead>
+
+					<tr>
+						<th class="header">Link</th>
+						<th class="yellow header">Clicks</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--ajax result goes here -->
+					
+					
+					
+				</tbody>
+			</table>
+		
+	</div>
+	<div class="modal-footer">
+		
+	</div>
+</div>
+
+
+
+
 {% else %}
 <h1>start your journey by creating the referral code</h1>
 {% endif %}
