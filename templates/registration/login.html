@@ -3,7 +3,6 @@
 {% block title %}User Login{% endblock %}
 
 {% block css %}
-<style type="text/css">
 
 label{
 	width: 75px;
@@ -13,8 +12,6 @@ label{
 ul.errorlist{
 	margin-left: 80px;
 }
-</style>
-
 
 {% endblock %}
 
@@ -39,7 +36,7 @@ ul.errorlist{
 			<p>
 				<label for="id_submit"></label>
     			<input type="submit" value="login" class="btn primary"/>
-            	<a href="/password_reset">forgot password</a>
+            	<!-- add later <a href="/password_reset">forgot password</a>-->
 
 	            <input type="hidden" name="next" value="{% if next %}{{next}}{% else%}/{%endif%}" />
 			</p>

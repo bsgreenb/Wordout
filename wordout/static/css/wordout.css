@@ -11,3 +11,8 @@ ul.errorlist{
 	list-style: none;
 	margin-bottom: 8px;
 }
+
+ul.errorlist li{
+    color: #B94A48;
+}
+
