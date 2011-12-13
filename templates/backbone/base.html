@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <title>Wordout.me{% block title %}{% endblock %}</title>
+	<link href="/static/css/main.css" type="text/css" title="default" rel="stylesheet" media="screen, projection">
+	<link href="/static/css/wordout.css" type="text/css" title="default" rel="stylesheet" media="screen, projection">
+	
+	<style type="text/css">
+	{% block css %}
+	
+	{% endblock %}
+	</style>
+	
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
+	<script src="static/js/plugin/bootstrap-dropdown.js"></script>
+	<script>
+	$(document).ready(function(){
+		$('.topbar').dropdown();
+	});
+	</script>
+	
+	
+	{% block js%}
+	
+	
+	{% endblock %}
+	
+</head>
+<body>
+			<div class="topbar">
+		      <div class="fill">
+		        <div class="container">
+		          <a class="brand" href="/">Wordout.me</a>
+		
+				{% block header%}
+				
+					{% if user.is_authenticated %}
+						<ul class="nav">
+					     	<li {% block dash_active %} class="active" {%endblock%}><a href="/">Dashboard</a></li>
+						</ul>
+						<p class="pull-right" id="header-pull-right">							
+							<ul class="nav secondary-nav">
+								<li class="dropdown">
+									<a href="#" class="dropdown-toggle">{{ user.username }}</a>
+									<ul class="dropdown-menu">
+										<li><a href="/password/change/">change password</a></li>
+										<li><a href="/logout/">logout</a></li>
+									</ul>
+								</li>
+							</ul>							
+						</p>
+					{% else %}
+		          	<form method="post" action="/accounts/login/" class="pull-right">
+						{% csrf_token %}
+				        <input class="input-medium" type="text" placeholder="Username or Email" name="username">
+
+				        <input class="input-medium" type="password" placeholder="Password" name="password">
+				        <button class="btn" type="submit">Sign in</button>
+				  	</form>
+				{% endif %}	
+	
+				{% endblock %}
+	
+		        </div>
+		      </div>
+		    </div>
+			
+		  	<div class="container">
+				{% block content %}
+				    
+				{% endblock content %}
+			    <footer>
+			    	<p>&copy; Wordout.me 2011</p>
+			    </footer>
+			 </div> <!-- /container -->
+</body>
+</html>

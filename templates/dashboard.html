@@ -1,11 +1,6 @@
-{% extends 'base.html' %}
-
-{% block title %} - Summary by Identifier{% endblock %}
-
-
+{% extends 'backbone/stats.html' %}
 
 {% block js %}
-
 <script src="static/js/plugin/jquery.tablesorter.min.js"></script>
 <script src="static/js/plugin/jquery.tablesorter.pager.js"></script>
 <script src="static/js/plugin/bootstrap-modal.js"></script>
@@ -14,7 +9,7 @@
 
 $(function() {
 $("table#sortTableExample")
-	.tablesorter({})
+	.tablesorter({widthFixed: true})
 	.tablesorterPager({container: $("#pager"), positionFixed: false });
 });
 
@@ -23,55 +18,48 @@ $(document).ready(function(){
 })
 
 </script>
-
 {% endblock %}
-
-
-{% block css %}
-h1{
-	width: 600px;
-	margin: auto;
-	margin-top: 150px;
+{% block extend-css %}
+input[type="checkbox"]{
+	margin-right: 15px;
 }
 
-h3{
-	clear: both;
+div#action{
+	padding-bottom: 10px;
+	border-bottom: 1px solid #EEEEEE;
 }
 
+div#action button{
+	margin-left: 10px;
+}
+
+div#action button.first{
+	margin-left: 0px;
+}
+
+h1#msg{
+	margin: 150px 0 0 60px;
+}
 
 {% endblock %}
-
-{% block left-nav %}
-		<ul class="pills">
-			<li class="active"><a href="/">Summary by Identifier</a></li>
-			<li><a href="/referrer/">Summary by Referrer</a></li>
-			<li><a href="/password/change/">Change Password</a></li>
-		</ul>
-{% endblock left-nav %}
 
 
 
 {% block right-table %}
 
-
-<p class="pull-left">
-	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">+ numeric identifier</button>
-	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="custom-modal-from-dom">+ custom identifier</button>
-	<button class="btn primary" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">edit redirect link</button>
-</p>
-
-
-
 {% if ls %}
+<div id="action">
+	<button class="btn first" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">Edit</button>
+	<button class="btn">Disable</button>
+</div>
 
-
-<h3>Total Clicks: {{sum_clicks}}</h3>
+<!--<h3>Total Clicks: {{sum_clicks}}</h3>-->
 
 <table id="sortTableExample" class="zebra-striped">
 	<thead>
 		
 		<tr>
-			<th class="header">Identifier</th>
+			<th class="header">User ID</th>
 			<th class="yellow header headerSortDown">Clicks</th>
 			<th class="blue header">Link</th>
 			<th class="green header">Enable</th>
@@ -80,7 +68,7 @@ h3{
 	<tbody>
 		{% for l in ls%}
 			<tr>
-				<td>{{ l.identifier }}</td>
+				<td><input id="" type="checkbox" value="" name=""/>{{ l.identifier }}</td>
 				<td>{{ l.num }} <span class="label notice" id="{{l.id}}">detail</span></td>
 				<td>
 					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
@@ -92,11 +80,11 @@ h3{
 	</tbody>
 </table>
 <div id="pager" class="pager">
-		<button class="btn info first">first</button>
-		<button class="btn info prev">prev</button>
+		<button class="btn first">first</button>
+		<button class="btn prev">prev</button>
 		<input type="text" class="pagedisplay span2" />
-		<button class="btn info next">next</button>
-		<button class="btn info last">last</button>
+		<button class="btn next">next</button>
+		<button class="btn last">last</button>
 		Item per page: 
 		<select class="pagesize">
 			<option selected="selected"  value="10">10</option>
@@ -107,7 +95,7 @@ h3{
 </div>
 
 {% else %}
-<h1>Create referral code for your users!</h1>
+<h1 id="msg">Create promote code for your users!</h1>
 {% endif %}
 
 <!------------------------------- -->
@@ -150,44 +138,6 @@ h3{
 
 	<div class="modal-footer">
 		<input class="btn primary" href="#" id="numeric_save" value="Save" type="submit">
-	</div>
-	</form>
-</div>
-
-<!------------------------------- -->
-
-<div id="custom-modal-from-dom" class="modal hide fade" style="display: block;">
-	<form method="POST" action="/createcustom/">
-	{% csrf_token %}
-	<div class="modal-header">
-		<a class="close" href="#">×</a>
-		<h3>Create custom identifiers</h3>
-	</div>
-	
-	<div class="modal-body">
-		
-			
-				<fieldset>
-					<div class="clearfix">
-						<label for="id_identifier">Identifier:</label>
-						<div class="input">
-							<input id="id_identifier" type="text" name="identifier">
-						</div>
-					</div>
-
-					<div class="clearfix">
-						<label for="id_redirect_link">Redirect link:</label>
-						<div class="input">
-							<input id="id_redirect_link" type="text" name="redirect_link">
-						</div>
-					</div>
-						
-				</fieldset>
-			
-	</div>
-	
-	<div class="modal-footer">
-		<input class="btn primary" href="#" id="cusmtom_save" value="Save" type="submit">
 	</div>
 	</form>
 </div>

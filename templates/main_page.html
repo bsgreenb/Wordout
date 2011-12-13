@@ -1,7 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'backbone/base.html' %}
 
 {% block css %}
-
 h2{
 border-bottom: 1px solid #EEEEEE;
 padding-bottom: 5px;
@@ -17,65 +16,18 @@ width: 120px;
 padding-right: 5px;
 }
 
+ul li{
+font-size: 15px;
+line-height: 33px;
+color: #404040;
+}
 {% endblock %}
 
 
 
 {% block content %}
-	
-		<div class="row">
-		{% if user.is_authenticated %}
-							
-							<div class="span4">
-								{% block left-nav %}
-										<ul class="pills">
-											<li class="active"><a href="/">Summary by Identifier</a></li>
-											<li><a href="/referrer">Summary by Referrer</a></li>
-											<li><a href="/password/change/">Change Password</a></li>
-										</ul>
-								{% endblock left-nav %}
-							</div>
-							
-							<div class="span12">
-								
-								{% block form-error %}
-								{% if form.errors %}
-									<div class="alert-message block-message error">
-										<a class="close" href="#">×</a>
-										<p>
-											<strong>You got an error!</strong>
-										</p>
-										<ul>
-										{% for field in form %}
-											{% if field.errors %}
-												<li>{{field.name}}: {{ field.errors|striptags }}</li>
-											{% endif %}
-										{% endfor %}
-										</ul>
-									</div>
-								{% endif %}
-								{% endblock form-error %}
-								
-								
-								
-								{% block right-table %}
-							
-								
-								
-								
-								
-								
-								{% endblock right-table %}
-							</div>
-						
-					    {% block dashboard %}
-					
-					
-					
-					    {% endblock dashboard %}
-						</div>
-					
-	{% else %}
+	<div class="row">
+		
 		<div class="span9">
 			<h1>On Wordout.me, you can:</h1>
 			<ul>
@@ -89,7 +41,7 @@ padding-right: 5px;
 		<div class="span7">
 			
 			<h2>Sign up</h2>
-        		<form method="post" action="/register">
+        		<form method="post" action="/register/">
             		{% csrf_token %}
             		{{form.as_p}}
             		<p>
@@ -98,6 +50,5 @@ padding-right: 5px;
 					</p>
         		</form>
 		</div>
-	{% endif %}
 	</div>
 {% endblock content %}

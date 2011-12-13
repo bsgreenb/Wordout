@@ -12,6 +12,10 @@ ul.errorlist{
 	margin-left: 135px;
 }
 
+h1{
+	border-bottom: 1px solid #EEEEEE;
+	padding-bottom: 10px;
+}
 
 {% endblock %}
 
@@ -20,7 +24,7 @@ ul.errorlist{
 
 
 {% block content %}
-	<h1>User Registration</h1>
+	<h1>Sign up</h1>
         <form method="post" action=".">
             {% csrf_token %}
             {{form.as_p}}
