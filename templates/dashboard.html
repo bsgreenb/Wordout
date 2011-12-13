@@ -6,17 +6,13 @@
 <script src="static/js/plugin/bootstrap-modal.js"></script>
 <script src="/static/js/lib.js"></script>
 <script>
-
 $(function() {
 $("table#sortTableExample")
 	.tablesorter({widthFixed: true})
 	.tablesorterPager({container: $("#pager"), positionFixed: false });
+	
+load_data_to_modal('identifier');
 });
-
-$(document).ready(function(){
-	load_data_to_modal('identifier');
-})
-
 </script>
 {% endblock %}
 {% block extend-css %}
@@ -40,7 +36,6 @@ div#action button.first{
 h1#msg{
 	margin: 150px 0 0 60px;
 }
-
 {% endblock %}
 
 
@@ -107,7 +102,7 @@ h1#msg{
 		{% csrf_token %}
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
-		<h3>Generate numeric identifiers</h3>
+		<h3>Create promote code for your users</h3>
 	</div>
 	
 	<div class="modal-body">
@@ -150,7 +145,7 @@ h1#msg{
 	{% csrf_token %}
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
-		<h3>Edit all redirect links</h3>
+		<h3>Edit links</h3>
 	</div>
 	<div class="modal-body">
 		
@@ -179,7 +174,7 @@ h1#msg{
 
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
-		<h3>Clicks come from the following referrers</h3>
+		<h3>Clicks come from the following links</h3>
 	</div>
 	<div class="modal-body">
 		
@@ -204,9 +199,6 @@ h1#msg{
 		
 	</div>
 </div>
-
-
-
 {% endblock %}
 
 	

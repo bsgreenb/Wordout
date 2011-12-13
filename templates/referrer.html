@@ -1,55 +1,35 @@
-{% extends 'base.html' %}
-
-{% block title %} - Summary by Referrer{% endblock %}
-
-
+{% extends 'backbone/stats.html' %}
+{% block title %} - Referrer Summary{% endblock %}
 {% block js %}
-
 <script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
-<script src="static/js/plugin/jquery.tablesorter.pager.js"></script>
+<script src="/static/js/plugin/jquery.tablesorter.pager.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script src="/static/js/lib.js"></script>
 <script>
 
 $(function() {
 $("table#sortTableExample")
-	.tablesorter({ sortList: [[1,1]] })
+	.tablesorter({ sortList: [[1,1]], widthFixed: true })
 	.tablesorterPager({container: $("#pager"), positionFixed: false });
+
+load_data_to_modal('referrer');
 });
-
-$(document).ready(function(){
-	load_data_to_modal('referrer');
-})
-
-
-
 </script>
 
 {% endblock %}
 
-{% block css %}
-h1{
-	margin-top: 150px;
+{% block extend-css %}
+
+h1#msg{
+	margin: 150px 0 0 60px;
 }
 
 {% endblock %}
 
-{% block left-nav %}
-		<ul class="pills">
-			<li><a href="/">Summary by Identifier</a></li>
-			<li class="active"><a href="/referrer/">Summary by Referrer</a></li>
-			<li><a href="/password/change/">Change Password</a></li>
-		</ul>
-{% endblock left-nav %}
-
-
-
 {% block right-table %}
-
 {% if ls.0.id %}
 <table id="sortTableExample" class="zebra-striped">
 	<thead>
-		
 		<tr>
 			<th class="header">Host</th>
 			<th class="yellow header headerSortDown">Clicks</th>
@@ -66,11 +46,11 @@ h1{
 </table>
 
 <div id="pager" class="pager">
-		<button class="btn info first">first</button>
-		<button class="btn info prev">prev</button>
+		<button class="btn first">first</button>
+		<button class="btn prev">prev</button>
 		<input type="text" class="pagedisplay span2" />
-		<button class="btn info next">next</button>
-		<button class="btn info last">last</button>
+		<button class="btn next">next</button>
+		<button class="btn last">last</button>
 		Item per page: 
 		<select class="pagesize">
 			<option selected="selected"  value="10">10</option>
@@ -85,7 +65,7 @@ h1{
 
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
-		<h3>Clicks come from the following paths</h3>
+		<h3>Clicks come from the following links</h3>
 	</div>
 	<div class="modal-body">
 		
@@ -111,11 +91,8 @@ h1{
 	</div>
 </div>
 
-
-
-
 {% else %}
-<h1>start your journey by creating the referral code</h1>
+<h1 id="msg">Create promote code for your users!</h1>
 {% endif %}
 
 {% endblock %}
