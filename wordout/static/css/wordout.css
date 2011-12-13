@@ -6,6 +6,16 @@ body {
 	min-height: 500px;
 }
 
+.span4{
+    width:219px;
+    border-right: 1px solid #EEEEEE;
+}
+
+ul.pills li{
+    padding-left: 40px;
+}
+
+
 ul.errorlist{
 	list-style: none;
 	margin-bottom: 8px;
@@ -13,4 +23,12 @@ ul.errorlist{
 
 ul.errorlist li{
     color: #B94A48;
+}
+
+#header-pull-right{
+    color: #BFBFBF;
+}
+
+#pager select.pagesize{
+	width: 80px;
 }

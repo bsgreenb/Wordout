@@ -28,7 +28,7 @@ class NumericIdenForm(forms.Form):
                 last = 0
             if last < start:
                 return start
-        raise forms.ValidationError('start < last')
+        raise forms.ValidationError('Part of numeric identifiers are already taken.')
     
     def clean_end(self):
         if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
@@ -39,11 +39,11 @@ class NumericIdenForm(forms.Form):
             total = Identifiers.objects.filter(customer = self._user).count()
             num_created = end - start + 1
             if (total + num_created) > 1000:
-                raise forms.ValidationError('limit is 1000')
+                raise forms.ValidationError('The amount of identifiers is limited to 1000.')
 
             if end > start:
                 return end
-        raise forms.ValidationError('end < start')
+        raise forms.ValidationError('The end number should be bigger than the start number.')
 
 class CustomIdenForm(forms.Form):
     identifier = forms.CharField()
@@ -59,7 +59,7 @@ class CustomIdenForm(forms.Form):
             #limit the number of identifiers
             total = Identifiers.objects.filter(customer = self._user).count()
             if total >= 1000:
-                raise forms.ValidationError('limit is 1000')
+                raise forms.ValidationError('The amount of identifiers is limited to 1000.')
 
             identifier = self.cleaned_data['identifier']
             try:
@@ -67,7 +67,7 @@ class CustomIdenForm(forms.Form):
             except Identifiers.DoesNotExist:
                 return identifier
 
-        raise forms.ValidationError('the identifier is taken')
+        raise forms.ValidationError('The identifier is alraedy taken.')
 
 class EditIdentForm(forms.Form):
     redirect_link = forms.URLField()

@@ -16,10 +16,10 @@ urlpatterns = patterns('',
     #django plugin for change password and reset password
     (r'^password/change/$', password_change),
     (r'^password/change/done$', password_change_done),
-    (r'^password_reset/$', password_reset),
-    (r'^password_reset/done/$', password_reset_done),
-    (r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', password_reset_confirm),
-    (r'^reset/done/$', password_reset_complete),
+    #(r'^password_reset/$', password_reset),
+    #(r'^password_reset/done/$', password_reset_done),
+    #(r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', password_reset_confirm),
+    #(r'^reset/done/$', password_reset_complete),
     url(r'^admin/', include(admin.site.urls)),
 
     #those two create identifier page should be in module instead of page and use ajax to send query

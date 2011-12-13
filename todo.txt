@@ -1,3 +1,22 @@
 - next is to figure out how to acess the error msg from form. 
 - why adding verify_exitto URLfieldwill give me error 
 - table sort on identifiers is based on stringbut int
+- better error msg and design for form errors
+
+
+
+
+
+
+
+
+
+
+
+- fix english with Ben
+    - front page message
+    - left nav
+    - 3 buttons
+    - module for each button
+    - error msg in forms
+

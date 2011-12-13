@@ -40,8 +40,10 @@ def main_page(request):
 
         return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, form=form),context_instance=RequestContext(request))
 
+    else:
+        form = RegistrationForm()
     return render_to_response(
-                'main_page.html',
+                'main_page.html', dict(form=form),
                 context_instance=RequestContext(request))
 
 

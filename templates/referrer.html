@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Summary by Referrer{% endblock %}
+{% block title %} - Summary by Referrer{% endblock %}
 
 
 {% block js %}
 
 <script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
+<script src="static/js/plugin/jquery.tablesorter.pager.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script src="/static/js/lib.js"></script>
 <script>
 
 $(function() {
-$("table#sortTableExample").tablesorter({ sortList: [[1,1]] });
+$("table#sortTableExample")
+	.tablesorter({ sortList: [[1,1]] })
+	.tablesorterPager({container: $("#pager"), positionFixed: false });
 });
 
 $(document).ready(function(){
@@ -61,6 +64,22 @@ h1{
 		{% endfor %}
 	</tbody>
 </table>
+
+<div id="pager" class="pager">
+		<button class="btn info first">first</button>
+		<button class="btn info prev">prev</button>
+		<input type="text" class="pagedisplay span2" />
+		<button class="btn info next">next</button>
+		<button class="btn info last">last</button>
+		Item per page: 
+		<select class="pagesize">
+			<option selected="selected"  value="10">10</option>
+			<option value="20">20</option>
+			<option value="30">30</option>
+			<option  value="40">40</option>
+		</select>
+</div>
+
 
 <div id="detail-modal-from-dom" class="modal hide fade" style="display: block;">
 

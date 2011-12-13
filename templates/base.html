@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
 <head>
-    <title>{% block title %}{% endblock %}</title>
+    <title>Wordout.me{% block title %}{% endblock %}</title>
 	<link href="/static/css/main.css" type="text/css" title="default" rel="stylesheet" media="screen, projection">
 	<link href="/static/css/wordout.css" type="text/css" title="default" rel="stylesheet" media="screen, projection">
 	
@@ -20,19 +20,20 @@
 	
 </head>
 <body>
-	{% block header%}
 			<div class="topbar">
 		      <div class="fill">
 		        <div class="container">
 		          <a class="brand" href="/">Wordout.me</a>
+		
+	{% block header%}
 				
 				{% if user.is_authenticated %}
 					<ul class="nav">
 					     <li {% block dash_active %} class="active" {%endblock%}><a href="/">Dashboard</a></li>
 					</ul>
-					<p class="pull-right">Logged in as <a href="#">{{ user.username }}</a> | <a href="logout">logout</a></p>
+					<p class="pull-right" id="header-pull-right"><a href="#">{{ user.username }}</a> | <a href="logout">logout</a></p>
 				{% else %}
-		          <form method="post" action="accounts/login/" class="pull-right">
+		          <form method="post" action="/accounts/login/" class="pull-right">
 							{% csrf_token %}
 				            <input class="input-medium" type="text" placeholder="Username or Email" name="username">
 
@@ -41,11 +42,12 @@
 							<a href="register">Sign up</a>
 				  </form>
 				{% endif %}	
-				
+	
+	{% endblock %}
+	
 		        </div>
 		      </div>
 		    </div>
-	{% endblock %}
 			
 		  	<div class="container">
 				{% block content %}
@@ -65,6 +67,7 @@
 							
 							<div class="span12">
 								
+								{% block form-error %}
 								{% if form.errors %}
 									<div class="alert-message block-message error">
 										<a class="close" href="#">×</a>
@@ -80,6 +83,7 @@
 										</ul>
 									</div>
 								{% endif %}
+								{% endblock form-error %}
 								
 								
 								
@@ -104,7 +108,7 @@
 				
 			          <!-- Main hero unit for a primary marketing message or call to action -->
 			          <div class="hero-unit">
-			            <h1>Wordout.me makes your users as marketers</h1>
+			            <h1>Wordout.me makes your user as yours marketers</h1>
 			            <p>Vestibulum id ligula porta felis euismod semper. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
 
 			          </div>

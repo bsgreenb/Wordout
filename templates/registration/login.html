@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}User Login{% endblock %}
+{% block title %} - User Login{% endblock %}
 
 {% block css %}
 
@@ -17,15 +17,6 @@ ul.errorlist{
 
 {% block header %}
 
-<div class="topbar">
-  <div class="fill">
-    <div class="container">
-      <a class="brand" href="#">Wordout.me</a>
-
-	</div>
-</div>
-</div>
-
 {% endblock%}
 
 {% block content %}
@@ -37,7 +28,7 @@ ul.errorlist{
 				<label for="id_submit"></label>
     			<input type="submit" value="login" class="btn primary"/>
             	<!-- add later <a href="/password_reset">forgot password</a>-->
-
+				or <a href="/register/">Sign up</a>
 	            <input type="hidden" name="next" value="{% if next %}{{next}}{% else%}/{%endif%}" />
 			</p>
         </form>
