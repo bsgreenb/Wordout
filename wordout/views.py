@@ -10,6 +10,10 @@ from wordout.forms import *
 from wordout.models import *
 from wordout.lib import *
 from django.utils import simplejson
+from wordout.sql import *
+
+
+
 
 def main_page(request):
     #just test sql
@@ -48,7 +52,7 @@ def main_page(request):
 @login_required
 def show_referrer_by_ident(request, ident_id):
     customer = Customer.objects.get(user = request.user)
-    ls = customer.display_referrer_for_identifier(ident_id)
+    ls = display_referrer_for_identifier_sql(customer.id, ident_id)
     results = generate_json_for_detail(ls)
     return HttpResponse(results, 'application/javascript')
     
@@ -87,16 +91,14 @@ def edit_identifier_page(request):
 def referrer_page(request):
     customer = Customer.objects.get(user=request.user)
     #figure out the best way to add start and end variables
-    ls = customer.display_referrer()
+    ls = display_referrer_sql(customer.id)
     return render_to_response('referrer.html', dict(ls=ls), context_instance=RequestContext(request))
 
 @login_required
 def path_page(request, host_id):
     customer = Customer.objects.get(user=request.user)
     
-    ls = customer.display_path(host_id)
-    
-    #should be ajax and attach elements to each host
+    ls = display_path_sql(customer.id, host_id)
     results = generate_json_for_detail(ls)
     
     return HttpResponse(results, 'application/javascript')

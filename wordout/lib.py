@@ -27,14 +27,9 @@ def generate_json_for_detail(ls):
     identifier and referrer details return the same data in json format
     '''
     try:
-        if ls[0].id:
+        if ls[0]:
             results = [{'success':True}]
-            for i in ls:
-                holder ={}
-                holder['host_name'] = i.host_name
-                holder['path_loc'] = i.path_loc
-                holder['clicks'] = i.clicks
-                results.append(holder)
+            results.extend(ls)
     except:
         results = [{'success':False}]
 

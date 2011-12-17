@@ -26,7 +26,7 @@ load_data_to_modal('referrer');
 {% endblock %}
 
 {% block right-table %}
-{% if ls.0.id %}
+{% if ls %}
 <table id="sortTableExample" class="zebra-striped">
 	<thead>
 		<tr>
@@ -55,7 +55,7 @@ load_data_to_modal('referrer');
 			<option selected="selected"  value="10">10</option>
 			<option value="20">20</option>
 			<option value="30">30</option>
-			<option  value="40">40</option>
+			<option value="40">40</option>
 		</select>
 </div>
 
@@ -90,7 +90,6 @@ load_data_to_modal('referrer');
 	</div>
 </div>
 
-{% else %}
 {% endif %}
 
 
