@@ -26,7 +26,6 @@ urlpatterns = patterns('',
 
     (r'^createnumeric/$', create_numeric_page),
     (r'^identifier/([0-9]+)/$', show_referrer_by_ident),
-    (r'^createcustom/$', create_custom_page),
     (r'^editident/$', edit_identifier_page),      
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),

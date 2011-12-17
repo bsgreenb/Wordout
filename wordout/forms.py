@@ -3,10 +3,7 @@ from django import forms
 import re
 from django.contrib.auth.models import User
 
-'''
-question: do I need a form to validate all inputs from my redirect_page?
-'''
-
+#question: do I need a form to validate all inputs from my redirect_page?
 
 class NumericIdenForm(forms.Form):
     start = forms.IntegerField()
@@ -22,7 +19,7 @@ class NumericIdenForm(forms.Form):
         if 'start' in self.cleaned_data:
             start = self.cleaned_data['start']
             try:
-                last = Identifiers.objects.filter(customer = self._user, identifier_type = 1).order_by('-created')[0]
+                last = Identifiers.objects.filter(customer = self._user).order_by('-created')[0]
                 last = int(last.identifier)
             except IndexError:
                 last = 0
@@ -44,30 +41,6 @@ class NumericIdenForm(forms.Form):
             if end > start:
                 return end
         raise forms.ValidationError('The end number should be bigger than the start number.')
-
-class CustomIdenForm(forms.Form):
-    identifier = forms.CharField()
-    redirect_link = forms.URLField()
-    
-    def __init__(self, user=None, *args, **kwargs):
-        super(CustomIdenForm, self).__init__(*args, **kwargs)
-        self._user = user
-
-    def clean_identifier(self):
-        if 'identifier' in self.cleaned_data:
-            
-            #limit the number of identifiers
-            total = Identifiers.objects.filter(customer = self._user).count()
-            if total >= 1000:
-                raise forms.ValidationError('The amount of identifiers is limited to 1000.')
-
-            identifier = self.cleaned_data['identifier']
-            try:
-                Identifiers.objects.get(customer = self._user, identifier_type = 2, identifier = identifier)
-            except Identifiers.DoesNotExist:
-                return identifier
-
-        raise forms.ValidationError('The identifier is alraedy taken.')
 
 class EditIdentForm(forms.Form):
     redirect_link = forms.URLField()

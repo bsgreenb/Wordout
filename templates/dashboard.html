@@ -12,6 +12,9 @@ $("table#sortTableExample")
 	.tablesorterPager({container: $("#pager"), positionFixed: false });
 	
 load_data_to_modal('identifier');
+
+$('button#edit, button#disable').attr("disabled", "disabled");
+
 });
 </script>
 {% endblock %}
@@ -33,10 +36,11 @@ div#action button.first{
 	margin-left: 0px;
 }
 
-h1#msg{
-	margin: 150px 0 0 60px;
+button#msg{
+	margin: 150px 0 0 250px;
 }
 {% endblock %}
+
 
 
 
@@ -44,8 +48,9 @@ h1#msg{
 
 {% if ls %}
 <div id="action">
-	<button class="btn first" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">Edit</button>
-	<button class="btn">Disable</button>
+	<button class="btn first" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">Compose codes</button>
+	<button id="edit" class="btn disabled" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">Edit</button>
+	<button id="disable" class="btn disabled">Disable</button>
 </div>
 
 <!--<h3>Total Clicks: {{sum_clicks}}</h3>-->
@@ -90,7 +95,7 @@ h1#msg{
 </div>
 
 {% else %}
-<h1 id="msg">Create promote code for your users!</h1>
+<button id="msg" class="btn primary large" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">COMPOSE PROMOTION CODES</button>
 {% endif %}
 
 <!------------------------------- -->
@@ -102,20 +107,20 @@ h1#msg{
 		{% csrf_token %}
 	<div class="modal-header">
 		<a class="close" href="#">×</a>
-		<h3>Create promote code for your users</h3>
+		<h3>Create promotion code for your users</h3>
 	</div>
 	
 	<div class="modal-body">
 			<fieldset>
 				<div class="clearfix">
-					<label for="numeric_start">Start number: </label>
+					<label for="numeric_start">Start user id: </label>
 					<div class="input">
 						<input id="numeric_start" type="text" value="{{default_start}}" name="start" readonly="readonly">
 					</div>
 				</div>
 			
 				<div class="clearfix">
-					<label for="numeric_end">End number: </label>
+					<label for="numeric_end">End user id: </label>
 					<div class="input">
 						<input id="numeric_end" type="text" name="end">
 					</div>

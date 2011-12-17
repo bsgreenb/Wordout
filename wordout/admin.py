@@ -5,7 +5,7 @@ class Full_LinkAdmin(admin.ModelAdmin):
     list_display = ('host', 'path')
 
 class IdentifiersAdmin(admin.ModelAdmin):
-    list_display = ('customer', 'identifier', 'code', 'redirect_link', 'identifier_type')
+    list_display = ('customer', 'identifier', 'code', 'redirect_link')
 
 class RequestAdmin(admin.ModelAdmin):
     list_display = ('referral_code', 'redirect_link', 'referrer','IP', 'created')

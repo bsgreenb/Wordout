@@ -1,12 +1,9 @@
 {% extends 'backbone/base.html' %}
 
 {% block css %}
-button#compose{
-margin-left: 20px;
-}
 
 ul#left-nav{
-margin: 20px 0 0 20px;
+margin-left: 20px;
 }
 
 ul#left-nav li{
@@ -26,9 +23,6 @@ line-height: 35px;
 {% block content %}
 <div class="row">
 	<div class="span4">
-		<div>
-			<button id="compose" class="btn large primary" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">COMPOSE CODES</button>
-		</div>
 		<ul class="unstyled" id="left-nav">
 			<li><a href="/">Code Summary</a></li>
 			<li><a href="/referrer">Referrer Summary</a></li>

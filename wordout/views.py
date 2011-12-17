@@ -22,11 +22,10 @@ def main_page(request):
         #three filter variables for display_identifiers()
         ls, sum_clicks = customer.display_identifiers()
 
-
         #get default start value for create numeric identifiers
         try:
-            last = Identifiers.objects.filter(customer = customer, identifier_type = 1).order_by('-created')[0]
-            last = int(last.identifier)
+            last = Identifiers.objects.filter(customer = customer).order_by('-created')[0]
+            last = last.identifier
         except IndexError:
             last = 0
         
@@ -38,7 +37,7 @@ def main_page(request):
         else:
             form = ''
 
-        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, form=form),context_instance=RequestContext(request))
+        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, form=form), context_instance=RequestContext(request))
 
     else:
         form = RegistrationForm()
@@ -46,16 +45,12 @@ def main_page(request):
                 'main_page.html', dict(form=form),
                 context_instance=RequestContext(request))
 
-
-
 @login_required
 def show_referrer_by_ident(request, ident_id):
     customer = Customer.objects.get(user = request.user)
     ls = customer.display_referrer_for_identifier(ident_id)
     results = generate_json_for_detail(ls)
     return HttpResponse(results, 'application/javascript')
-
-
     
 @login_required
 def create_numeric_page(request):
@@ -77,32 +72,13 @@ def create_numeric_page(request):
     return HttpResponseRedirect('/')
 
 @login_required
-def create_custom_page(request):
-    if request.method == 'POST':
-        form = CustomIdenForm(user = request.user, data = request.POST)
-        if form.is_valid():
-            identifier = form.cleaned_data['identifier']
-            redirect_link = form.cleaned_data['redirect_link']
-            customer = Customer.objects.get(user=request.user)
-            customer.custom_ident_save(identifier, redirect_link)
-        else:
-            request.session['form'] = form
-    return HttpResponseRedirect('/')
-
-@login_required
 def edit_identifier_page(request):
     if request.method == 'POST':
         form = EditIdentForm(user = request.user, data = request.POST)
         if form.is_valid():
-            
-            if request.POST.get('ident_type', '') and request.POST['ident_type'] in (1, 2):
-                ident_type = request.POST['ident_type']
-            else:
-                ident_type = None
-
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
-            customer.change_all_redirect_link(redirect_link, ident_type)
+            customer.change_all_redirect_link(redirect_link)
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/')
@@ -126,26 +102,12 @@ def path_page(request, host_id):
     return HttpResponse(results, 'application/javascript')
 
 def direct_page(request, code):
-    '''
-    referrer = request.META['HTTP_REFERER']
-    result = urlparse(referrer)
-    path = result.path
-    netloc = result.netloc
-    m = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9\-\.]+\.(com|org|net|mil|edu|COM|ORG|NET|MIL|EDU)$')
-    search = m.search(html)
-    if not search:
-        netloc = 'www.' + netloc
-    
-    user_agent = request.META['HTTP_USER_AGENT']
-    ip = request.META['REMOTE_ADDR']
-    '''
 
     try:
         identifier = Identifiers.objects.get(code = code)
         redirect_link = identifier.redirect_link
     except Identifiers.DoesNotExist:
         return HttpResponseRedirect('/')
-
 
     if not request.META.get('HTTP_REFERER', ''):
         referrer = None
@@ -158,11 +120,9 @@ def direct_page(request, code):
     else:
         user_agent = request.META['HTTP_USER_AGENT']
         user_agent, created = User_Agent.objects.get_or_create(agent = user_agent)
-
-    if not request.META.get('REMOTE_ADDR', ''):
-        ip = None
-    else:
-        ip = request.META['REMOTE_ADDR']
+    
+    ip = get_ip(request)
+    if ip:
         ip, created = IP.objects.get_or_create(address = ip)
 
     Request.objects.create(referral_code = identifier, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
@@ -175,7 +135,6 @@ def logout_page(request):
     return HttpResponseRedirect('/')
 
 def register_page(request):
-
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -193,4 +152,3 @@ def register_page(request):
     else:
         form = RegistrationForm()
     return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
-

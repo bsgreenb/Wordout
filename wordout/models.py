@@ -5,12 +5,6 @@ from urlparse import urlparse
 from lib import *
 from django.db.models import Count, Sum
 
-
-IDENTIFIER_TYPE = (
-        ('1', 'number'),
-        ('2', 'custom'),
-)
-
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
 
 class HOST(models.Model):
@@ -67,11 +61,6 @@ class Customer(models.Model):
     user = models.OneToOneField(User)
     def __unicode__(self):
         return str(self.user)
-    
-    '''
-    the customer can create two identifiers. 1. numberic. 2. custom.
-    those are given on two forms with two save methods.
-    '''
 
     def numeric_ident_save(self, start, end, redirect_link):
         redirect_link, created = get_or_create_link(redirect_link)
@@ -84,31 +73,14 @@ class Customer(models.Model):
                     Identifiers.objects.get(code = code)
                 except Identifiers.DoesNotExist:
                     loop = False
-                    Identifiers.objects.create(customer = self, identifier = i, identifier_type = 1, code = code, redirect_link = redirect_link)
+                    Identifiers.objects.create(customer = self, identifier = i, code = code, redirect_link = redirect_link)
 
-
-    def custom_ident_save(self, identifier, redirect_link):
-       
-        redirect_link, created = get_or_create_link(redirect_link)
-        loop = True
-        while loop == True:
-            code = code_generator()
-            try:
-                Identifiers.objects.get(code=code)
-            except Identifiers.DoesNotExist:
-                loop = False
-                Identifiers.objects.create(customer = self, identifier = identifier, identifier_type = 2, code = code, redirect_link = redirect_link)
-    
-    def change_all_redirect_link(self, new_redirect_link, ident_type=None):
+    def change_all_redirect_link(self, new_redirect_link):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
         ls = Identifiers.objects
-        
-        if ident_type:
-            ls = ls.filter(identifier_type = ident_type)
-        
         ls = ls.update(redirect_link = new_redirect_link)
 
-    def display_identifiers(self, least_click=None, start=None, end=None, ident_type=None):
+    def display_identifiers(self, least_click=None, start=None, end=None):
         
         ls = Identifiers.objects.select_related().filter(customer = self)
         
@@ -119,9 +91,6 @@ class Customer(models.Model):
         
         if least_click:
             ls = ls.filter(num__gte=least_click)
-        
-        if ident_type in (1, 2):
-            ls = ls.filter(identifier_type = ident_type)
 
         ls = ls.order_by('-created')
 
@@ -197,8 +166,7 @@ class Customer(models.Model):
 
 class Identifiers(models.Model):
     customer = models.ForeignKey(Customer)
-    identifier = models.CharField(max_length = 50)
-    identifier_type = models.CharField(max_length = 1, choices = IDENTIFIER_TYPE)
+    identifier = models.IntegerField(max_length = 10)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='identifier_redirect_link')
     enabled = models.BooleanField(default = True)
@@ -215,5 +183,4 @@ class Request(models.Model):
     IP = models.ForeignKey(IP, blank=True, null=True)
     Agent = models.ForeignKey(User_Agent, blank=True, null=True)
     created = models.DateTimeField(auto_now_add = True)
-    
 

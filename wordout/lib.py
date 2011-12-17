@@ -1,6 +1,17 @@
 import re, string, random
 from django.utils import simplejson
 
+
+def get_ip(request):
+    ip = request.META.get("HTTP_X_FORWARDED_FOR", None)
+    if ip:
+    # X_FORWARDED_FOR returns client1, proxy1, proxy2,...
+        ip = ip.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR", None)
+    
+    return ip
+
 def code_generator(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for i in range(size))
 
