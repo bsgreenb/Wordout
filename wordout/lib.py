@@ -2,6 +2,14 @@ import re, string, random
 from django.utils import simplejson
 
 
+def dictfetchall(cursor):
+    #returns all rows from a cursor as a dict
+    desc = cursor.description
+    return [
+            dict(zip([col[0] for col in desc], row))
+            for row in cursor.fetchall()
+            ]
+
 def get_ip(request):
     ip = request.META.get("HTTP_X_FORWARDED_FOR", None)
     if ip:
