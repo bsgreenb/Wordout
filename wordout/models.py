@@ -4,6 +4,7 @@ from datetime import datetime
 from urlparse import urlparse
 from lib import *
 from django.db.models import Count, Sum
+from django.db import connection, transaction
 
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
 
@@ -97,6 +98,78 @@ class Customer(models.Model):
         sum_clicks = ls.aggregate(sum_clicks=Sum('num'))['sum_clicks']
         
         return (ls, sum_clicks)
+        
+    def display_referrer_for_identifier(self, identifier_id):
+        cursor = connection.cursor()
+        cursor.execute('''
+
+        SELECT wordout_request.id, wordout_request.referrer_id, count(wordout_request.id) as clicks, wordout_host.host_name, wordout_path.path_loc
+        FROM wordout_request
+        LEFT JOIN wordout_full_link
+            ON wordout_full_link.id = wordout_request.referrer_id
+        LEFT JOIN wordout_host
+            ON wordout_full_link.host_id = wordout_host.id
+        LEFT JOIN wordout_path
+            ON wordout_full_link.path_id = wordout_path.id
+        LEFT JOIN wordout_identifiers
+            ON wordout_identifiers.id = wordout_request.referral_code_id
+        WHERE
+            wordout_identifiers.customer_id = %s AND wordout_identifiers.id = %s
+        GROUP BY 
+            wordout_request.referrer_id
+        ORDER BY
+            clicks DESC
+
+        ''', (self.id, identifier_id))
+
+        return dictfetchall(cursor)
+
+
+
+    def display_referrer(self):
+        cursor = connection.cursor()
+        cursor.execute('''
+
+        SELECT wordout_host.id, wordout_host.host_name, COUNT(distinct wordout_request.id) as clicks
+        FROM wordout_host
+        LEFT JOIN wordout_full_link
+            ON wordout_full_link.host_id = wordout_host.id
+        LEFT JOIN wordout_request
+            ON wordout_full_link.id = wordout_request.referrer_id
+        LEFT JOIN wordout_identifiers
+            ON wordout_request.referral_code_id = wordout_identifiers.id
+        WHERE
+            wordout_identifiers.customer_id = %s
+        GROUP BY
+            wordout_host.id
+        ORDER BY
+            clicks DESC
+
+        ''', [self.id])
+
+        return dictfetchall(cursor)
+
+
+    def display_path(self, host_id):
+        cursor = connection.cursor()
+        cursor.execute('''
+
+        SELECT wordout_path.id, wordout_path.path_loc, wordout_host.host_name, wordout_host.id, COUNT(distinct wordout_request.id) as clicks
+        FROM wordout_path
+        LEFT JOIN wordout_full_link
+            ON wordout_full_link.path_id = wordout_path.id
+        LEFT JOIN wordout_host
+            ON wordout_full_link.host_id = wordout_host.id
+        LEFT JOIN wordout_request
+            ON wordout_full_link.id = wordout_request.referrer_id
+        LEFT JOIN wordout_identifiers
+            ON wordout_request.referral_code_id = wordout_identifiers.id
+        WHERE wordout_identifiers.customer_id = %s AND wordout_host.id = %s
+        GROUP BY wordout_path.id
+        ORDER BY clicks DESC
+
+        ''', (self.id, host_id))
+        return dictfetchall(cursor)
     
 class Identifiers(models.Model):
     customer = models.ForeignKey(Customer)
