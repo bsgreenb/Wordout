@@ -29,5 +29,6 @@ urlpatterns = patterns('',
     (r'^editident/$', edit_identifier_page),      
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),
+    (r'^api/$', api_page),
     (r'^([0-9a-z]{6})/$', direct_page),
 )

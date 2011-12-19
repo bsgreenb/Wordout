@@ -1,14 +1,12 @@
-
-
-
 - we don't want to store proxy ip
 - fix my parse http issue if there is
-
 - start to work on disable and edit actions. those might be ajax
-
-
-
-- need write the view for the api page.
+- need write the api page.
+    - facebook share
+    - twitter share
+    - points = 1 * 100
+    - referral code input
+    - msg box
 
 - next is to figure out how to acess the error msg from form. 
 - why adding verify_exitto URLfieldwill give me error 

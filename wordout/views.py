@@ -10,7 +10,6 @@ from wordout.forms import *
 from wordout.models import *
 from wordout.lib import *
 from django.utils import simplejson
-from wordout.sql import *
 
 
 
@@ -154,3 +153,6 @@ def register_page(request):
     else:
         form = RegistrationForm()
     return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
+
+def api_page(request):
+    return render_to_response('api.html', context_instance=RequestContext(request))
