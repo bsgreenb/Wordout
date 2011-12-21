@@ -145,7 +145,14 @@ def register_page(request):
                     email=form.cleaned_data['email']
                      )
             #this is not the best practice. I forced extra query here.  change on version 2
-            Customer.objects.create(user = user)
+            loop  = True
+            while loop == True:
+                client_id = code_generator(9)
+                try:
+                    Customer.objects.get(client_id = client_id)
+                except Customer.DoesNotExist:
+                    loop = False
+                    Customer.objects.create(user = user, client_id = client_id)
             
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)
@@ -154,5 +161,16 @@ def register_page(request):
         form = RegistrationForm()
     return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
 
-def api_page(request):
-    return render_to_response('api.html', context_instance=RequestContext(request))
+def api_page(request, client_id, user_id):
+    try:
+        ident_ls = Identifiers.objects.select_related().filter(customer__client_id = client_id, identifier = user_id) #use filter cuz aggregate works on queryset
+        points = ident_ls.aggregate(total_request = Count('request'))['total_request'] * 100
+
+        ident = ident_ls[0]
+        referral_code = ident.code
+        message_title = ident.customer.message_title
+        message_body = ident.customer.message_body
+        return render_to_response('api.html', dict(referral_code = referral_code, message_title = message_title, message_body = message_body, points = points), context_instance=RequestContext(request))
+
+    except IndexError:
+        return HttpResponseRedirect('/')

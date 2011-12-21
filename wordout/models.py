@@ -60,6 +60,10 @@ def get_or_create_link(url):
 
 class Customer(models.Model):
     user = models.OneToOneField(User)
+    client_id = models.CharField(max_length = 9, unique=True)
+    message_title = models.CharField(max_length = 200, null=True, blank=True)
+    message_body = models.TextField(null=True, blank=True)
+
     def __unicode__(self):
         return str(self.user)
 

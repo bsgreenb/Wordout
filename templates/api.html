@@ -70,12 +70,6 @@
 	</style>
 	
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
-	
-	
-	
-	
-	
-	
 	<script type="text/javascript">
 	
 	
@@ -85,41 +79,26 @@
 </head>
 	
 <body>
-	
-	<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-	
-	
 			<div id="content">
-				<h1 id="title">Invite your friends!</h1>
+				<h1 id="title">{{message_title}}</h1>
 				<div id="top">
 					
 					<div id="msg">
-						<h2>Invite your friends. You'll get $25 when you get 1500 points. there is a textbook site you really want to share with</h2>
+						<h2>{{message_body}}</h2>
 					</div>
 					
 					<div id="points">
-						200000 pts
+						{{points}} pts
 						
 					</div>
 				</div>
 				
 				<div id="middle">
-					<input type="text" id="code" value="wordout.me/ascvde" />
+					<input type="text" id="code" value="wordout.me/{{referral_code}}" />
 				</div>
 				
 				<div id="bottom">
 					<div>
-						<div class="fb-like" data-href="http://163.com" data-send="false" data-width="265" data-show-faces="false" data-action="recommend" data-font="arial"></div>
-					
-					
-					
 					</div>
 				</div>
 			</div>

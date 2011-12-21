@@ -49,8 +49,7 @@ button#msg{
 {% if ls %}
 <div id="action">
 	<button class="btn first" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">Compose codes</button>
-	<button id="edit" class="btn disabled" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">Edit</button>
-	<button id="disable" class="btn disabled">Disable</button>
+	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-modal-from-dom">Edit Links</button>
 </div>
 
 <!--<h3>Total Clicks: {{sum_clicks}}</h3>-->
@@ -68,7 +67,7 @@ button#msg{
 	<tbody>
 		{% for l in ls%}
 			<tr>
-				<td><input id="" type="checkbox" value="" name=""/>{{ l.identifier }}</td>
+				<td>{{ l.identifier }}</td>
 				<td>{{ l.num }} <span class="label notice" id="{{l.id}}">detail</span></td>
 				<td>
 					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>

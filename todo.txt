@@ -7,7 +7,7 @@
     - points = 1 * 100
     - referral code input
     - msg box
-
+    - powered by wordout.me
 - next is to figure out how to acess the error msg from form. 
 - why adding verify_exitto URLfieldwill give me error 
 - table sort on identifiers is based on stringbut int
