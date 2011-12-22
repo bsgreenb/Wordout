@@ -35,8 +35,10 @@ class NumericIdenForm(forms.Form):
             #limit the number of identifiers. current is 1000
             total = Identifiers.objects.filter(customer = self._user).count()
             num_created = end - start + 1
-            if (total + num_created) > 1000:
-                raise forms.ValidationError('The amount of identifiers is limited to 1000.')
+            
+            max_users = Customer.objects.get(user = self._user).customergroup.max_users
+            if (total + num_created) > max_users:
+                raise forms.ValidationError('The amount of identifiers is limited to %s' % max_users)
 
             if end > start:
                 return end

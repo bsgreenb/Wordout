@@ -11,9 +11,6 @@ from wordout.models import *
 from wordout.lib import *
 from django.utils import simplejson
 
-
-
-
 def main_page(request):
     #just test sql
     if request.user.is_authenticated():
@@ -57,11 +54,6 @@ def show_referrer_by_ident(request, ident_id):
     
 @login_required
 def create_numeric_page(request):
-    '''
-    if the request is post, i go into form, validate it and the customer will save those identifiers and redirect into the main page
-    if not, 
-    we display the form. start should be a default
-    '''
     if request.method == 'POST':
         form = NumericIdenForm(user=request.user, data=request.POST)
         if form.is_valid():

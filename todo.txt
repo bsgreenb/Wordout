@@ -1,32 +1,15 @@
 - we don't want to store proxy ip
 - fix my parse http issue if there is
-- start to work on disable and edit actions. those might be ajax
 - need write the api page.
-    - facebook share
-    - twitter share
-    - points = 1 * 100
+    - message_title
+    - message_body
+    - points = 1* 100
     - referral code input
-    - msg box
+    - facebook link
+    - twitter link
     - powered by wordout.me
-- next is to figure out how to acess the error msg from form. 
+- have all external functions as module.function
 - why adding verify_exitto URLfieldwill give me error 
-- table sort on identifiers is based on stringbut int
 - better error msg and design for form errors
-
-
-
-
-
-
-
-
-
-
-
-- fix english with Ben
-    - front page message
-    - left nav
-    - 3 buttons
-    - module for each button
-    - error msg in forms
+- validate all the request info at direct_page
 

@@ -44,6 +44,11 @@ class Full_Link(models.Model):
     def __unicode__(self):
         return '%s%s' % (self.host, self.path)
 
+class Customergroups(models.Model):
+    max_users = models.IntegerField(max_length = 10)
+    
+    def __unicode__(self):
+        return str(self.id)
 
 def get_or_create_link(url):
     result = urlparse(url)
@@ -63,6 +68,7 @@ class Customer(models.Model):
     client_id = models.CharField(max_length = 9, unique=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
+    customergroup = models.ForeignKey(Customergroups)
 
     def __unicode__(self):
         return str(self.user)
@@ -174,7 +180,7 @@ class Customer(models.Model):
 
         ''', (self.id, host_id))
         return dictfetchall(cursor)
-    
+
 class Identifiers(models.Model):
     customer = models.ForeignKey(Customer)
     identifier = models.IntegerField(max_length = 10)
