@@ -46,6 +46,23 @@ button#msg{
 
 {% block right-table %}
 
+{% if form.errors %}
+	<div class="alert-message block-message error">
+		<a class="close" href="#">×</a>
+		<p>
+			<strong>You got an error!</strong>
+		</p>
+		<ul>
+			{% for field in form %}
+				{% if field.errors %}
+					<li>{{field.name}}: {{ field.errors|striptags }}</li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	</div>
+{% endif %}
+
+
 {% if ls %}
 <div id="action">
 	<button class="btn first" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">Compose codes</button>
