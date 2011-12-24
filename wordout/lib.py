@@ -44,3 +44,5 @@ def generate_json_for_detail(ls):
     results = simplejson.dumps(results)
 
     return results
+
+

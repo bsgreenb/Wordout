@@ -1,3 +1,8 @@
+TODO:
+- display_sharers takes customer id and return sum of clicks, also sum of actions group by action_name
+
+
+
 new features and implementation
 - click is the higher level of all the actions
 - I will send click_id along with the redirect link. i.e. textyard.com/?woclickid=xxxxxxx

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 from urlparse import urlparse
-from lib import *
+from lib import dictfetchall, force_subdomain
 from django.db.models import Count, Sum
 from django.db import connection, transaction
 
@@ -44,7 +44,7 @@ class Full_Link(models.Model):
     def __unicode__(self):
         return '%s%s' % (self.host, self.path)
 
-class Customergroups(models.Model):
+class Customergroups(models.Model): # identify paid/unpaid users
     max_users = models.IntegerField(max_length = 10)
     
     def __unicode__(self):
@@ -77,7 +77,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    def numeric_ident_save(self, start, end, redirect_link):
+    def create_sharers(self, start, end, redirect_link):
         redirect_link, created = get_or_create_link(redirect_link)
 
         for i in range(start, end+1):
@@ -85,109 +85,96 @@ class Customer(models.Model):
             while loop == True:
                 code = code_generator()
                 try:
-                    Identifiers.objects.get(code = code)
-                except Identifiers.DoesNotExist:
+                    Sharers.objects.get(code = code)
+                except Sharers.DoesNotExist:
                     loop = False
-                    Identifiers.objects.create(customer = self, identifier = i, code = code, redirect_link = redirect_link)
+                    Sharers.objects.create(customer = self, customer_sharer_id = i, code = code, redirect_link = redirect_link)
 
-    def change_all_redirect_link(self, new_redirect_link):
+   
+    def change_redirect_link(self, new_redirect_link):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
-        ls = Identifiers.objects
-        ls = ls.update(redirect_link = new_redirect_link)
+        Sharers.objects.filter(customer=self).update(redirect_link = new_redirect_link)
 
-    def display_identifiers(self, least_click=None, start=None, end=None):
+    
+    def display_sharers(self, least_click=None, start=None, end=None):
         
-        ls = Identifiers.objects.select_related().filter(customer = self)
-        
+        #######I NEED EITHER BEN OR ERIN'S HELP ON THIS 
+        ls = Sharers.objects.select_related().filter(customer = self)
         if start and end:
             ls = ls.filter(request__created__range=(start, end))
-
-        ls = ls.annotate(num = Count('request'))
-        
+        ls = ls.annotate(num = Count('Clicks'))
         if least_click:
             ls = ls.filter(num__gte=least_click)
 
         ls = ls.order_by('-created')
-
         sum_clicks = ls.aggregate(sum_clicks=Sum('num'))['sum_clicks']
-        
         return (ls, sum_clicks)
         
-    def display_referrer_for_identifier(self, identifier_id):
+    def display_referrer_by_sharer(self, customer_sharer_id):
         cursor = connection.cursor()
         cursor.execute('''
-
-        SELECT wordout_request.id, wordout_request.referrer_id, count(wordout_request.id) as clicks, wordout_host.host_name, wordout_path.path_loc
-        FROM wordout_request
+        SELECT wordout_clicks.id, wordout_clicks.referrer_id, count(wordout_clicks.id) as clicks, wordout_host.host_name, wordout_path.path_loc
+        FROM wordout_clicks
         LEFT JOIN wordout_full_link
             ON wordout_full_link.id = wordout_request.referrer_id
         LEFT JOIN wordout_host
             ON wordout_full_link.host_id = wordout_host.id
         LEFT JOIN wordout_path
             ON wordout_full_link.path_id = wordout_path.id
-        LEFT JOIN wordout_identifiers
-            ON wordout_identifiers.id = wordout_request.referral_code_id
+        LEFT JOIN wordout_sharers
+            ON wordout_sharers.id = wordout_clicks.sharer_id
         WHERE
-            wordout_identifiers.customer_id = %s AND wordout_identifiers.id = %s
+            wordout_sharers.customer_id = %s AND wordout_sharers.customer_sharer_id = %s
         GROUP BY 
-            wordout_request.referrer_id
+            wordout_clicks.referrer_id
         ORDER BY
             clicks DESC
-
-        ''', (self.id, identifier_id))
-
+        ''', (self.id, customer_sharer_id))
         return dictfetchall(cursor)
-
-
 
     def display_referrer(self):
         cursor = connection.cursor()
         cursor.execute('''
-
-        SELECT wordout_host.id, wordout_host.host_name, COUNT(distinct wordout_request.id) as clicks
+        SELECT wordout_host.id, wordout_host.host_name, COUNT(wordout_clicks.id) as clicks
         FROM wordout_host
         LEFT JOIN wordout_full_link
             ON wordout_full_link.host_id = wordout_host.id
-        LEFT JOIN wordout_request
-            ON wordout_full_link.id = wordout_request.referrer_id
-        LEFT JOIN wordout_identifiers
-            ON wordout_request.referral_code_id = wordout_identifiers.id
+        LEFT JOIN wordout_clicks
+            ON wordout_full_link.id = wordout_clicks.referrer_id
+        LEFT JOIN wordout_sharers
+            ON wordout_clicks.sharer_id = wordout_sharers.id
         WHERE
-            wordout_identifiers.customer_id = %s
+            wordout_sharers.customer_id = %s
         GROUP BY
             wordout_host.id
         ORDER BY
             clicks DESC
-
         ''', [self.id])
-
         return dictfetchall(cursor)
 
 
     def display_path(self, host_id):
         cursor = connection.cursor()
         cursor.execute('''
-
-        SELECT wordout_path.id, wordout_path.path_loc, wordout_host.host_name, wordout_host.id, COUNT(distinct wordout_request.id) as clicks
+        SELECT wordout_path.id, wordout_path.path_loc, wordout_host.host_name, wordout_host.id, COUNT(wordout_clicks.id) as clicks
         FROM wordout_path
         LEFT JOIN wordout_full_link
             ON wordout_full_link.path_id = wordout_path.id
         LEFT JOIN wordout_host
             ON wordout_full_link.host_id = wordout_host.id
-        LEFT JOIN wordout_request
-            ON wordout_full_link.id = wordout_request.referrer_id
-        LEFT JOIN wordout_identifiers
-            ON wordout_request.referral_code_id = wordout_identifiers.id
-        WHERE wordout_identifiers.customer_id = %s AND wordout_host.id = %s
+        LEFT JOIN wordout_clicks
+            ON wordout_full_link.id = wordout_clicks.referrer_id
+        LEFT JOIN wordout_sharers
+            ON wordout_clicks.sharer_id = wordout_sharers.id
+        WHERE wordout_sharers.customer_id = %s AND wordout_host.id = %s
         GROUP BY wordout_path.id
         ORDER BY clicks DESC
-
         ''', (self.id, host_id))
         return dictfetchall(cursor)
 
 class Sharers(models.Model):
     customer = models.ForeignKey(Customer)
-    sharerid = models.IntegerField(max_length = 10)
+    customer_sharer_id = models.IntegerField(max_length = 10)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)
