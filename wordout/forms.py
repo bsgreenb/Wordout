@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 
 #question: do I need a form to validate all inputs from my redirect_page?
 
-class NumericIdentForm(forms.Form):
+class CreateSharerForm(forms.Form):
     start = forms.IntegerField()
     end = forms.IntegerField()
     redirect_link = forms.URLField()
 
     def __init__(self, user=None, *args, **kwargs):
-        super(NumericIdentForm, self).__init__(*args, **kwargs)
+        super(CreateSharerForm, self).__init__(*args, **kwargs)
         self._user = user
 
     def clean_start(self):
@@ -19,10 +19,10 @@ class NumericIdentForm(forms.Form):
         if 'start' in self.cleaned_data:
             start = self.cleaned_data['start']
             try:
-                last = Identifiers.objects.filter(customer = self._user).order_by('-created')[0]
+                last = Sharer.objects.filter(customer = self._user).order_by('-created')[0]
                 last = int(last.identifier)
             except IndexError:
-                last = 0
+                last = -1  #start is 0 now. 0 is for test code
             if last < start:
                 return start
         raise forms.ValidationError('Part of numeric identifiers are already taken.')
@@ -33,9 +33,8 @@ class NumericIdentForm(forms.Form):
             end = self.cleaned_data['end']
             
             #limit the number of identifiers. current is 1000
-            total = Identifiers.objects.filter(customer = self._user).count()
+            total = Sharer.objects.filter(customer = self._user).count()
             num_created = end - start + 1
-            
             max_users = Customer.objects.get(user = self._user).customergroup.max_users
             if (total + num_created) > max_users:
                 raise forms.ValidationError('The amount of identifiers is limited to %s' % max_users)
@@ -44,11 +43,11 @@ class NumericIdentForm(forms.Form):
                 return end
         raise forms.ValidationError('The end number should be bigger than the start number.')
 
-class EditIdentForm(forms.Form):
+class ChangeLinkForm(forms.Form):
     redirect_link = forms.URLField()
 
     def __init__(self, user=None, *args, **kwargs):
-        super(EditIdentForm, self).__init__(*args, **kwargs)
+        super(ChangeLinkForm, self).__init__(*args, **kwargs)
         self._user = user
 
 

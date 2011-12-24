@@ -1,6 +1,6 @@
 TODO:
 - display_sharers takes customer id and return sum of clicks, also sum of actions group by action_name
-
+- need completely contruct the api page
 
 
 new features and implementation

@@ -8,29 +8,24 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from wordout.forms import *
 from wordout.models import *
-from wordout.lib import *
+from wordout.lib import get_ip, code_generator, generate_json_for_detail
 from django.utils import simplejson
 
 def main_page(request):
-    #just test sql
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
-        #a = datetime(2011, 11, 23)
-        #b = datetime(2011, 11, 26)
-        #least_click = 1
-        #ident_type = 2
-        #three filter variables for display_identifiers()
-        ls, sum_clicks = customer.display_identifiers()
+        ls, sum_clicks = customer.display_sharers()
 
         #get default start value for create numeric identifiers
         try:
-            last = Identifiers.objects.filter(customer = customer).order_by('-created')[0]
-            last = last.identifier
+            last = Sharer.objects.filter(customer = customer).order_by('-created')[0]
+            last = last.customer_sharer_id
         except IndexError:
             last = -1 # give -1 so that default start could be 0 which is the test code for admin
         
         default_start = last + 1
-
+        
+        #error msg, such as invalidate redirect link, is in the form. 
         if request.session.get('form', ''):
             form = request.session['form']
             del request.session['form']
@@ -46,35 +41,30 @@ def main_page(request):
                 context_instance=RequestContext(request))
 
 @login_required
-def show_referrer_by_ident(request, ident_id):
+def show_referrer_by_sharer(request, customer_sharer_id): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
     customer = Customer.objects.get(user = request.user)
-    ls = customer.display_referrer_for_identifier(ident_id)
+    ls = customer.display_referrer_for_sharer(customer_sharer_id)
     results = generate_json_for_detail(ls)
     return HttpResponse(results, 'application/javascript')
     
 @login_required
-def create_numeric_page(request):
-    '''
-    if the request is post, i go into form, validate it and the customer will save those identifiers and redirect into the main page
-    if not, 
-    we display the form. start should be a default
-    '''
+def create_sharer_page(request):
     if request.method == 'POST':
-        form = NumericIdenForm(user=request.user, data=request.POST)
+        form = CreateSharerForm(user=request.user, data=request.POST)
         if form.is_valid():
             start = form.cleaned_data['start']
             end = form.cleaned_data['end']
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
-            data = customer.numeric_ident_save(start, end, redirect_link)
+            data = customer.create_sharer(start, end, redirect_link)
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/')
 
 @login_required
-def edit_identifier_page(request):
+def change_redirect_link_page(request):
     if request.method == 'POST':
-        form = EditIdentForm(user = request.user, data = request.POST)
+        form = ChangeLinkForm(user = request.user, data = request.POST)
         if form.is_valid():
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
@@ -93,18 +83,15 @@ def referrer_page(request):
 @login_required
 def path_page(request, host_id):
     customer = Customer.objects.get(user=request.user)
-    
     ls = customer.display_path(host_id)
     results = generate_json_for_detail(ls)
-    
     return HttpResponse(results, 'application/javascript')
 
 def direct_page(request, code):
-
     try:
-        identifier = Identifiers.objects.get(code = code)
-        redirect_link = identifier.redirect_link
-    except Identifiers.DoesNotExist:
+        sharer = Sharer.objects.get(code = code)
+        redirect_link = sharer.redirect_link
+    except Sharer.DoesNotExist:
         return HttpResponseRedirect('/')
 
     if not request.META.get('HTTP_REFERER', ''):
@@ -123,8 +110,7 @@ def direct_page(request, code):
     if ip:
         ip, created = IP.objects.get_or_create(address = ip)
 
-    Request.objects.create(referral_code = identifier, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
-    
+    Click.objects.create(sharer = sharer, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
     return HttpResponseRedirect(redirect_link)
     
     
@@ -142,15 +128,20 @@ def register_page(request):
                     email=form.cleaned_data['email']
                      )
             #this is not the best practice. I forced extra query here.  change on version 2
+            #I need create/check both client_id and api_key
             loop  = True
             while loop == True:
-                client_id = code_generator(9)
+                client_key = code_generator(9)
+                api_key = code_generator(9)
                 try:
-                    Customer.objects.get(client_id = client_id)
+                    Customer.objects.get(client_key = client_key)
                 except Customer.DoesNotExist:
-                    loop = False
-                    Customer.objects.create(user=user, client_id=client_id)
-            
+                    try:
+                        Customer.objects.get(api_key = api_key)
+                    except Customer.DoesNotExist:
+                        loop = False
+
+            Customer.objects.create(user=user, client_key=client_key, api_key=api_key)
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)
             return HttpResponseRedirect('/')
@@ -158,9 +149,10 @@ def register_page(request):
         form = RegistrationForm()
     return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
 
-def api_page(request, client_id, user_id):
+def api_page(request, client_key, user_id):
+    #need completely construct this page.
     try:
-        ident_ls = Identifiers.objects.select_related().filter(customer__client_id = client_id, identifier = user_id) #use filter cuz aggregate works on queryset
+        sharer = Identifiers.objects.select_related().filter(customer__client_id = client_id, identifier = user_id) #use filter cuz aggregate works on queryset
         points = ident_ls.aggregate(total_request = Count('request'))['total_request'] * 100
 
         ident = ident_ls[0]

@@ -24,9 +24,9 @@ urlpatterns = patterns('',
 
     #those two create identifier page should be in module instead of page and use ajax to send query
 
-    (r'^createnumeric/$', create_numeric_page),
-    (r'^identifier/([0-9]+)/$', show_referrer_by_ident),
-    (r'^editident/$', edit_identifier_page),      
+    (r'^createsharer/$', create_sharer_page),
+    (r'^identifier/([0-9]+)/$', show_referrer_by_sharer),
+    (r'^changelink/$', change_redirect_link_page),      
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),
     (r'^api/([0-9A-Za-z]{9})/([0-9]+)/$', api_page),
