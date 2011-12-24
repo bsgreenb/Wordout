@@ -50,6 +50,9 @@ class Customergroups(models.Model):
     def __unicode__(self):
         return str(self.id)
 
+def get_default_customergroup():
+    return Customergroups.objects.get(id=1) #set default customergroup for new customer
+
 def get_or_create_link(url):
     result = urlparse(url)
     
@@ -65,10 +68,11 @@ def get_or_create_link(url):
 
 class Customer(models.Model):
     user = models.OneToOneField(User)
-    client_id = models.CharField(max_length = 9, unique=True)
+    client_key = models.CharField(max_length = 9, unique=True)
+    api_key = models.CharField(max_length = 9, unique=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
-    customergroup = models.ForeignKey(Customergroups)
+    customergroup = models.ForeignKey(Customergroups, default=get_default_customergroup())
 
     def __unicode__(self):
         return str(self.user)
@@ -181,11 +185,11 @@ class Customer(models.Model):
         ''', (self.id, host_id))
         return dictfetchall(cursor)
 
-class Identifiers(models.Model):
+class Sharers(models.Model):
     customer = models.ForeignKey(Customer)
-    identifier = models.IntegerField(max_length = 10)
+    sharerid = models.IntegerField(max_length = 10)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
-    redirect_link = models.ForeignKey(Full_Link, related_name='identifier_redirect_link')
+    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)
     modified = models.DateTimeField(auto_now = True)
     created = models.DateTimeField(auto_now_add = True)
@@ -193,11 +197,24 @@ class Identifiers(models.Model):
     def __unicode__(self):
         return self.code
 
-class Request(models.Model):
-    referral_code = models.ForeignKey(Identifiers)
-    redirect_link = models.ForeignKey(Full_Link, related_name='request_redirect_link')
+class Clicks(models.Model):
+    sharer = models.ForeignKey(Sharers)
+    redirect_link = models.ForeignKey(Full_Link, related_name='click_redirect_link') # it could be different from sharers' redirect link because sharer's link can be changed.
     referrer = models.ForeignKey(Full_Link, blank=True, null=True)
     IP = models.ForeignKey(IP, blank=True, null=True)
     Agent = models.ForeignKey(User_Agent, blank=True, null=True)
     created = models.DateTimeField(auto_now_add = True)
 
+class Action_Type(models.Model):
+    customer = models.ForeignKey(Customer)
+    action_name = models.CharField(max_length=20)
+    description = models.CharField(max_length=250, blank=True, null=True)
+    enabled = models.BooleanField(default = True)
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class Actions(models.Model):
+    click = models.ForeignKey(Clicks)
+    action = models.ForeignKey(Action_Type)
+    description = models.CharField(max_length=250, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)

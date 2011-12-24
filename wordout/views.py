@@ -27,7 +27,7 @@ def main_page(request):
             last = Identifiers.objects.filter(customer = customer).order_by('-created')[0]
             last = last.identifier
         except IndexError:
-            last = 0
+            last = -1 # give -1 so that default start could be 0 which is the test code for admin
         
         default_start = last + 1
 
@@ -54,6 +54,11 @@ def show_referrer_by_ident(request, ident_id):
     
 @login_required
 def create_numeric_page(request):
+    '''
+    if the request is post, i go into form, validate it and the customer will save those identifiers and redirect into the main page
+    if not, 
+    we display the form. start should be a default
+    '''
     if request.method == 'POST':
         form = NumericIdenForm(user=request.user, data=request.POST)
         if form.is_valid():
@@ -144,7 +149,7 @@ def register_page(request):
                     Customer.objects.get(client_id = client_id)
                 except Customer.DoesNotExist:
                     loop = False
-                    Customer.objects.create(user = user, client_id = client_id)
+                    Customer.objects.create(user=user, client_id=client_id)
             
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)

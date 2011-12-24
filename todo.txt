@@ -1,3 +1,64 @@
+new features and implementation
+- click is the higher level of all the actions
+- I will send click_id along with the redirect link. i.e. textyard.com/?woclickid=xxxxxxx
+- the customer will store this id and eventually send it along with the actions
+
+    DB change
+    - Action_type table: my client defines all the actions along with points
+        - id
+        - Customer_id
+        - action_name
+        - description
+        - enabled
+        - created
+
+    - Actions: the actual api request sent by my client
+        - id
+        - click_id
+        - actions_id
+        - description
+        - created
+
+- Customer table will have two keys. client_key and api_key.  client key is used for the iframe. api key is used for the api request.
+
+- the request is like: api.wordout.me/?
+    api_key=XXXXXXXX&
+    woclickid=XXXXXXX&
+    action=STRING&
+    description=XXXXXXXXX&
+    code=XXXXXX
+    {response: {Status: ok/fail, Message: SUCCESS OR ERROR MESSAGE}}
+
+- "Compose codes" is going to be "Add users"
+- "Edit links" is going to be "Edit"
+- "Disable" button
+- check box at the front of User ID (version 2)
+- select all method (version 2)
+
+
+- pages
+    - dashboard page is the anaylisis table that includes "ADD USERS", "CHANGE LINKS", "DISABLE", user_id, link, clicks, other actions, enable, pagination
+    - page plugin
+        - instruction on how to implement the iframe. basically, give client key along with user id
+    - api
+        - first define actions
+        - give instruction on how to send http request to our server
+
+    - other statistics page, includes clicks by referrer
+    - my keys
+        - client key
+        - api key
+
+- user_id 0 should be a test code
+
+
+- show action tables on the iframe. no need to record any points
+
+
+
+
+
+
 - we don't want to store proxy ip
 - fix my parse http issue if there is
 - need write the api page.

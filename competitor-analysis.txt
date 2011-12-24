@@ -1,0 +1,15 @@
+referralcandy
+
+pros:
+- good ui
+- branding
+    - logo along with email
+
+- the email that includes referral message/code, facebook, twitter buttons is deliveried after purchase. we could have sending email api after certain action is triggered. 
+- it also sends email to reward referrals once his referral code has been used. 
+
+
+
+cons:
+- it's an ecommerce based service. all clients are online sellers and associated with some online shopping platforms.
+- it takes a big cut of sales plus monthly fee

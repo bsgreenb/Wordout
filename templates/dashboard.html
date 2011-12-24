@@ -85,7 +85,11 @@ button#msg{
 		{% for l in ls%}
 			<tr>
 				<td>{{ l.identifier }}</td>
-				<td>{{ l.num }} <span class="label notice" id="{{l.id}}">detail</span></td>
+				<td>{{ l.num }} 
+					{% if l.num > 0 %}
+						<span class="label notice" id="{{l.id}}">detail</span>
+					{% endif %}		
+				</td>
 				<td>
 					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
 					<div>{{ l.redirect_link }}</div>

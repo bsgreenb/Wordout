@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 
 #question: do I need a form to validate all inputs from my redirect_page?
 
-class NumericIdenForm(forms.Form):
+class NumericIdentForm(forms.Form):
     start = forms.IntegerField()
     end = forms.IntegerField()
     redirect_link = forms.URLField()
 
     def __init__(self, user=None, *args, **kwargs):
-        super(NumericIdenForm, self).__init__(*args, **kwargs)
+        super(NumericIdentForm, self).__init__(*args, **kwargs)
         self._user = user
 
     def clean_start(self):
@@ -84,3 +84,9 @@ class RegistrationForm(forms.Form):
             return email
         raise forms.ValidationError('Email is already taken')
 
+
+class ValidateReferrer(forms.Form):
+    referrer = forms.URLField()
+
+class ValidateIP(forms.Form):
+    ip = forms.IPAddressField()
