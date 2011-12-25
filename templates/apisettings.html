@@ -11,5 +11,62 @@
 		<div>{{ l.description }}</div>
 		<div>{{ l.enabled }}</div>
 	{% endfor %}
+	
+	
+	
+	<form method="POST" action="/createactions/">
+		{% csrf_token %}
+	
+	<div>
+			<fieldset>
+				<div class="clearfix">
+					<label for="numeric_start">Action Name: </label>
+					<div class="input">
+						<input id="numeric_start" type="text" value="" name="form-0-action_name">
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label for="numeric_end">Description: </label>
+					<div class="input">
+						<textarea id="numeric_end" type="text" name="form-0-description"></textarea>
+					</div>
+				</div>
+				
+				<div class="clearfix">
+					<label for="numeric_start">Action Name: </label>
+					<div class="input">
+						<input id="numeric_start" type="text" value="" name="form-1-action_name">
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label for="numeric_end">Description: </label>
+					<div class="input">
+						<textarea id="numeric_end" type="text" name="form-1-description"></textarea>
+					</div>
+				</div>
+				
+				<div class="clearfix">
+					<label for="numeric_start">Action Name: </label>
+					<div class="input">
+						<input id="numeric_start" type="text" value="" name="form-2-action_name">
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label for="numeric_end">Description: </label>
+					<div class="input">
+						<textarea id="numeric_end" type="text" name="form-2-description"></textarea>
+					</div>
+				</div>
+			</fieldset>
+		
+	</div>
+
+	<div class="modal-footer">
+		<input class="btn primary" href="#" id="numeric_save" value="Save" type="submit">
+	</div>
+	</form>
 
 {% endblock %}

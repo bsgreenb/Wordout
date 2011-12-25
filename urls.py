@@ -31,5 +31,6 @@ urlpatterns = patterns('',
     (r'^referrer/([0-9]+)/$', path_page),
     (r'^api/([0-9A-Za-z]{9})/([0-9]+)/$', api_page),
     (r'^apisettings/$', api_settings_page),
+    (r'^createactions/$', create_action_type_page),
     (r'^([0-9a-z]{6})/$', direct_page),
 )

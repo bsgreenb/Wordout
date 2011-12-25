@@ -10,6 +10,7 @@ from wordout.forms import *
 from wordout.models import *
 from wordout.lib import get_ip, code_generator, generate_json_for_detail
 from django.utils import simplejson
+from django.forms.formsets import formset_factory
 
 def main_page(request):
     if request.user.is_authenticated():
@@ -182,20 +183,19 @@ def api_settings_page(request):
 
 
 @login_required
-def save_action_type_page(request):
+def create_action_type_page(request):
     if request.method == 'POST':
-        dataset = request.POST['data']
+        dataset = request.POST
         customer = Customer.objects.get(user=request.user)
         max_actions = customer.customergroup.max_actions
-        current_number_actions = customer.action_type_set.fulter(enabled=True)
-        if current_number_actions + len(dataset) > max_actions:
+        current_number_actions = customer.action_type_set.filter(enabled=True).count()
+        if current_number_actions + len(dataset.getlist('action_name')) > max_actions:
             request.seesion['api_setting_error'] = 'The max number of actions is %' % max_actions
-            HttpResponseRedirect('apisettings')
 
+        ActionTypeFormSet = formset_factory(ActionTypeForm)
+        formset = ActionTypeFormSet(dataset)
         with transaction.commit_manually(): #make insert query only triggers once
-            for i in dataset:
-                form = ActionTypeForm(i)
+            for form in formset:
                 if form.is_valid():
                     customer.create_actiontype(form.cleaned_data['action_name'], form.cleaned_data['description'])
-
-    return HttpResponseRedirect('apisettings')
+    return HttpResponseRedirect('/apisettings')
