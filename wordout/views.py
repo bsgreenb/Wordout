@@ -185,21 +185,14 @@ def api_settings_page(request):
 @login_required
 def create_action_type_page(request):
     if request.method == 'POST':
-        dataset = request.POST
         customer = Customer.objects.get(user=request.user)
         max_actions = customer.customergroup.max_actions
         current_number_actions = customer.action_type_set.filter(enabled=True).count()
-        ActionTypeFormSet = formset_factory(ActionTypeForm)
-        formset = ActionTypeFormSet(dataset)
-        if current_number_actions + int(dataset['form-TOTAL_FORMS']) > max_actions:
-            request.seesion['api_setting_error'] = 'The max number of actions is %' % max_actions
+        if current_number_actions >= max_actions:
+            request.session['api_setting_error'] = 'The max number of actions is %s' % max_actions
             return HttpResponseRedirect('/apisettings')
-
-
-        #ActionTypeFormSet = formset_factory(ActionTypeForm)
-        #formset = ActionTypeFormSet(dataset)
-        #with transaction.commit_manually(): #make insert query only triggers once
-        if formset.is_valid():
-            for form in formset.cleaned_data:
-                customer.create_actiontype(form['action_name'], form['description'])
+        
+        form  = ActionTypeForm(request.POST)
+        if form.is_valid():
+            customer.create_actiontype(form.cleaned_data['action_name'], form.cleaned_data['description'])
     return HttpResponseRedirect('/apisettings')
