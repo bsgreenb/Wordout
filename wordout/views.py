@@ -94,11 +94,14 @@ def direct_page(request, code):
     except Sharer.DoesNotExist:
         return HttpResponseRedirect('/')
 
-    if not request.META.get('HTTP_REFERER', ''):
-        referrer = None
+    if request.META.get('HTTP_REFERER', ''):
+        referrer_form = ValidateReferrer({'referrer':request.META['HTTP_Referrer']})
+        if referrer_form.is_valid():
+            referrer, created = get_or_create_link(referrer_form.cleaned_data['referrer'])
+        else:
+            referrer = None
     else:
-        referrer = request.META['HTTP_REFERER']
-        referrer, created = get_or_create_link(referrer)
+        referrer = None
 
     if not request.META.get('HTTP_USER_AGENT', ''):
         user_agent = None
@@ -108,9 +111,11 @@ def direct_page(request, code):
     
     ip = get_ip(request)
     if ip:
-        ip, created = IP.objects.get_or_create(address = ip)
+        ip_form = ValidateIP({'ip':ip})
+        if ip_form.is_valid():
+            ip, created = IP.objects.get_or_create(address = ip)
 
-    Click.objects.create(sharer = sharer, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
+    click = Click.objects.create(sharer = sharer, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
     return HttpResponseRedirect(redirect_link)
     
     
