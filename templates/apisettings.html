@@ -1,0 +1,15 @@
+{% extends 'backbone/base.html' %}
+
+{% block content %}
+	<div>{{ customer.client_key }}</div>
+	<div>{{ customer.api_key }}</div>
+	<div>{{ customergroup.max_actions}} </div>
+	<div>{{ action_number }}</div>
+
+	{% for l in action_type_ls %}
+		<div>{{ l.action_name }}</div>
+		<div>{{ l.description }}</div>
+		<div>{{ l.enabled }}</div>
+	{% endfor %}
+
+{% endblock %}

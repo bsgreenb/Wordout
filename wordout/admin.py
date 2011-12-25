@@ -11,7 +11,7 @@ class ClickAdmin(admin.ModelAdmin):
     list_display = ('sharer', 'redirect_link', 'referrer','IP', 'created')
 
 class CustomergroupAdmin(admin.ModelAdmin):
-    list_display = ('id', 'max_users')
+    list_display = ('id', 'max_users', 'max_actions')
 
 class ActionTypeAdmin(admin.ModelAdmin):
     list_display = ('customer', 'action_name', 'description')

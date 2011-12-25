@@ -140,8 +140,8 @@ def register_page(request):
                         Customer.objects.get(api_key = api_key)
                     except Customer.DoesNotExist:
                         loop = False
-
-            Customer.objects.create(user=user, client_key=client_key, api_key=api_key)
+            free_group = Customergroup.objects.get(id=1)
+            Customer.objects.create(user=user, client_key=client_key, api_key=api_key, customergroup=free_group )
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)
             return HttpResponseRedirect('/')
@@ -163,3 +163,34 @@ def api_page(request, client_key, user_id):
 
     except IndexError:
         return HttpResponseRedirect('/')
+
+
+@login_required
+def api_settings_page(request):
+    customer = Customer.objects.get(user = request.user)
+    #action_type_ls = Action_Type.objects.filter(customer=customer, enabled=True)
+    action_type_ls = customer.action_type_set.filter(enabled=True)
+    action_number = action_type_ls.count()
+    customergroup = customer.customergroup
+
+    return render_to_response('apisettings.html', dict(customer = customer,  action_type_ls = action_type_ls,  action_number = action_number, customergroup = customergroup), context_instance=RequestContext(request))
+
+
+@login_required
+def save_action_type_page(request):
+    if request.method == 'POST':
+        dataset = request.POST['data']
+        customer = Customer.objects.get(user=request.user)
+        max_actions = customer.customergroup.max_actions
+        current_number_actions = customer.action_type_set.fulter(enabled=True)
+        if current_number_actions + len(dataset) > max_actions:
+            request.seesion['api_setting_error'] = 'The max number of actions is %' % max_actions
+            HttpResponseRedirect('apisettings')
+
+        with transaction.commit_manually(): #make insert query only triggers once
+            for i in dataset:
+                form = ActionTypeForm(i)
+                if form.is_valid():
+                    customer.create_actiontype(form.cleaned_data['action_name'], form.cleaned_data['description'])
+
+    return HttpResponseRedirect('apisettings')

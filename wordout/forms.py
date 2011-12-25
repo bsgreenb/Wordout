@@ -2,8 +2,8 @@ from wordout.models import *
 from django import forms
 import re
 from django.contrib.auth.models import User
-
-#question: do I need a form to validate all inputs from my redirect_page?
+#todo
+#how i can validate the user agent.
 
 class CreateSharerForm(forms.Form):
     start = forms.IntegerField()
@@ -89,3 +89,7 @@ class ValidateReferrer(forms.Form):
 
 class ValidateIP(forms.Form):
     ip = forms.IPAddressField()
+    
+class ActionTypeForm(forms.Form):
+    action_name = models.CharField(max_length=20)
+    description = models.CharField(max_length=250, blank=True, null=True)

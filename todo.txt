@@ -1,6 +1,20 @@
+PLANOUT API
+- I have an account page that includes user's client_key, api_key and action table. 
+- the table is like my current table. we have all action buttons on the top. at the first version, the user can create max 5 actions. action buttons include "add [] actions", "edit action" and "disable action"
+    - add [] actions. [] is a select box for number of actionst the user wants to create. this number's max is from max_action minus number of exsiting actions. once clicked, it pops out a modal which has (action_name + description) * number of actions. The input will be like data[0]['action_name'], data[0]['description']. To simplify the error msg, I redirect the page along with the form once the error occurs. 
+    - i handle the validation through forms. I give request.POST['data'][0] as the variable. 
+    - 
+
+- I have an api documentation page.
+
+
+
 TODO:
 - display_sharers takes customer id and return sum of clicks, also sum of actions group by action_name
 - need completely contruct the api page
+- both dashboard and action table needs add checkbox and individual action functionality. 
+
+
 
 
 new features and implementation

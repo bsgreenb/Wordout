@@ -46,12 +46,10 @@ class Full_Link(models.Model):
 
 class Customergroup(models.Model): # identify paid/unpaid users
     max_users = models.IntegerField(max_length = 10)
+    max_actions = models.IntegerField(max_length = 2)
     
     def __unicode__(self):
         return str(self.id)
-
-def get_default_customergroup():
-    return Customergroup.objects.get(id=1) #set default customergroup for new customer
 
 def get_or_create_link(url):
     result = urlparse(url)
@@ -72,7 +70,7 @@ class Customer(models.Model):
     api_key = models.CharField(max_length = 9, unique=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
-    customergroup = models.ForeignKey(Customergroup, default=get_default_customergroup())
+    customergroup = models.ForeignKey(Customergroup)
 
     def __unicode__(self):
         return str(self.user)
@@ -90,7 +88,12 @@ class Customer(models.Model):
                     loop = False
                     Sharer.objects.create(customer = self, customer_sharer_id = i, code = code, redirect_link = redirect_link)
 
-   
+
+    def create_actiontype(self, action_name, description):
+        entry = Action_Type(customer=self, action_name=action_name, description=description)
+        entry.save()
+
+
     def change_redirect_link(self, new_redirect_link):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
         Sharer.objects.filter(customer=self).update(redirect_link = new_redirect_link)
