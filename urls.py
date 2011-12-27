@@ -22,11 +22,21 @@ urlpatterns = patterns('',
     #(r'^reset/done/$', password_reset_complete),
     url(r'^admin/', include(admin.site.urls)),
 
-    #those two create identifier page should be in module instead of page and use ajax to send query
-
+    #sharer
     (r'^createsharer/$', create_sharer_page),
-    (r'^identifier/([0-9]+)/$', show_referrer_by_sharer),
+    (r'^sharer/([0-9]+)/$', show_referrer_by_sharer),
     (r'^changelink/$', change_redirect_link_page),      
+    (r'^disablesharer/$', disable_or_enable_sharer_page, {'action':'disable'}),
+    (r'^enablesharer/$', disable_or_enable_sharer_page, {'action':'enable'}),
+
+    #sharer page
+    (r'^sharerpage/$', sharer_page),
+
+    #action page
+    (r'^action/$', action_page),
+    (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
+    (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
+
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),
     (r'^api/([0-9A-Za-z]{9})/([0-9]+)/$', api_page),

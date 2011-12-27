@@ -1,0 +1,312 @@
+{% extends 'backbone/base.html' %}
+
+{% block js %}
+<script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
+<script src="/static/js/plugin/jquery.tablesorter.pager.js"></script>
+<script src="/static/js/plugin/bootstrap-modal.js"></script>
+<script src="/static/js/lib.js"></script>
+<script>
+$(function() {
+
+	load_data_to_modal('sharer');  //load data to detail modal
+
+	$("table#sortTableExample")
+		.tablesorter({widthFixed: true})
+		.tablesorterPager({container: $("#pager"), positionFixed: false });
+
+	$('#select-all').on('click', function(){
+		var $checkbox = $('.checkbox');
+		$checkbox.prop('checked', 'checked');
+		$('button#edit, button#disable, button#enable').removeAttr("disabled", "");
+		$(this).hide();
+		$('#unselect-all').show();
+	});
+	
+	$('#unselect-all').on('click', function(){
+		var $checkbox = $('.checkbox')
+		$checkbox.prop('checked', '')
+		$('button#edit, button#disable, button#enable').attr("disabled", "disabled");
+		$(this).hide();
+		$('#select-all').show();
+	});
+	
+	$('.checkbox').click(function(){
+		if ($('.checkbox:checked').length == 0)
+		{
+			$('button#edit, button#disable, button#enable').attr("disabled", "disabled");
+		}
+		else
+		{
+			$('button#edit, button#disable, button#enable').removeAttr("disabled", "");
+		}
+	});
+
+	$('#edit').click(function(){
+		$('#edit-link-sharer-ls').val('');
+		
+		var sharer = '';
+		$('.checkbox:checked').each(function(){
+			sharer += $(this).val() + ',';
+		});
+		$('#edit-link-sharer-ls').val(sharer);
+	});
+	
+	$('#disable').click(function(){
+		$('#disable-sharer-ls').val('');
+		
+		var sharer = '';
+		$('.checkbox:checked').each(function(){
+			sharer += $(this).val() + ',';
+		});
+		$('#disable-sharer-ls').val(sharer);
+		$('#disable-form').submit();
+	});
+	
+	$('#enable').click(function(){
+		$('#enable-sharer-ls').val('');
+		
+		var sharer = '';
+		$('.checkbox:checked').each(function(){
+			sharer += $(this).val() + ',';
+		});
+		$('#enable-sharer-ls').val(sharer);
+		$('#enable-form').submit();
+	});
+
+});
+</script>
+{% endblock %}
+
+{% block css %}
+input[type="checkbox"]{
+	margin-right: 15px;
+}
+
+div#action{
+	padding-bottom: 10px;
+	border-bottom: 1px solid #EEEEEE;
+}
+
+div#action button{
+	margin-left: 10px;
+}
+
+div#action button.first{
+	margin-left: 0px;
+}
+
+div#action #enable, div#action #disable{
+	float: right;
+}
+
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+	<div class="alert-message block-message error">
+		<a class="close" href="#">×</a>
+		<p>
+			<strong>You got an error!</strong>
+		</p>
+		<ul>
+			{% for field in form %}
+				{% if field.errors %}
+					<li>{{field.name}}: {{ field.errors|striptags }}</li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	</div>
+{% endif %}
+
+
+{% if ls %}
+<div id="action">
+
+	<button class="btn first" id="select-all">Select All</button>
+	<button class="btn first" id="unselect-all" style="display:none">Unselect All</button>
+	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="create-sharer-modal-from-dom" id="create-sharer">Create Sharers</button>
+	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-link-modal-from-dom" id="edit" disabled="disabled">Edit Links</button>
+	<button class="btn" id="enable" disabled="disabled">Enable</button>
+	<button class="btn" id="disable" disabled="disabled">Disable</button>
+	
+</div>
+
+<table id="sortTableExample" class="zebra-striped">
+	<thead>
+		
+		<tr>
+			<th class="header">Sharer ID</th>
+			<th class="blue header">Link</th>
+			<th class="yellow header headerSortDown">Clicks</th>
+			<th class="green header">Enable</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for l in ls%}
+			<tr>
+				<td><input class="checkbox" type="checkbox" name="sharer_id" value="{{l.customer_sharer_id}}"/>{{ l.customer_sharer_id }}</td>
+				<td>
+					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
+					<div>{{ l.redirect_link }}</div>
+				</td>
+				<td>{{ l.num }} 
+					{% if l.num > 0 %}
+						<span class="label notice" id="{{l.id}}">detail</span>
+					{% endif %}		
+				</td>
+				<td>{{ l.enabled }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<div id="pager" class="pager">
+		<button class="btn first">first</button>
+		<button class="btn prev">prev</button>
+		<input type="text" class="pagedisplay span2" />
+		<button class="btn next">next</button>
+		<button class="btn last">last</button>
+		Item per page: 
+		<select class="pagesize">
+			<option selected="selected"  value="10">10</option>
+			<option value="20">20</option>
+			<option value="30">30</option>
+			<option  value="40">40</option>
+		</select>
+</div>
+
+{% else %}
+<div class="hero-unit">
+	<h1>Hello, world!</h1>
+	<p>
+		Vestibulum id ligula porta felis euismod semper. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+	</p>
+
+	<p>
+		<button id="msg" class="btn primary large" data-keyboard="true" data-backdrop="true" data-controls-modal="numeric-modal-from-dom">CREATE SHARERS</button>
+	</p>
+</div>
+
+{% endif %}
+
+<!------------------------------- -->
+
+
+<div id="create-sharer-modal-from-dom" class="modal hide fade" style="display: block;">
+	
+	<form method="POST" action="/createsharer/" id="create-sharer-form">
+		{% csrf_token %}
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Create Sharers</h3>
+	</div>
+	
+	<div class="modal-body">
+			<fieldset>
+				<div class="clearfix">
+					<label for="numeric_start">Start sharer id:</label>
+					<div class="input">
+						<input id="numeric_start" type="text" value="{{default_start}}" name="start" readonly="readonly">
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label for="numeric_end">End sharer id: </label>
+					<div class="input">
+						<input id="numeric_end" type="text" name="end">
+					</div>
+				</div>
+				
+				<div class="clearfix">
+					<label for="numeric_redirect_link">Redirect link: </label>
+					<div class="input">
+						<input id="numeric_redirect_link" type="text" name="redirect_link">
+					</div>
+				</div>
+			</fieldset>
+		
+	</div>
+
+	<div class="modal-footer">
+		<input class="btn primary" href="#" id="numeric_save" value="Save" type="submit">
+	</div>
+	</form>
+</div>
+
+<!------------------------------- -->
+
+
+<div id="edit-link-modal-from-dom" class="modal hide fade" style="display: block;">
+	<form method="POST" action="/changelink/" id="edit-link-form">
+	{% csrf_token %}
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Edit links</h3>
+	</div>
+	<div class="modal-body">
+		
+			
+			<fieldset>
+				<div class="clearfix">
+					<label for="id-redirect-link">Redirect link:</label>
+					<div class="input">
+						<input id="id-redirect-link" type="text" name="redirect_link">
+					</div>
+				</div>
+				<input id="edit-link-sharer-ls" name="edit_link_sharer_ls" value="" type="hidden"/>
+					
+			</fieldset>
+		
+	</div>
+	<div class="modal-footer">
+		<input class="btn primary" href="#" id="edit_save" value="Save" type="submit">
+	</div>
+	</form>
+</div>
+
+
+<!-- this modal is to hold the ajax request -->
+
+<div id="detail-modal-from-dom" class="modal hide fade" style="display: block;">
+
+	<div class="modal-header">
+		<a class="close" href="#">×</a>
+		<h3>Clicks come from the following links</h3>
+	</div>
+	<div class="modal-body">
+		
+			<table id="clickDetail" class="zebra-striped">
+				<thead>
+
+					<tr>
+						<th class="header">Referrer</th>
+						<th class="yellow header">Clicks</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--ajax result goes here -->
+					
+					
+					
+				</tbody>
+			</table>
+		
+	</div>
+	<div class="modal-footer">
+		
+	</div>
+</div>
+
+<form id="disable-form" action="/disablesharer/" method="POST" style="display:hidden">
+{% csrf_token %}
+<input type="hidden" id="disable-sharer-ls" name="sharer_ls" value="" />
+</form>
+
+<form id="enable-form" action="/enablesharer/" method="POST" style="display:hidden">
+{% csrf_token %}
+<input type="hidden" id="enable-sharer-ls" name="sharer_ls" value="" />
+</form>
+
+
+{% endblock %}
+
+	

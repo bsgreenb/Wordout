@@ -14,7 +14,7 @@ class CustomergroupAdmin(admin.ModelAdmin):
     list_display = ('id', 'max_users', 'max_actions')
 
 class ActionTypeAdmin(admin.ModelAdmin):
-    list_display = ('customer', 'action_name', 'description')
+    list_display = ('customer', 'action_id', 'action_name', 'description')
 
 class ActionAdmin(admin.ModelAdmin):
     list_display =('click', 'action', 'description')

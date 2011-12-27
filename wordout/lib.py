@@ -31,9 +31,7 @@ def force_subdomain(netloc):
     return netloc
 
 def generate_json_for_detail(ls):
-    '''
-    identifier and referrer details return the same data in json format
-    '''
+    #sharer and referrer details return the same data in json format
     try:
         if ls[0]:
             results = [{'success':True}]
@@ -41,8 +39,4 @@ def generate_json_for_detail(ls):
     except:
         results = [{'success':False}]
 
-    results = simplejson.dumps(results)
-
-    return results
-
-
+    return simplejson.dumps(results)

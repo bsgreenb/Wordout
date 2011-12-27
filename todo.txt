@@ -1,5 +1,24 @@
 REDESIGN ALL THE PAGES
-- 
+- sharer page. this describes what is the plugin page and how to implement it.
+    - if the customer has not created any sharer yet, we display the message leading him to create sharers
+    - give instruction that he can apply the iframe. 
+    - need have client_key
+    - have a demo page which links to client_key/user_id=0
+    - give the iframe code
+
+- action page. this descibes how to use the action page. also, client is to define the actions here
+    - instruction
+    - form/table for  all actions
+    - instruction on recording those actions
+
+
+
+
+- api documentation. this describes the api. apisettings is the place to define all the actions and how to use them.this page should have a left navigation bar. 
+
+- setting page. this page includes client_key, api_key and the action table defined.
+
+
 
 
 
@@ -11,6 +30,9 @@ PLANOUT API
 
 
 TODO:
+- tabs need add active code.
+- select all not working on sortable
+- also, do i need validate the post ls from change_redirect_link, disable and enable
 - give api_setting_error on apisettins page
 - display_sharers takes customer id and return sum of clicks, also sum of actions group by action_name
 - need completely contruct the api page

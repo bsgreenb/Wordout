@@ -89,29 +89,26 @@ class Customer(models.Model):
                     Sharer.objects.create(customer = self, customer_sharer_id = i, code = code, redirect_link = redirect_link)
 
 
-    def create_actiontype(self, action_name, description):
-        entry = Action_Type(customer=self, action_name=action_name, description=description)
+    def create_actiontype(self, action_id, action_name, description):
+        entry = Action_Type(customer=self, action_id=action_id, action_name=action_name, description=description)
         entry.save()
 
 
-    def change_redirect_link(self, new_redirect_link):
+    def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
-        Sharer.objects.filter(customer=self).update(redirect_link = new_redirect_link)
+        Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(redirect_link = new_redirect_link)
 
+    def disable_or_enable_sharer(self, sharer_ls, boolean):
+        Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(enabled = boolean)
+
+    def disable_or_enable_action(self, action_ls, boolean):
+        Action_Type.objects.filter(customer=self, action_id__in = action_ls).update(enabled = boolean)
     
-    def display_sharers(self, least_click=None, start=None, end=None):
+    def display_sharers(self):
         
         #######I NEED EITHER BEN OR ERIN'S HELP ON THIS 
-        ls = Sharer.objects.select_related().filter(customer = self)
-        if start and end:
-            ls = ls.filter(request__created__range=(start, end))
-        ls = ls.annotate(num = Count('click'))
-        if least_click:
-            ls = ls.filter(num__gte=least_click)
-
-        ls = ls.order_by('-created')
-        sum_clicks = ls.aggregate(sum_clicks=Sum('num'))['sum_clicks']
-        return (ls, sum_clicks)
+        ls = Sharer.objects.select_related().filter(customer = self).annotate(num = Count('click')).order_by('-created')
+        return ls
         
     def display_referrer_by_sharer(self, customer_sharer_id):
         #show where the clicks come from by each sharer
@@ -198,6 +195,7 @@ class Click(models.Model):
 
 class Action_Type(models.Model):
     customer = models.ForeignKey(Customer)
+    action_id = models.IntegerField(max_length=2)
     action_name = models.CharField(max_length=20)
     description = models.CharField(max_length=250, blank=True, null=True)
     enabled = models.BooleanField(default = True)

@@ -20,12 +20,12 @@ class CreateSharerForm(forms.Form):
             start = self.cleaned_data['start']
             try:
                 last = Sharer.objects.filter(customer = self._user).order_by('-created')[0]
-                last = int(last.identifier)
+                last = int(last.customer_sharer_id)
             except IndexError:
-                last = -1  #start is 0 now. 0 is for test code
+                last = 0
             if last < start:
                 return start
-        raise forms.ValidationError('Part of numeric identifiers are already taken.')
+        raise forms.ValidationError('Sharer id is already taken.')
     
     def clean_end(self):
         if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
@@ -37,7 +37,7 @@ class CreateSharerForm(forms.Form):
             num_created = end - start + 1
             max_users = Customer.objects.get(user = self._user).customergroup.max_users
             if (total + num_created) > max_users:
-                raise forms.ValidationError('The amount of identifiers is limited to %s' % max_users)
+                raise forms.ValidationError('The amount of sharer is limited to %s' % max_users)
 
             if end > start:
                 return end
@@ -92,4 +92,4 @@ class ValidateIP(forms.Form):
     
 class ActionTypeForm(forms.Form):
     action_name = forms.CharField(max_length=20)
-    description = forms.CharField(max_length=250, required=False)
+    action_description = forms.CharField(max_length=250, required=False)

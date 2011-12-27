@@ -1,0 +1,38 @@
+{% extends 'backbone/base.html' %}
+
+{% block content %}
+
+{% if not customer_sharer_ls %}
+    <div class="alert-message block-message warning">
+    	<a class="close" href="#">×</a>
+    	<p>
+    		<strong>Holy guacamole! This is a warning!</strong> Best check yo self, you’re not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+    	</p>
+    </div>
+{% endif %}
+
+<h1>Sharer Page Plugin</h1>
+<p>I am talking on sense right now. This part is basically a instruction that describes the iframe plugin, how it works. this part will also show them the client_key which is used to trigger the iframe. <strong>client_key: {{client_key}}</strong> <a class="btn primary" href="#">Demo</a></p>
+
+<div class="alert-message block-message info">
+    <p>
+    	<div>Permanent Shortlink URL</div>
+    	<div>
+    		&lt;iframe src=&quot;http://127.0.0.1:8000/api/123456789/102/&quot; frameBorder=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;width:100%; border:none; height:900px&quot;&gt;"
+    	</div>
+    </p>
+</div>
+
+<div class="alert-message block-message info">
+    <p>
+    	<div>Iframe code</div>
+    	<div>
+    		&lt;iframe src=&quot;http://127.0.0.1:8000/api/123456789/102/&quot; frameBorder=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;width:100%; border:none; height:900px&quot;&gt;"
+    	</div>
+    </p>
+</div>
+
+<p>describes the beneft after the user can try out the code. </p>
+
+
+{% endblock %}

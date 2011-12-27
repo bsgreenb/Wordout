@@ -11,19 +11,21 @@ from wordout.models import *
 from wordout.lib import get_ip, code_generator, generate_json_for_detail
 from django.utils import simplejson
 from django.forms.formsets import formset_factory
+from django.db.models import Max
 
+#SHARER
 def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
-        ls, sum_clicks = customer.display_sharers()
+        ls = customer.display_sharers()
 
         #get default start value for create numeric identifiers
         try:
             last = Sharer.objects.filter(customer = customer).order_by('-created')[0]
             last = last.customer_sharer_id
         except IndexError:
-            last = -1 # give -1 so that default start could be 0 which is the test code for admin
-        
+            last = 0
+
         default_start = last + 1
         
         #error msg, such as invalidate redirect link, is in the form. 
@@ -33,7 +35,7 @@ def main_page(request):
         else:
             form = ''
 
-        return render_to_response('dashboard.html', dict(ls=ls, sum_clicks = sum_clicks, default_start = default_start, form=form), context_instance=RequestContext(request))
+        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form=form), context_instance=RequestContext(request))
 
     else:
         form = RegistrationForm()
@@ -44,7 +46,7 @@ def main_page(request):
 @login_required
 def show_referrer_by_sharer(request, customer_sharer_id): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
     customer = Customer.objects.get(user = request.user)
-    ls = customer.display_referrer_for_sharer(customer_sharer_id)
+    ls = customer.display_referrer_by_sharer(customer_sharer_id)
     results = generate_json_for_detail(ls)
     return HttpResponse(results, 'application/javascript')
     
@@ -67,12 +69,72 @@ def change_redirect_link_page(request):
     if request.method == 'POST':
         form = ChangeLinkForm(user = request.user, data = request.POST)
         if form.is_valid():
+            sharer_ls = request.POST['edit_link_sharer_ls'][0:-1].split(',')
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
-            customer.change_all_redirect_link(redirect_link)
+            customer.change_redirect_link(redirect_link, sharer_ls)
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/')
+
+@login_required
+def disable_or_enable_sharer_page(request, action):
+    if request.method == 'POST':
+        sharer_ls = request.POST['sharer_ls'][:-1].split(',')
+        customer = Customer.objects.get(user=request.user)
+        if action == 'disable':
+            customer.disable_or_enable_sharer(sharer_ls, False)
+        if action ==  'enable':
+            customer.disable_or_enable_sharer(sharer_ls, True)
+    return HttpResponseRedirect('/')
+
+#SHARER PAGE
+@login_required
+def sharer_page(request):
+    customer = Customer.objects.get(user=request.user)
+    customer_sharer_ls = customer.sharer_set.all()
+    client_key = customer.client_key
+    return render_to_response('sharer_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key), context_instance=RequestContext(request))
+
+#ACTION 
+@login_required
+def action_page(request):
+    customer = Customer.objects.get(user=request.user)
+    action_type_ls = customer.action_type_set.all()
+    api_key = customer.api_key
+    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key), context_instance=RequestContext(request))
+
+@login_required
+def create_action_type_page(request):
+    if request.method == 'POST':
+        customer = Customer.objects.get(user=request.user)
+        max_actions = customer.customergroup.max_actions
+        current_number_actions = customer.action_type_set.filter(enabled=True).count()
+        if current_number_actions == 0:
+            action_id = 1
+        else:
+            action_id = customer.action_type_set.aggregate(last_action_id = Max('action_id'))['last_action_id'] + 1
+
+        if current_number_actions >= max_actions:
+            request.session['action_error'] = 'The max number of enabled actions is %s' % max_actions
+            return HttpResponseRedirect('/action')
+        
+        form  = ActionTypeForm(request.POST)
+        if form.is_valid():
+            customer.create_actiontype(action_id, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+    return HttpResponseRedirect('/action')
+
+@login_required
+def disable_or_enable_action_page(request, action):
+    if request.method == 'POST':
+        action_ls = request.POST['action_ls'][:-1].split(',')
+        customer = Customer.objects.get(user=request.user)
+        if action == 'disable':
+            customer.disable_or_enable_action(action_ls, False)
+        if action == 'enable':
+            customer.disable_or_enable_action(action_ls, True)
+    return HttpResponseRedirect('/action')
+
 
 @login_required
 def referrer_page(request):
@@ -119,7 +181,7 @@ def direct_page(request, code):
     click = Click.objects.create(sharer = sharer, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
     return HttpResponseRedirect(redirect_link)
     
-    
+@login_required
 def logout_page(request):
     logout(request)
     return HttpResponseRedirect('/')
@@ -182,17 +244,4 @@ def api_settings_page(request):
     return render_to_response('apisettings.html', dict(customer = customer,  action_type_ls = action_type_ls,  action_number = action_number, customergroup = customergroup), context_instance=RequestContext(request))
 
 
-@login_required
-def create_action_type_page(request):
-    if request.method == 'POST':
-        customer = Customer.objects.get(user=request.user)
-        max_actions = customer.customergroup.max_actions
-        current_number_actions = customer.action_type_set.filter(enabled=True).count()
-        if current_number_actions >= max_actions:
-            request.session['api_setting_error'] = 'The max number of actions is %s' % max_actions
-            return HttpResponseRedirect('/apisettings')
-        
-        form  = ActionTypeForm(request.POST)
-        if form.is_valid():
-            customer.create_actiontype(form.cleaned_data['action_name'], form.cleaned_data['description'])
-    return HttpResponseRedirect('/apisettings')
+

@@ -11,7 +11,8 @@
 	{% endblock %}
 	</style>
 	
-	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
+"></script>
 	<script src="/static/js/plugin/bootstrap-dropdown.js"></script>
 	<script>
 	$(document).ready(function(){
@@ -36,7 +37,10 @@
 				
 					{% if user.is_authenticated %}
 						<ul class="nav">
-					     	<li><a href="/">Dashboard</a></li>
+					     	<li><a href="/">Sharer</a></li>
+					     	<li><a href="/sharerpage/">Sharer Page</a></li>
+					     	<li><a href="/action/">Action</a></li>
+					     	<li><a href="/api/">API</a></li>
 						</ul>
 						<p class="pull-right" id="header-pull-right">							
 							<ul class="nav secondary-nav">
@@ -53,7 +57,6 @@
 		          	<form method="post" action="/accounts/login/" class="pull-right">
 						{% csrf_token %}
 				        <input class="input-medium" type="text" placeholder="Username or Email" name="username">
-
 				        <input class="input-medium" type="password" placeholder="Password" name="password">
 				        <button class="btn" type="submit">Sign in</button>
 				  	</form>
