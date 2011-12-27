@@ -87,19 +87,20 @@ class Customer(models.Model):
                 except Sharer.DoesNotExist:
                     loop = False
                     Sharer.objects.create(customer = self, customer_sharer_id = i, code = code, redirect_link = redirect_link)
-
-
-    def create_actiontype(self, action_id, action_name, description):
-        entry = Action_Type(customer=self, action_id=action_id, action_name=action_name, description=description)
-        entry.save()
-
-
+   
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
         Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(redirect_link = new_redirect_link)
 
     def disable_or_enable_sharer(self, sharer_ls, boolean):
         Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(enabled = boolean)
+    
+    def create_actiontype(self, action_id, action_name, description):
+        entry = Action_Type(customer=self, action_id=action_id, action_name=action_name, description=description)
+        entry.save()
+        
+    def edit_actiontype(self, action_ls, action_name, description):
+        Action_Type.objects.filter(customer=self, action_id__in = action_ls).update(action_name=action_name, description=description)
 
     def disable_or_enable_action(self, action_ls, boolean):
         Action_Type.objects.filter(customer=self, action_id__in = action_ls).update(enabled = boolean)

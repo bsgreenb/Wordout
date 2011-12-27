@@ -124,6 +124,14 @@ def create_action_type_page(request):
             customer.create_actiontype(action_id, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
     return HttpResponseRedirect('/action')
 
+def edit_actiontype_page(request):
+    if request.method == 'POST':
+        customer = Customer.objects.get(user=request.user)
+        action_ls = request.POST['action_list'][:-1].split(',')
+        form = ActionTypeForm(request.POST)
+        if form.is_valid():
+            customer.edit_actiontype(customer, action_ls, form.cleaned_data['action_name'], form.cleaned_data['action_description']
+
 @login_required
 def disable_or_enable_action_page(request, action):
     if request.method == 'POST':

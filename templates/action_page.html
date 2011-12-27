@@ -5,14 +5,19 @@
 <script>
 $(function() {
 
-	$('.checkbox').click(function(){
+	$('.checkbox').on('click', function(){
 		if ($('.checkbox:checked').length == 0)
 		{
 			$('button#edit, button#disable, button#enable').attr("disabled", "disabled");
 		}
-		else
+		else if ($('.checkbox:checked').length == 1)
 		{
 			$('button#edit, button#disable, button#enable').removeAttr("disabled", "");
+		}
+		else
+		{
+			$('button#edit').attr("disabled", "disabled");
+			$('button#disable, button#enable').removeAttr("disabled", "");
 		}
 	});
 
@@ -47,7 +52,7 @@ $(function() {
 		$('#enable-action-ls').val(sharer);
 		$('#enable-form').submit();
 	});
-
+	
 })
 </script>
 {% endblock %}
@@ -61,8 +66,8 @@ $(function() {
 {% if action_type_ls %}
 <div id="action">
 
-	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="create-action-modal-from-dom" id="create-action">Create Action</button>
-	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-action-modal-from-dom" id="edit">Edit</button>
+	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="create-action-modal-from-dom">Create Action</button>
+	<button class="btn" data-keyboard="true" data-backdrop="true" data-controls-modal="edit-action-modal-from-dom" id="edit" disabled="disabled">Edit</button>
 	<button class="btn" id="enable" disabled="disabled">Enable</button>
 	<button class="btn" id="disable" disabled="disabled">Disable</button>
 	
@@ -95,43 +100,74 @@ $(function() {
 	</tbody>
 </table>
 {% else %}
-<button class="btn primary large" data-keyboard="true" data-backdrop="true" data-controls-modal="create-action-modal-from-dom" id="create-sharer">Create Action</button>
+<button class="btn primary large" data-keyboard="true" data-backdrop="true" data-controls-modal="create-action-modal-from-dom">Create Action</button>
 {% endif %}
 
 <p>this part is going to describe how to implement the action</p>
 
 
 <div id="create-action-modal-from-dom" class="modal hide fade" style="display: block;">
-	
-	<form method="POST" action="/createactions/" id="create-sharer-form">
+	<form method="POST" action="/createactions/">
 		{% csrf_token %}
-	<div class="modal-header">
-		<a class="close" href="#">×</a>
-		<h3>Create Action</h3>
-	</div>
+		<div class="modal-header">
+			<a class="close" href="#">×</a>
+			<h3>Create Action</h3>
+		</div>
 	
-	<div class="modal-body">
+		<div class="modal-body">
 			<fieldset>
 				<div class="clearfix">
-					<label for="action_name">Action Name: </label>
+					<label>Action Name: </label>
 					<div class="input">
-						<input id="action_name" type="text" value="" name="action_name" />
+						<input type="text" value="" name="action_name" />
 					</div>
 				</div>
 			
 				<div class="clearfix">
-					<label for="numeric_end">Action Description: </label>
+					<label>Action Description: </label>
 					<div class="input">
 						<textarea name="action_description"></textarea>
 					</div>
 				</div>
 			</fieldset>
-		
-	</div>
+		</div>
+		<div class="modal-footer">
+			<input class="btn primary" href="#" value="Save" type="submit">
+		</div>
+	</form>
+</div>
 
-	<div class="modal-footer">
-		<input class="btn primary" href="#" id="numeric_save" value="Save" type="submit">
-	</div>
+<div id="edit-action-modal-from-dom" class="modal hide fade" style="display: block;">
+	<form method="POST" action="/editaction/">
+		{% csrf_token %}
+		<div class="modal-header">
+			<a class="close" href="#">×</a>
+			<h3>Edit Action</h3>
+		</div>
+	
+		<div class="modal-body">
+			<fieldset>
+				<div class="clearfix">
+					<label>Action Name: </label>
+					<div class="input">
+						<input type="text" value="" name="action_name" />
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label>Action Description: </label>
+					<div class="input">
+						<textarea name="action_description"></textarea>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+
+		<div class="modal-footer">
+			<input class="btn primary" href="#" value="Save" type="submit">
+		</div>
+		
+		<input type="hidden" id="edit-action-ls" name="action_ls" value="" />
 	</form>
 </div>
 
