@@ -11,16 +11,9 @@ REDESIGN ALL THE PAGES
     - form/table for  all actions
     - instruction on recording those actions
 
-
-
-
 - api documentation. this describes the api. apisettings is the place to define all the actions and how to use them.this page should have a left navigation bar. 
 
 - setting page. this page includes client_key, api_key and the action table defined.
-
-
-
-
 
 PLANOUT API
 - I have an account page that includes user's client_key, api_key and action table. 
@@ -30,6 +23,9 @@ PLANOUT API
 
 
 TODO:
+- deal with successfully update update_title_and_body message
+- write body_title and body_message form on api page
+- have a plan on showing the error msg from the modal
 - tabs need add active code.
 - select all not working on sortable
 - also, do i need validate the post ls from change_redirect_link, disable and enable

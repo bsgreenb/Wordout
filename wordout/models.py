@@ -95,6 +95,12 @@ class Customer(models.Model):
     def disable_or_enable_sharer(self, sharer_ls, boolean):
         Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(enabled = boolean)
     
+    def update_title_and_body(self, message_title, message_body):
+        self.message_title=message_title
+        self.message_body=message_body
+        self.save()
+        #Customer.objects.get(user=self).update(message_title=message_title, message_body=message_body)
+
     def create_actiontype(self, action_id, action_name, description):
         entry = Action_Type(customer=self, action_id=action_id, action_name=action_name, description=description)
         entry.save()

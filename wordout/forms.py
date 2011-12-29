@@ -93,3 +93,8 @@ class ValidateIP(forms.Form):
 class ActionTypeForm(forms.Form):
     action_name = forms.CharField(max_length=20)
     action_description = forms.CharField(max_length=250, required=False)
+
+class MessageForm(forms.Form):
+    message_title = forms.CharField(max_length=200, required=False)
+    message_body = forms.CharField(required=False)
+    

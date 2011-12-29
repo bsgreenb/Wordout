@@ -12,7 +12,31 @@
 {% endif %}
 
 <h1>Sharer Page Plugin</h1>
-<p>I am talking on sense right now. This part is basically a instruction that describes the iframe plugin, how it works. this part will also show them the client_key which is used to trigger the iframe. <strong>client_key: {{client_key}}</strong> <a class="btn primary" href="#">Demo</a></p>
+<p>I am talking on sense right now. This part is basically a instruction that describes the iframe plugin, how it works. this part will also show them the client_key which is used to trigger the iframe. <strong>client_key: {{client_key}}</strong> 
+
+<form class="form-stacked" action="/editmsg/" method="POST">
+	{% csrf_token %}
+	<fieldset>
+		<legend>Customize your sharer page</legend>
+		<div class="clearfix">
+			<label>Sharer page title</label>
+			<div class="input">
+				<input class="xlarge" type="text" size="30" name="message_title" value="{{message_title}}">
+			</div>
+		</div>
+		<div class="clearfix">
+			<label>Sharer page message</label>
+			<div class="input">
+				<textarea name="message_body" class="xxlarge">{{message_body}}</textarea>
+			</div>
+		</div>
+		<div>
+			<button class="btn primary" type="submit">Save changes</button>
+			<a class="btn primary" href="#">Preview</a>
+		</div>
+	</fieldset>
+</form>
+
 
 <div class="alert-message block-message info">
     <p>

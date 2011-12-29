@@ -94,7 +94,19 @@ def sharer_page(request):
     customer = Customer.objects.get(user=request.user)
     customer_sharer_ls = customer.sharer_set.all()
     client_key = customer.client_key
-    return render_to_response('sharer_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key), context_instance=RequestContext(request))
+    message_title = customer.message_title
+    message_body = customer.message_body
+    return render_to_response('sharer_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body), context_instance=RequestContext(request))
+
+@login_required
+def edit_msg_page(request):
+    if request.method == 'POST':
+        customer = Customer.objects.get(user=request.user)
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            customer.update_title_and_body(form.cleaned_data['message_title'], form.cleaned_data['message_body'])
+
+    return HttpResponseRedirect('/sharerpage/')
 
 #ACTION 
 @login_required
@@ -127,10 +139,11 @@ def create_action_type_page(request):
 def edit_actiontype_page(request):
     if request.method == 'POST':
         customer = Customer.objects.get(user=request.user)
-        action_ls = request.POST['action_list'][:-1].split(',')
+        action_ls = request.POST['action_ls'][:-1].split(',')
         form = ActionTypeForm(request.POST)
         if form.is_valid():
-            customer.edit_actiontype(customer, action_ls, form.cleaned_data['action_name'], form.cleaned_data['action_description']
+            customer.edit_actiontype(action_ls, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+    return HttpResponseRedirect('/action')
 
 @login_required
 def disable_or_enable_action_page(request, action):

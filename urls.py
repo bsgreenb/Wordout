@@ -31,7 +31,7 @@ urlpatterns = patterns('',
 
     #sharer page
     (r'^sharerpage/$', sharer_page),
-
+    (r'^editmsg/$', edit_msg_page),
     #action page
     (r'^action/$', action_page),
     (r'^createactions/$', create_action_type_page),
