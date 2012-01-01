@@ -1,10 +1,11 @@
 {% extends 'backbone/base.html' %}
 
 {% block js %}
+<script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script>
 $(function() {
-
+	$("table#actions").tablesorter({widthFixed: true})
 	$('.checkbox').on('click', function(){
 		if ($('.checkbox:checked').length == 0)
 		{
@@ -22,46 +23,49 @@ $(function() {
 	});
 
 	$('#edit').click(function(){
-		$('#edit-action-ls').val('');
-		
-		var sharer = '';
-		$('.checkbox:checked').each(function(){
-			sharer += $(this).val() + ',';
-		});
-		$('#edit-action-ls').val(sharer);
+		$('#edit-action-id').val('');
+		var action_id = $('.checkbox:checked').val();
+		$('#edit-action-id').val(action_id);
 	});
 	
 	$('#disable').click(function(){
 		$('#disable-action-ls').val('');
 		
-		var sharer = '';
+		var actions = '';
 		$('.checkbox:checked').each(function(){
-			sharer += $(this).val() + ',';
+			actions += $(this).val() + ',';
 		});
-		$('#disable-action-ls').val(sharer);
+		$('#disable-action-ls').val(actions);
 		$('#disable-form').submit();
 	});
 	
 	$('#enable').click(function(){
 		$('#enable-action-ls').val('');
 		
-		var sharer = '';
+		var actions = '';
 		$('.checkbox:checked').each(function(){
-			sharer += $(this).val() + ',';
+			actions += $(this).val() + ',';
 		});
-		$('#enable-action-ls').val(sharer);
+		$('#enable-action-ls').val(actions);
 		$('#enable-form').submit();
 	});
 	
 })
 </script>
 {% endblock %}
-	
+
+{% block css %}
+#action-description{
+	width: 400px;
+}
+{% endblock %}
 
 {% block content %}
 <h1>Track Actions</h1>
 
 <p>This part is to give a brief instruction</p>
+
+{% include 'backbone/form_errors.html' %}
 
 {% if action_type_ls %}
 <div id="action">
@@ -73,12 +77,12 @@ $(function() {
 	
 </div>
 
-<table class="zebra-striped">
+<table id="actions" class="zebra-striped">
 	<thead>
 		<tr>
 			<th class="header">Action ID</th>
 			<th class="blue header">Action Name</th>
-			<th class="yellow header">Action Description</th>
+			<th class="yellow header" id="action-description">Action Description</th>
 			<th class="green header">Enable</th>
 		</tr>
 	</thead>
@@ -116,6 +120,13 @@ $(function() {
 	
 		<div class="modal-body">
 			<fieldset>
+				<div class="clearfix">
+					<label>Action ID: </label>
+					<div class="input">
+						<input type="text" value="{{action_id}}" name="action_id" readonly="readonly"/>
+					</div>
+				</div>
+				
 				<div class="clearfix">
 					<label>Action Name: </label>
 					<div class="input">
@@ -167,7 +178,7 @@ $(function() {
 			<input class="btn primary" href="#" value="Save" type="submit">
 		</div>
 		
-		<input type="hidden" id="edit-action-ls" name="action_ls" value="" />
+		<input type="hidden" id="edit-action-id" name="action_id" value="" />
 	</form>
 </div>
 

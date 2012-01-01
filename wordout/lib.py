@@ -40,3 +40,11 @@ def generate_json_for_detail(ls):
         results = [{'success':False}]
 
     return simplejson.dumps(results)
+
+def check_session_form(request):
+    if request.session.get('form', ''):
+        form = request.session['form']
+        del request.session['form']
+    else:
+        form = ''
+    return form

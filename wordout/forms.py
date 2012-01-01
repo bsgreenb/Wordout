@@ -91,8 +91,23 @@ class ValidateIP(forms.Form):
     ip = forms.IPAddressField()
     
 class ActionTypeForm(forms.Form):
+
+    action_id = forms.IntegerField()
     action_name = forms.CharField(max_length=20)
     action_description = forms.CharField(max_length=250, required=False)
+    
+    def __init__(self, user=None, *args, **kwargs):
+        super(ActionTypeForm, self).__init__(*args, **kwargs)
+        self._user = user
+
+    def clean_action_id(self):
+        if 'action_id' in self.cleaned_data:
+            action_id = self.cleaned_data['action_id']
+            max_actions = self._user.customergroup.max_actions
+            if action_id >= max_actions:
+                raise forms.ValidationError('The max number of  actions is %s' % max_actions)
+            return action_id
+
 
 class MessageForm(forms.Form):
     message_title = forms.CharField(max_length=200, required=False)

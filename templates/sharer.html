@@ -12,7 +12,7 @@ $(function() {
 
 	$("table#sortTableExample")
 		.tablesorter({widthFixed: true})
-		.tablesorterPager({container: $("#pager"), positionFixed: false });
+		.tablesorterPager({container: $("#pager"), positionFixed: false, removeRows: false});
 
 	$('#select-all').on('click', function(){
 		var $checkbox = $('.checkbox');
@@ -98,26 +98,10 @@ div#action button.first{
 div#action #enable, div#action #disable{
 	float: right;
 }
-
 {% endblock %}
 
 {% block content %}
-{% if form.errors %}
-	<div class="alert-message block-message error">
-		<a class="close" href="#">×</a>
-		<p>
-			<strong>You got an error!</strong>
-		</p>
-		<ul>
-			{% for field in form %}
-				{% if field.errors %}
-					<li>{{field.name}}: {{ field.errors|striptags }}</li>
-				{% endif %}
-			{% endfor %}
-		</ul>
-	</div>
-{% endif %}
-
+{% include 'backbone/form_errors.html' %}
 
 {% if ls %}
 <div id="action">
@@ -203,23 +187,23 @@ div#action #enable, div#action #disable{
 	<div class="modal-body">
 			<fieldset>
 				<div class="clearfix">
-					<label for="numeric_start">Start sharer id:</label>
+					<label>Start sharer id:</label>
 					<div class="input">
-						<input id="numeric_start" type="text" value="{{default_start}}" name="start" readonly="readonly">
+						<input type="text" value="{{default_start}}" name="start" readonly="readonly">
 					</div>
 				</div>
 			
 				<div class="clearfix">
-					<label for="numeric_end">End sharer id: </label>
+					<label>End sharer id: </label>
 					<div class="input">
-						<input id="numeric_end" type="text" name="end">
+						<input type="text" name="end">
 					</div>
 				</div>
 				
 				<div class="clearfix">
-					<label for="numeric_redirect_link">Redirect link: </label>
+					<label>Redirect link: </label>
 					<div class="input">
-						<input id="numeric_redirect_link" type="text" name="redirect_link">
+						<input type="text" name="redirect_link">
 					</div>
 				</div>
 			</fieldset>
@@ -227,7 +211,7 @@ div#action #enable, div#action #disable{
 	</div>
 
 	<div class="modal-footer">
-		<input class="btn primary" href="#" id="numeric_save" value="Save" type="submit">
+		<input class="btn primary" href="#" value="Save" type="submit">
 	</div>
 	</form>
 </div>
@@ -247,9 +231,9 @@ div#action #enable, div#action #disable{
 			
 			<fieldset>
 				<div class="clearfix">
-					<label for="id-redirect-link">Redirect link:</label>
+					<label>Redirect link:</label>
 					<div class="input">
-						<input id="id-redirect-link" type="text" name="redirect_link">
+						<input type="text" name="redirect_link">
 					</div>
 				</div>
 				<input id="edit-link-sharer-ls" name="edit_link_sharer_ls" value="" type="hidden"/>
@@ -258,7 +242,7 @@ div#action #enable, div#action #disable{
 		
 	</div>
 	<div class="modal-footer">
-		<input class="btn primary" href="#" id="edit_save" value="Save" type="submit">
+		<input class="btn primary" href="#" value="Save" type="submit">
 	</div>
 	</form>
 </div>

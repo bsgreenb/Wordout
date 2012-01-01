@@ -10,9 +10,7 @@ REDESIGN ALL THE PAGES
     - instruction
     - form/table for  all actions
     - instruction on recording those actions
-
 - api documentation. this describes the api. apisettings is the place to define all the actions and how to use them.this page should have a left navigation bar. 
-
 - setting page. this page includes client_key, api_key and the action table defined.
 
 PLANOUT API
@@ -23,11 +21,12 @@ PLANOUT API
 
 
 TODO:
+- how to replace request.user with customer while login
 - deal with successfully update update_title_and_body message
 - write body_title and body_message form on api page
 - have a plan on showing the error msg from the modal
 - tabs need add active code.
-- select all not working on sortable
+- select all not working on sortable, even i added removeRows:false. check out
 - also, do i need validate the post ls from change_redirect_link, disable and enable
 - give api_setting_error on apisettins page
 - display_sharers takes customer id and return sum of clicks, also sum of actions group by action_name

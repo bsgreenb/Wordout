@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from wordout.forms import *
 from wordout.models import *
 from wordout.lib import get_ip, code_generator, generate_json_for_detail
+from wordout.lib import check_session_form  #I store form error in session['form'] this function is to return the form that includes error
 from django.utils import simplejson
 from django.forms.formsets import formset_factory
 from django.db.models import Max
@@ -29,12 +30,7 @@ def main_page(request):
         default_start = last + 1
         
         #error msg, such as invalidate redirect link, is in the form. 
-        if request.session.get('form', ''):
-            form = request.session['form']
-            del request.session['form']
-        else:
-            form = ''
-
+        form = check_session_form(request)
         return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form=form), context_instance=RequestContext(request))
 
     else:
@@ -96,7 +92,8 @@ def sharer_page(request):
     client_key = customer.client_key
     message_title = customer.message_title
     message_body = customer.message_body
-    return render_to_response('sharer_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body), context_instance=RequestContext(request))
+    form = check_session_form(request)
+    return render_to_response('sharer_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
 
 @login_required
 def edit_msg_page(request):
@@ -105,6 +102,8 @@ def edit_msg_page(request):
         form = MessageForm(request.POST)
         if form.is_valid():
             customer.update_title_and_body(form.cleaned_data['message_title'], form.cleaned_data['message_body'])
+        else:
+            request.session['form'] = form
 
     return HttpResponseRedirect('/sharerpage/')
 
@@ -114,35 +113,35 @@ def action_page(request):
     customer = Customer.objects.get(user=request.user)
     action_type_ls = customer.action_type_set.all()
     api_key = customer.api_key
-    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key), context_instance=RequestContext(request))
+
+    current_number_actions = customer.action_type_set.all().count()
+    if current_number_actions == 0:
+        action_id = 1
+    else:
+        action_id = customer.action_type_set.aggregate(last_action_id=Max('action_id'))['last_action_id'] + 1
+
+    form = check_session_form(request)
+    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, action_id=action_id, form=form), context_instance=RequestContext(request))
 
 @login_required
 def create_action_type_page(request):
     if request.method == 'POST':
         customer = Customer.objects.get(user=request.user)
-        max_actions = customer.customergroup.max_actions
-        current_number_actions = customer.action_type_set.filter(enabled=True).count()
-        if current_number_actions == 0:
-            action_id = 1
-        else:
-            action_id = customer.action_type_set.aggregate(last_action_id = Max('action_id'))['last_action_id'] + 1
-
-        if current_number_actions >= max_actions:
-            request.session['action_error'] = 'The max number of enabled actions is %s' % max_actions
-            return HttpResponseRedirect('/action')
-        
-        form  = ActionTypeForm(request.POST)
+        form  = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.create_actiontype(action_id, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.create_actiontype(form.cleaned_data['action_id'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+        else:
+            request.session['form'] = form
     return HttpResponseRedirect('/action')
 
 def edit_actiontype_page(request):
     if request.method == 'POST':
         customer = Customer.objects.get(user=request.user)
-        action_ls = request.POST['action_ls'][:-1].split(',')
-        form = ActionTypeForm(request.POST)
+        form = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.edit_actiontype(action_ls, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.edit_actiontype(form.cleaned_data['action_id'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+        else:
+            request.session['form'] = form
     return HttpResponseRedirect('/action')
 
 @login_required

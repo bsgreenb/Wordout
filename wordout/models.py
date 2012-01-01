@@ -105,8 +105,11 @@ class Customer(models.Model):
         entry = Action_Type(customer=self, action_id=action_id, action_name=action_name, description=description)
         entry.save()
         
-    def edit_actiontype(self, action_ls, action_name, description):
-        Action_Type.objects.filter(customer=self, action_id__in = action_ls).update(action_name=action_name, description=description)
+    def edit_actiontype(self, action_id, action_name, description):
+        action_type = Action_Type.objects.get(customer=self, action_id = action_id)
+        action_type.action_name=action_name
+        action_type.description=description
+        action_type.save()
 
     def disable_or_enable_action(self, action_ls, boolean):
         Action_Type.objects.filter(customer=self, action_id__in = action_ls).update(enabled = boolean)
