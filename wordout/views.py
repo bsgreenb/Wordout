@@ -18,6 +18,8 @@ from django.db.models import Max
 def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
+        #ls = customer.display_sharers2()
+        #return HttpResponse(ls)
         ls = customer.display_sharers()
 
         #get default start value for create numeric identifiers
