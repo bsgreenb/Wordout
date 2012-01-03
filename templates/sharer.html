@@ -1,18 +1,18 @@
 {% extends 'backbone/base.html' %}
 
 {% block js %}
-<script src="/static/js/plugin/jquery.tablesorter.min.js"></script>
+<script src="/static/js/plugin/jquery.tablesorter.js"></script>
 <script src="/static/js/plugin/jquery.tablesorter.pager.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script src="/static/js/lib.js"></script>
 <script>
 $(function() {
-
+	
 	load_data_to_modal('sharer');  //load data to detail modal
 
-	$("table#sortTableExample")
-		.tablesorter({widthFixed: true})
-		.tablesorterPager({container: $("#pager"), positionFixed: false, removeRows: false});
+	$('table#actions')
+	.tablesorter({widthFixed: true})
+	.tablesorterPager({container: $("#pager"), positionFixed: false, removeRows: false});
 
 	$('#select-all').on('click', function(){
 		var $checkbox = $('.checkbox');
@@ -115,7 +115,7 @@ div#action #enable, div#action #disable{
 	
 </div>
 
-<table id="sortTableExample" class="zebra-striped">
+<table id="actions" class="zebra-striped">
 	<thead>
 		
 		<tr>
@@ -146,7 +146,7 @@ div#action #enable, div#action #disable{
 <div id="pager" class="pager">
 		<button class="btn first">first</button>
 		<button class="btn prev">prev</button>
-		<input type="text" class="pagedisplay span2" />
+		<input type="text" class="large pagedisplay" />
 		<button class="btn next">next</button>
 		<button class="btn last">last</button>
 		Item per page: 

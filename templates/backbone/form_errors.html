@@ -1,0 +1,15 @@
+{% if form.errors %}
+	<div class="alert-message block-message error" id="form-error">
+		<a class="close" href="#">×</a>
+		<p>
+			<strong>You got an error!</strong>
+		</p>
+		<ul>
+			{% for field in form %}
+				{% if field.errors %}
+					<li>{{field.name}}: {{ field.errors|striptags }}</li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	</div>
+{% endif %}

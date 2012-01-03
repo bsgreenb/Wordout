@@ -14,11 +14,12 @@ REDESIGN ALL THE PAGES
 - setting page. this page includes client_key, api_key and the action table defined.
 
 PLANOUT API
-- I have an account page that includes user's client_key, api_key and action table. 
-- the table is like my current table. we have all action buttons on the top. at the first version, the user can create max 5 actions. action buttons include "add [] actions", "edit action" and "disable action"
-- I have an api documentation page.
-
-
+- api key should be 30 integers
+- I'd prefer the foursquare style. give different urls. rather than uwaterloo style
+- AllSharerSummary (This is the table I return at the default page), ClickMoreThan is one paramester
+- SingleSharer (clicks break down by referrer, action breakdown by referrer, time)
+- SharerPageMessage (return title and body)
+- MyActions (action table)
 
 TODO:
 - how to replace request.user with customer while login
