@@ -16,14 +16,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('wordout', ['HOST'])
 
-        # Adding model 'Path'
-        db.create_table('wordout_path', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('path_loc', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-        ))
-        db.send_create_signal('wordout', ['Path'])
-
         # Adding model 'IP'
         db.create_table('wordout_ip', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -44,45 +36,83 @@ class Migration(SchemaMigration):
         db.create_table('wordout_full_link', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('host', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.HOST'])),
-            ('path', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Path'])),
+            ('path', self.gf('django.db.models.fields.CharField')(max_length=200)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
         db.send_create_signal('wordout', ['Full_Link'])
 
-        # Adding model 'Identifiers'
-        db.create_table('wordout_identifiers', (
+        # Adding model 'Customergroup'
+        db.create_table('wordout_customergroup', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('identifier', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('identifier_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
+            ('max_users', self.gf('django.db.models.fields.IntegerField')(max_length=10)),
+            ('max_actions', self.gf('django.db.models.fields.IntegerField')(max_length=2)),
+        ))
+        db.send_create_signal('wordout', ['Customergroup'])
+
+        # Adding model 'Customer'
+        db.create_table('wordout_customer', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
+            ('client_key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=9)),
+            ('api_key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=30)),
+            ('message_title', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
+            ('message_body', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('customergroup', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Customergroup'])),
+        ))
+        db.send_create_signal('wordout', ['Customer'])
+
+        # Adding model 'Sharer'
+        db.create_table('wordout_sharer', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Customer'])),
+            ('customer_sharer_identifier', self.gf('django.db.models.fields.IntegerField')(max_length=10)),
             ('code', self.gf('django.db.models.fields.CharField')(unique=True, max_length=8, db_index=True)),
-            ('redirect_link', self.gf('django.db.models.fields.related.ForeignKey')(related_name='identifier_redirect_link', to=orm['wordout.Full_Link'])),
+            ('redirect_link', self.gf('django.db.models.fields.related.ForeignKey')(related_name='sharer_redirect_link', to=orm['wordout.Full_Link'])),
             ('enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
-        db.send_create_signal('wordout', ['Identifiers'])
+        db.send_create_signal('wordout', ['Sharer'])
 
-        # Adding model 'Request'
-        db.create_table('wordout_request', (
+        # Adding model 'Click'
+        db.create_table('wordout_click', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('referral_code', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Identifiers'])),
-            ('redirect_link', self.gf('django.db.models.fields.related.ForeignKey')(related_name='request_redirect_link', to=orm['wordout.Full_Link'])),
-            ('referrer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Full_Link'])),
-            ('IP', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.IP'])),
-            ('Agent', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.User_Agent'])),
+            ('sharer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Sharer'])),
+            ('redirect_link', self.gf('django.db.models.fields.related.ForeignKey')(related_name='click_redirect_link', to=orm['wordout.Full_Link'])),
+            ('referrer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Full_Link'], null=True, blank=True)),
+            ('IP', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.IP'], null=True, blank=True)),
+            ('Agent', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.User_Agent'], null=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
-        db.send_create_signal('wordout', ['Request'])
+        db.send_create_signal('wordout', ['Click'])
+
+        # Adding model 'Action_Type'
+        db.create_table('wordout_action_type', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Customer'])),
+            ('customer_action_type_identifier', self.gf('django.db.models.fields.IntegerField')(max_length=2)),
+            ('action_name', self.gf('django.db.models.fields.CharField')(max_length=20)),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
+            ('enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal('wordout', ['Action_Type'])
+
+        # Adding model 'Action'
+        db.create_table('wordout_action', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('click', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Click'])),
+            ('action_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Action_Type'])),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal('wordout', ['Action'])
 
 
     def backwards(self, orm):
         
         # Deleting model 'HOST'
         db.delete_table('wordout_host')
-
-        # Deleting model 'Path'
-        db.delete_table('wordout_path')
 
         # Deleting model 'IP'
         db.delete_table('wordout_ip')
@@ -93,11 +123,23 @@ class Migration(SchemaMigration):
         # Deleting model 'Full_Link'
         db.delete_table('wordout_full_link')
 
-        # Deleting model 'Identifiers'
-        db.delete_table('wordout_identifiers')
+        # Deleting model 'Customergroup'
+        db.delete_table('wordout_customergroup')
 
-        # Deleting model 'Request'
-        db.delete_table('wordout_request')
+        # Deleting model 'Customer'
+        db.delete_table('wordout_customer')
+
+        # Deleting model 'Sharer'
+        db.delete_table('wordout_sharer')
+
+        # Deleting model 'Click'
+        db.delete_table('wordout_click')
+
+        # Deleting model 'Action_Type'
+        db.delete_table('wordout_action_type')
+
+        # Deleting model 'Action'
+        db.delete_table('wordout_action')
 
 
     models = {
@@ -137,12 +179,56 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'wordout.action': {
+            'Meta': {'object_name': 'Action'},
+            'action_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Action_Type']"}),
+            'click': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Click']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        'wordout.action_type': {
+            'Meta': {'object_name': 'Action_Type'},
+            'action_name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'customer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Customer']"}),
+            'customer_action_type_identifier': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
+            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        'wordout.click': {
+            'Agent': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.User_Agent']", 'null': 'True', 'blank': 'True'}),
+            'IP': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.IP']", 'null': 'True', 'blank': 'True'}),
+            'Meta': {'object_name': 'Click'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'redirect_link': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'click_redirect_link'", 'to': "orm['wordout.Full_Link']"}),
+            'referrer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Full_Link']", 'null': 'True', 'blank': 'True'}),
+            'sharer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Sharer']"})
+        },
+        'wordout.customer': {
+            'Meta': {'object_name': 'Customer'},
+            'api_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'}),
+            'client_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '9'}),
+            'customergroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Customergroup']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'message_body': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'message_title': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
+        },
+        'wordout.customergroup': {
+            'Meta': {'object_name': 'Customergroup'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'max_actions': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
+            'max_users': ('django.db.models.fields.IntegerField', [], {'max_length': '10'})
+        },
         'wordout.full_link': {
             'Meta': {'object_name': 'Full_Link'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.HOST']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'path': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Path']"})
+            'path': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
         'wordout.host': {
             'Meta': {'object_name': 'HOST'},
@@ -150,39 +236,22 @@ class Migration(SchemaMigration):
             'host_name': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        'wordout.identifiers': {
-            'Meta': {'object_name': 'Identifiers'},
-            'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '8', 'db_index': 'True'}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'identifier': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'identifier_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'redirect_link': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'identifier_redirect_link'", 'to': "orm['wordout.Full_Link']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
-        },
         'wordout.ip': {
             'Meta': {'object_name': 'IP'},
             'address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        'wordout.path': {
-            'Meta': {'object_name': 'Path'},
+        'wordout.sharer': {
+            'Meta': {'object_name': 'Sharer'},
+            'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '8', 'db_index': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'customer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Customer']"}),
+            'customer_sharer_identifier': ('django.db.models.fields.IntegerField', [], {'max_length': '10'}),
+            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'path_loc': ('django.db.models.fields.CharField', [], {'max_length': '200'})
-        },
-        'wordout.request': {
-            'Agent': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.User_Agent']"}),
-            'IP': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.IP']"}),
-            'Meta': {'object_name': 'Request'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'redirect_link': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'request_redirect_link'", 'to': "orm['wordout.Full_Link']"}),
-            'referral_code': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Identifiers']"}),
-            'referrer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Full_Link']"})
+            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'redirect_link': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'sharer_redirect_link'", 'to': "orm['wordout.Full_Link']"})
         },
         'wordout.user_agent': {
             'Meta': {'object_name': 'User_Agent'},
