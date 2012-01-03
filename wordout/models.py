@@ -68,7 +68,7 @@ def get_or_create_link(url):
 class Customer(models.Model):
     user = models.OneToOneField(User)
     client_key = models.CharField(max_length = 9, unique=True)
-    api_key = models.CharField(max_length = 9, unique=True)
+    api_key = models.CharField(max_length = 30, unique=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
     customergroup = models.ForeignKey(Customergroup)
