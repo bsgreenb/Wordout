@@ -16,13 +16,6 @@ class HOST(models.Model):
     def __unicode__(self):
         return self.host_name
 
-class Path(models.Model):
-    path_loc = models.CharField(max_length = 200)
-    created= models.DateTimeField(auto_now_add = True)
-
-    def __unicode__(self):
-        return self.path_loc
-
 class IP(models.Model):
     address = models.IPAddressField()
     created = models.DateTimeField(auto_now_add = True)
@@ -31,7 +24,7 @@ class IP(models.Model):
         return self.address
 
 class User_Agent(models.Model):
-    agent = models.CharField(max_length = 200)
+    agent = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
     
     def __unicode__(self):
@@ -39,7 +32,7 @@ class User_Agent(models.Model):
 
 class Full_Link(models.Model):
     host = models.ForeignKey(HOST)
-    path = models.ForeignKey(Path)
+    path = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add = True)
     
     def __unicode__(self):
@@ -54,13 +47,9 @@ class Customergroup(models.Model): # identify paid/unpaid users
 
 def get_or_create_link(url):
     result = urlparse(url)
-    
     path = result.path
-    path, created = Path.objects.get_or_create(path_loc=path)
-
     netloc = result.scheme + '://' + force_subdomain(result.netloc) #prefix www.
     netloc, created = HOST.objects.get_or_create(host_name = netloc)
-
     link, created = Full_Link.objects.get_or_create(host = netloc, path = path)
     return (link, created)
 
@@ -87,33 +76,32 @@ class Customer(models.Model):
                     Sharer.objects.get(code = code)
                 except Sharer.DoesNotExist:
                     loop = False
-                    Sharer.objects.create(customer = self, customer_sharer_id = i, code = code, redirect_link = redirect_link)
+                    Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
-        Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(redirect_link = new_redirect_link)
+        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(redirect_link = new_redirect_link)
 
     def disable_or_enable_sharer(self, sharer_ls, boolean):
-        Sharer.objects.filter(customer=self, customer_sharer_id__in = sharer_ls).update(enabled = boolean)
+        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(enabled = boolean)
     
     def update_title_and_body(self, message_title, message_body):
         self.message_title=message_title
         self.message_body=message_body
         self.save()
-        #Customer.objects.get(user=self).update(message_title=message_title, message_body=message_body)
 
-    def create_actiontype(self, action_id, action_name, description):
-        entry = Action_Type(customer=self, action_id=action_id, action_name=action_name, description=description)
+    def create_actiontype(self, customer_action_type_identifier, action_name, description):
+        entry = Action_Type(customer=self, customer_action_type_identifer=customer_action_type_identifier, action_name=action_name, description=description)
         entry.save()
         
-    def edit_actiontype(self, action_id, action_name, description):
-        action_type = Action_Type.objects.get(customer=self, action_id = action_id)
+    def edit_actiontype(self, customer_action_type_identifier, action_name, description):
+        action_type = Action_Type.objects.get(customer=self, customer_action_type_identifier = customer_action_type_identifier)
         action_type.action_name=action_name
         action_type.description=description
         action_type.save()
 
-    def disable_or_enable_action(self, action_ls, boolean):
-        Action_Type.objects.filter(customer=self, action_id__in = action_ls).update(enabled = boolean)
+    def disable_or_enable_action(self, action_type_identifier_ls, boolean):
+        Action_Type.objects.filter(customer=self, customer_action_type_identifier__in = action_type_identifier_ls).update(enabled = boolean)
     
     def display_sharers(self):
         
@@ -153,27 +141,25 @@ class Customer(models.Model):
         return dictfetchall(cursor)
 
         
-    def display_referrer_by_sharer(self, customer_sharer_id):
+    def display_referrer_by_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
         cursor = connection.cursor()
         cursor.execute('''
-        SELECT wordout_click.id, wordout_click.referrer_id, count(wordout_click.id) as clicks, wordout_host.host_name, wordout_path.path_loc
+        SELECT wordout_click.id, wordout_click.referrer_id, count(wordout_click.id) as clicks, wordout_host.host_name, wordout_full_link.path
         FROM wordout_click
         LEFT JOIN wordout_full_link
             ON wordout_full_link.id = wordout_click.referrer_id
         LEFT JOIN wordout_host
             ON wordout_full_link.host_id = wordout_host.id
-        LEFT JOIN wordout_path
-            ON wordout_full_link.path_id = wordout_path.id
         LEFT JOIN wordout_sharer
             ON wordout_sharer.id = wordout_click.sharer_id
         WHERE
-            wordout_sharer.customer_id = %s AND wordout_sharer.customer_sharer_id = %s
+            wordout_sharer.customer_id = %s AND wordout_sharer.customer_sharer_identifier = %s
         GROUP BY 
             wordout_click.referrer_id
         ORDER BY
             clicks DESC
-        ''', (self.id, customer_sharer_id))
+        ''', (self.id, customer_sharer_identifier))
         return dictfetchall(cursor)
 
     def display_referrer(self):
@@ -196,14 +182,11 @@ class Customer(models.Model):
         ''', [self.id])
         return dictfetchall(cursor)
 
-
     def display_path(self, host_id):
         cursor = connection.cursor()
         cursor.execute('''
-        SELECT wordout_path.id, wordout_path.path_loc, wordout_host.host_name, wordout_host.id, COUNT(wordout_click.id) as clicks
-        FROM wordout_path
-        LEFT JOIN wordout_full_link
-            ON wordout_full_link.path_id = wordout_path.id
+        SELECT wordout_host.host_name, wordout_host.id, wordout_full_link.path, COUNT(wordout_click.id) as clicks
+        FROM wordout_full_link
         LEFT JOIN wordout_host
             ON wordout_full_link.host_id = wordout_host.id
         LEFT JOIN wordout_click
@@ -211,14 +194,14 @@ class Customer(models.Model):
         LEFT JOIN wordout_sharer
             ON wordout_click.sharer_id = wordout_sharer.id
         WHERE wordout_sharer.customer_id = %s AND wordout_host.id = %s
-        GROUP BY wordout_path.id
+        GROUP BY wordout_path
         ORDER BY clicks DESC
         ''', (self.id, host_id))
         return dictfetchall(cursor)
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_sharer_id = models.IntegerField(max_length = 10)
+    customer_sharer_identifier = models.IntegerField(max_length = 10)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)
@@ -242,7 +225,7 @@ class Click(models.Model):
 
 class Action_Type(models.Model):
     customer = models.ForeignKey(Customer)
-    action_id = models.IntegerField(max_length=2)
+    customer_action_type_identifier = models.IntegerField(max_length=2)
     action_name = models.CharField(max_length=20)
     description = models.CharField(max_length=250, blank=True, null=True)
     enabled = models.BooleanField(default = True)
@@ -254,11 +237,11 @@ class Action_Type(models.Model):
 
 class Action(models.Model):
     click = models.ForeignKey(Click)
-    action = models.ForeignKey(Action_Type)
+    action_type = models.ForeignKey(Action_Type)
     description = models.CharField(max_length=250, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return '%s on %s' % (self.action, self.created)
+        return '%s on %s' % (self.action_type, self.created)
     
 

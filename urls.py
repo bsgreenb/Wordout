@@ -35,7 +35,7 @@ urlpatterns = patterns('',
     #action page
     (r'^action/$', action_page),
     (r'^createactions/$', create_action_type_page),
-    (r'^editactiontype/$', edit_actiontype_page),
+    (r'^editactiontype/$', edit_action_type_page),
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
 

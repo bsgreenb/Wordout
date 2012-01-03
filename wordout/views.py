@@ -25,7 +25,7 @@ def main_page(request):
         #get default start value for create numeric identifiers
         try:
             last = Sharer.objects.filter(customer = customer).order_by('-created')[0]
-            last = last.customer_sharer_id
+            last = last.customer_sharer_identifier
         except IndexError:
             last = 0
 
@@ -42,9 +42,9 @@ def main_page(request):
                 context_instance=RequestContext(request))
 
 @login_required
-def show_referrer_by_sharer(request, customer_sharer_id): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
+def show_referrer_by_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
     customer = Customer.objects.get(user = request.user)
-    ls = customer.display_referrer_by_sharer(customer_sharer_id)
+    ls = customer.display_referrer_by_sharer(customer_sharer_identifier)
     results = generate_json_for_detail(ls)
     return HttpResponse(results, 'application/javascript')
     
@@ -118,12 +118,12 @@ def action_page(request):
 
     current_number_actions = customer.action_type_set.all().count()
     if current_number_actions == 0:
-        action_id = 1
+        customer_action_type_identifier = 1
     else:
-        action_id = customer.action_type_set.aggregate(last_action_id=Max('action_id'))['last_action_id'] + 1
+        customer_action_type_identifier = customer.action_type_set.aggregate(last_customer_action_type_identifier=Max('customer_action_type_identifier'))['last_customer_action_type_identifier'] + 1
 
     form = check_session_form(request)
-    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, action_id=action_id, form=form), context_instance=RequestContext(request))
+    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, customer_action_type_identifier = customer_action_type_identifier, form=form), context_instance=RequestContext(request))
 
 @login_required
 def create_action_type_page(request):
@@ -131,18 +131,18 @@ def create_action_type_page(request):
         customer = Customer.objects.get(user=request.user)
         form  = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.create_actiontype(form.cleaned_data['action_id'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.create_actiontype(form.cleaned_data['customer_action_type_identifier'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/action')
 
 @login_required
-def edit_actiontype_page(request):
+def edit_action_type_page(request):
     if request.method == 'POST':
         customer = Customer.objects.get(user=request.user)
         form = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.edit_actiontype(form.cleaned_data['action_id'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.edit_actiontype(form.cleaned_data['customer_action_type_identifier'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/action')
@@ -150,12 +150,12 @@ def edit_actiontype_page(request):
 @login_required
 def disable_or_enable_action_page(request, action):
     if request.method == 'POST':
-        action_ls = request.POST['action_ls'][:-1].split(',')
+        action_type_ls = request.POST['action_type_ls'][:-1].split(',')
         customer = Customer.objects.get(user=request.user)
         if action == 'disable':
-            customer.disable_or_enable_action(action_ls, False)
+            customer.disable_or_enable_action(action_type_ls, False)
         if action == 'enable':
-            customer.disable_or_enable_action(action_ls, True)
+            customer.disable_or_enable_action(action_type_ls, True)
     return HttpResponseRedirect('/action')
 
 
