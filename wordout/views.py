@@ -134,6 +134,7 @@ def create_action_type_page(request):
             request.session['form'] = form
     return HttpResponseRedirect('/action')
 
+@login_required
 def edit_actiontype_page(request):
     if request.method == 'POST':
         customer = Customer.objects.get(user=request.user)
@@ -220,7 +221,7 @@ def register_page(request):
             loop  = True
             while loop == True:
                 client_key = code_generator(9)
-                api_key = code_generator(9)
+                api_key = code_generator(30)
                 try:
                     Customer.objects.get(client_key = client_key)
                 except Customer.DoesNotExist:
@@ -262,6 +263,4 @@ def api_settings_page(request):
     customergroup = customer.customergroup
 
     return render_to_response('apisettings.html', dict(customer = customer,  action_type_ls = action_type_ls,  action_number = action_number, customergroup = customergroup), context_instance=RequestContext(request))
-
-
 
