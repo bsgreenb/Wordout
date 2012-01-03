@@ -8,6 +8,7 @@ from django.db import connection, transaction
 
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
 
+
 class HOST(models.Model):
     host_name = models.URLField()
     created = models.DateTimeField(auto_now_add = True)
