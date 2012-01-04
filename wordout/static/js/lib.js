@@ -18,3 +18,7 @@ function load_data_to_modal(page){
     	});
     }); 
 }
+
+$('a.close').live('click',function() {
+    $(this).parent('div.alert-message').remove();
+});
