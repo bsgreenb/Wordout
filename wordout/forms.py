@@ -20,7 +20,7 @@ class CreateSharerForm(forms.Form):
             start = self.cleaned_data['start']
             try:
                 last = Sharer.objects.filter(customer = self._user).order_by('-created')[0]
-                last = int(last.customer_sharer_id)
+                last = int(last.customer_sharer_identifier)
             except IndexError:
                 last = 0
             if last < start:
@@ -100,12 +100,12 @@ class ActionTypeForm(forms.Form):
         super(ActionTypeForm, self).__init__(*args, **kwargs)
         self._user = user
 
-    def clean_customer_action_type_identifier(self):
-        if 'action_id' in self.cleaned_data:
+    def clean_action_id(self):
+        if 'customer_action_type_identifier' in self.cleaned_data:
             customer_action_type_identifier = self.cleaned_data['customer_action_type_identifier']
             max_actions = self._user.customergroup.max_actions
-            if  customer_action_type_identifier >= max_actions:
-                raise forms.ValidationError('The max number of action type is %s' % max_actions)
+            if customer_action_type_identifier >= max_actions:
+                raise forms.ValidationError('The max number of  actions is %s' % max_actions)
             return customer_action_type_identifier
 
 

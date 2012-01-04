@@ -64,44 +64,7 @@ class Customer(models.Model):
 
     def __unicode__(self):
         return str(self.user)
-
-    def create_sharer(self, start, end, redirect_link):
-        redirect_link, created = get_or_create_link(redirect_link)
-
-        for i in range(start, end+1):
-            loop = True
-            while loop == True:
-                code = code_generator()
-                try:
-                    Sharer.objects.get(code = code)
-                except Sharer.DoesNotExist:
-                    loop = False
-                    Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
-   
-    def change_redirect_link(self, new_redirect_link, sharer_ls):
-        new_redirect_link, created = get_or_create_link(new_redirect_link)
-        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(redirect_link = new_redirect_link)
-
-    def disable_or_enable_sharer(self, sharer_ls, boolean):
-        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(enabled = boolean)
-    
-    def update_title_and_body(self, message_title, message_body):
-        self.message_title=message_title
-        self.message_body=message_body
-        self.save()
-
-    def create_actiontype(self, customer_action_type_identifier, action_name, description):
-        entry = Action_Type(customer=self, customer_action_type_identifer=customer_action_type_identifier, action_name=action_name, description=description)
-        entry.save()
-        
-    def edit_actiontype(self, customer_action_type_identifier, action_name, description):
-        action_type = Action_Type.objects.get(customer=self, customer_action_type_identifier = customer_action_type_identifier)
-        action_type.action_name=action_name
-        action_type.description=description
-        action_type.save()
-
-    def disable_or_enable_action(self, action_type_identifier_ls, boolean):
-        Action_Type.objects.filter(customer=self, customer_action_type_identifier__in = action_type_identifier_ls).update(enabled = boolean)
+ 
     
     def display_sharers(self):
         
@@ -145,7 +108,7 @@ class Customer(models.Model):
         #show where the clicks come from by each sharer
         cursor = connection.cursor()
         cursor.execute('''
-        SELECT wordout_click.id, wordout_click.referrer_id, count(wordout_click.id) as clicks, wordout_host.host_name, wordout_full_link.path
+        SELECT wordout_click.id, wordout_click.referrer_id, COUNT(wordout_click.id) as clicks, wordout_host.host_name, wordout_full_link.path
         FROM wordout_click
         LEFT JOIN wordout_full_link
             ON wordout_full_link.id = wordout_click.referrer_id
@@ -162,6 +125,45 @@ class Customer(models.Model):
         ''', (self.id, customer_sharer_identifier))
         return dictfetchall(cursor)
 
+    def create_sharer(self, start, end, redirect_link):
+        redirect_link, created = get_or_create_link(redirect_link)
+
+        for i in range(start, end+1):
+            loop = True
+            while loop == True:
+                code = code_generator()
+                try:
+                    Sharer.objects.get(code = code)
+                except Sharer.DoesNotExist:
+                    loop = False
+                    Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
+   
+    def change_redirect_link(self, new_redirect_link, sharer_ls):
+        new_redirect_link, created = get_or_create_link(new_redirect_link)
+        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(redirect_link = new_redirect_link)
+
+    def disable_or_enable_sharer(self, sharer_ls, boolean):
+        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(enabled = boolean)
+    
+    def update_title_and_body(self, message_title, message_body):
+        self.message_title=message_title
+        self.message_body=message_body
+        self.save()
+
+    def create_actiontype(self, customer_action_type_identifier, action_name, description):
+        entry = Action_Type(customer=self, customer_action_type_identifier=customer_action_type_identifier, action_name=action_name, description=description)
+        entry.save()
+        
+    def edit_actiontype(self, customer_action_type_identifier, action_name, description):
+        action_type = Action_Type.objects.get(customer=self, customer_action_type_identifier = customer_action_type_identifier)
+        action_type.action_name=action_name
+        action_type.description=description
+        action_type.save()
+
+    def disable_or_enable_action(self, action_type_identifier_ls, boolean):
+        Action_Type.objects.filter(customer=self, customer_action_type_identifier__in = action_type_identifier_ls).update(enabled = boolean)
+    
+   
     def display_referrer(self):
         cursor = connection.cursor()
         cursor.execute('''

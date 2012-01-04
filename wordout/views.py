@@ -123,7 +123,7 @@ def action_type_page(request):
         new_action_type_identifier = customer.action_type_set.aggregate(last_customer_action_type_identifier=Max('customer_action_type_identifier'))['last_customer_action_type_identifier'] + 1
 
     form = check_session_form(request)
-    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, new_action_type_identifier = new_action_type_identifier, form=form), context_instance=RequestContext(request))
+    return render_to_response('action_type_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, new_action_type_identifier = new_action_type_identifier, form=form), context_instance=RequestContext(request))
 
 @login_required
 def create_action_type_page(request):
