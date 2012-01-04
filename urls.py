@@ -29,12 +29,12 @@ urlpatterns = patterns('',
     (r'^disablesharer/$', disable_or_enable_sharer_page, {'action':'disable'}),
     (r'^enablesharer/$', disable_or_enable_sharer_page, {'action':'enable'}),
 
-    #sharer page
-    (r'^sharerpage/$', sharer_page),
+    #sharer plugin page
+    (r'^pluginpage/$', sharer_plugin_page),
     (r'^editmsg/$', edit_msg_page),
     #action page
-    (r'^action/$', action_page),
-    (r'^createactions/$', create_action_type_page),
+    (r'^actiontype/$', action_type_page),
+    (r'^createactiontype/$', create_action_type_page),
     (r'^editactiontype/$', edit_action_type_page),
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),

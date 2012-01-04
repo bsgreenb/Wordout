@@ -88,14 +88,14 @@ def disable_or_enable_sharer_page(request, action):
 
 #SHARER PAGE
 @login_required
-def sharer_page(request):
+def sharer_plugin_page(request):
     customer = Customer.objects.get(user=request.user)
     customer_sharer_ls = customer.sharer_set.all()
     client_key = customer.client_key
     message_title = customer.message_title
     message_body = customer.message_body
     form = check_session_form(request)
-    return render_to_response('sharer_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
+    return render_to_response('sharer_plugin_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
 
 @login_required
 def edit_msg_page(request):
@@ -107,23 +107,23 @@ def edit_msg_page(request):
         else:
             request.session['form'] = form
 
-    return HttpResponseRedirect('/sharerpage/')
+    return HttpResponseRedirect('/pluginpage/')
 
 #ACTION 
 @login_required
-def action_page(request):
+def action_type_page(request):
     customer = Customer.objects.get(user=request.user)
     action_type_ls = customer.action_type_set.all()
     api_key = customer.api_key
 
     current_number_actions = customer.action_type_set.all().count()
     if current_number_actions == 0:
-        customer_action_type_identifier = 1
+        new_action_type_identifier = 1
     else:
-        customer_action_type_identifier = customer.action_type_set.aggregate(last_customer_action_type_identifier=Max('customer_action_type_identifier'))['last_customer_action_type_identifier'] + 1
+        new_action_type_identifier = customer.action_type_set.aggregate(last_customer_action_type_identifier=Max('customer_action_type_identifier'))['last_customer_action_type_identifier'] + 1
 
     form = check_session_form(request)
-    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, customer_action_type_identifier = customer_action_type_identifier, form=form), context_instance=RequestContext(request))
+    return render_to_response('action_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, new_action_type_identifier = new_action_type_identifier, form=form), context_instance=RequestContext(request))
 
 @login_required
 def create_action_type_page(request):
@@ -134,7 +134,7 @@ def create_action_type_page(request):
             customer.create_actiontype(form.cleaned_data['customer_action_type_identifier'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
-    return HttpResponseRedirect('/action')
+    return HttpResponseRedirect('/actiontype')
 
 @login_required
 def edit_action_type_page(request):
@@ -145,7 +145,7 @@ def edit_action_type_page(request):
             customer.edit_actiontype(form.cleaned_data['customer_action_type_identifier'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
-    return HttpResponseRedirect('/action')
+    return HttpResponseRedirect('/actiontype')
 
 @login_required
 def disable_or_enable_action_page(request, action):
@@ -156,7 +156,7 @@ def disable_or_enable_action_page(request, action):
             customer.disable_or_enable_action(action_type_ls, False)
         if action == 'enable':
             customer.disable_or_enable_action(action_type_ls, True)
-    return HttpResponseRedirect('/action')
+    return HttpResponseRedirect('/actiontype')
 
 
 @login_required

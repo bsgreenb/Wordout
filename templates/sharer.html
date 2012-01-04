@@ -116,8 +116,7 @@ div#action #enable, div#action #disable{
 </div>
 
 <table id="actions" class="zebra-striped">
-	<thead>
-		
+	<thead>	
 		<tr>
 			<th class="header">Sharer ID</th>
 			<th class="blue header">Link</th>
@@ -176,15 +175,14 @@ div#action #enable, div#action #disable{
 
 
 <div id="create-sharer-modal-from-dom" class="modal hide fade" style="display: block;">
-	
 	<form method="POST" action="/createsharer/" id="create-sharer-form">
 		{% csrf_token %}
-	<div class="modal-header">
-		<a class="close" href="#">×</a>
-		<h3>Create Sharers</h3>
-	</div>
+	    <div class="modal-header">
+		    <a class="close" href="#">×</a>
+		    <h3>Create Sharers</h3>
+	    </div>
 	
-	<div class="modal-body">
+	    <div class="modal-body">
 			<fieldset>
 				<div class="clearfix">
 					<label>Start sharer id:</label>
@@ -207,12 +205,11 @@ div#action #enable, div#action #disable{
 					</div>
 				</div>
 			</fieldset>
-		
-	</div>
+	    </div>
 
-	<div class="modal-footer">
-		<input class="btn primary" href="#" value="Save" type="submit">
-	</div>
+	    <div class="modal-footer">
+		    <input class="btn primary" href="#" value="Save" type="submit">
+	    </div>
 	</form>
 </div>
 
@@ -221,14 +218,13 @@ div#action #enable, div#action #disable{
 
 <div id="edit-link-modal-from-dom" class="modal hide fade" style="display: block;">
 	<form method="POST" action="/changelink/" id="edit-link-form">
-	{% csrf_token %}
-	<div class="modal-header">
-		<a class="close" href="#">×</a>
-		<h3>Edit links</h3>
-	</div>
-	<div class="modal-body">
-		
-			
+	    {% csrf_token %}
+	    <div class="modal-header">
+		    <a class="close" href="#">×</a>
+		    <h3>Edit links</h3>
+	    </div>
+	    
+        <div class="modal-body">
 			<fieldset>
 				<div class="clearfix">
 					<label>Redirect link:</label>
@@ -239,11 +235,11 @@ div#action #enable, div#action #disable{
 				<input id="edit-link-sharer-ls" name="edit_link_sharer_ls" value="" type="hidden"/>
 					
 			</fieldset>
-		
-	</div>
-	<div class="modal-footer">
-		<input class="btn primary" href="#" value="Save" type="submit">
-	</div>
+	    </div>
+
+	    <div class="modal-footer">
+		    <input class="btn primary" href="#" value="Save" type="submit">
+	    </div>
 	</form>
 </div>
 
@@ -257,23 +253,20 @@ div#action #enable, div#action #disable{
 		<h3>Clicks come from the following links</h3>
 	</div>
 	<div class="modal-body">
-		
-			<table id="clickDetail" class="zebra-striped">
-				<thead>
-
-					<tr>
-						<th class="header">Referrer</th>
-						<th class="yellow header">Clicks</th>
-					</tr>
-				</thead>
-				<tbody>
+		<table id="clickDetail" class="zebra-striped">
+			<thead>
+				<tr>
+					<th class="header">Referrer</th>
+					<th class="yellow header">Clicks</th>
+				</tr>
+			</thead>
+			<tbody>
 					<!--ajax result goes here -->
 					
 					
 					
-				</tbody>
-			</table>
-		
+			</tbody>
+		</table>
 	</div>
 	<div class="modal-footer">
 		
@@ -281,16 +274,12 @@ div#action #enable, div#action #disable{
 </div>
 
 <form id="disable-form" action="/disablesharer/" method="POST" style="display:hidden">
-{% csrf_token %}
-<input type="hidden" id="disable-sharer-ls" name="sharer_ls" value="" />
+    {% csrf_token %}
+    <input type="hidden" id="disable-sharer-ls" name="sharer_ls" value="" />
 </form>
 
 <form id="enable-form" action="/enablesharer/" method="POST" style="display:hidden">
-{% csrf_token %}
-<input type="hidden" id="enable-sharer-ls" name="sharer_ls" value="" />
+    {% csrf_token %}
+    <input type="hidden" id="enable-sharer-ls" name="sharer_ls" value="" />
 </form>
-
-
 {% endblock %}
-
-	
