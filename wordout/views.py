@@ -13,6 +13,7 @@ from wordout.lib import check_session_form  #I store form error in session['form
 from django.utils import simplejson
 from django.forms.formsets import formset_factory
 from django.db.models import Max
+from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
 
 #SHARER
 def main_page(request):
@@ -49,6 +50,7 @@ def show_referrer_by_sharer(request, customer_sharer_identifier): #show where th
     return HttpResponse(results, 'application/javascript')
     
 @login_required
+@transaction.commit_on_success
 def create_sharer_page(request):
     if request.method == 'POST':
         form = CreateSharerForm(user=request.user, data=request.POST)

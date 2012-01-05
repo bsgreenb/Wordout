@@ -4,7 +4,7 @@ from datetime import datetime
 from urlparse import urlparse
 from lib import dictfetchall, force_subdomain, code_generator
 from django.db.models import Count, Sum
-from django.db import connection, transaction
+from django.db import connection
 
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
 

@@ -16,13 +16,14 @@ REDESIGN ALL THE PAGES
 PLANOUT API
 - api key should be 30 integers
 - I'd prefer the foursquare style. give different urls. rather than uwaterloo style
-- number of clicks group by sharer. default is sort by clicks DESC
-- number of action type 1 group by sharer. default is sort by clicks DESC
-- one sharer's number of clicks, number of actions for each action type
-- referrer breakdown for one sharers' number of clicks
-- api plugin title and body
-- action type list
-
+- section 1. how to record api actions.
+- section 2. number of clicks group by sharer. default is sort by clicks DESC
+- section 3. number of action type 1 group by sharer. default is sort by clicks DESC
+- section 4. one sharer's number of clicks, number of actions for each action type
+- section 5.  api plugin title and body
+- section 6. action type list
+- section 7. referrer breakdown for one sharers' number of clicks
+-
 
 
 - AllSharerSummary (This is the table I return at the default page), ClickMoreThan is one paramester
