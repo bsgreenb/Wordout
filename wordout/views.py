@@ -161,6 +161,14 @@ def disable_or_enable_action_page(request, action):
     return HttpResponseRedirect('/actiontype')
 
 
+##### api overview #####
+@login_required
+def api_overview_page(request):
+    customer = Customer.objects.get(user=request.user)
+    api_key = customer.api_key
+    return render_to_response('api_overview.html', dict(api_key=api_key), context_instance=(RequestContext(request)))
+
+
 @login_required
 def referrer_page(request):
     customer = Customer.objects.get(user=request.user)

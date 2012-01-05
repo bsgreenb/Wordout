@@ -1,0 +1,41 @@
+{% extends 'backbone/base.html' %}
+
+{% block content %}
+<div class="row">
+	<div class="span3">
+		<ul class="unstyled">
+			<li>
+				<a href="/api/overview/">Overview</a>
+			</li>
+			<li>
+				<a href="/api/overview/recordaction/">Record Action</a>
+			</li>
+			<li>
+				<a href="/api/overview/clickstats/">Click Stats</a>
+			</li>
+			<li>
+				<a href="/api/overview/actionstats/">Action Stats</a>
+			</li>
+			<li>
+				<a href="/api/overview/sharerstats/">Sharer Stats</a>
+			</li>
+			<li>
+				<a href="/api/overview/plugininfo/">Plugin Page Info</a>
+			</li>
+			<li>
+				<a href="/api/overview/actiontypelist/">Action Type List</a>
+			</li>
+			<li>
+				<a href="/api/overview/referrerbreakdown/">Referrer Breakdown</a>
+			</li>
+		</ul>
+	</div>
+	
+	<div class="span13">
+		{% block api_overview_subcontent %}
+	
+		
+		{% endblock %}
+	</div>
+</div>
+{% endblock %}

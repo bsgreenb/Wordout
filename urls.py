@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth.views import login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete, password_change, password_change_done
-
 from wordout.views import *
 from django.contrib import admin
 admin.autodiscover()
@@ -38,6 +37,18 @@ urlpatterns = patterns('',
     (r'^editactiontype/$', edit_action_type_page),
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
+    
+    #api page
+    (r'api/overview/$', api_overview_page),
+    #(r'api/overview/recordaction/$', api_overview_record_action_page),
+    #(r'api/overview/clickstats/$', api_overview_clickstats_page),
+    #(r'api/overview/actionstats/$', api_overview_actionstats_page),
+    #(r'api/overview/sharerstats/$', api_overview_sharerstats_page),
+    #(r'api/overview/plugininfo/$', api_overview_plugin_info_page),
+    #(r'api/overview/actiontypelist/$', api_overview_action_type_list_page),
+   # (r'api/overview/referrerbreakdown/$', api_overview_referrer_breakdown_page),
+
+
 
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),

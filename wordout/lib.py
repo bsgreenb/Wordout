@@ -1,7 +1,6 @@
 import re, string, random
 from django.utils import simplejson
 
-
 def dictfetchall(cursor):
     #returns all rows from a cursor as a dict
     desc = cursor.description
