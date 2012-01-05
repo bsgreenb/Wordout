@@ -1,13 +1,71 @@
-- add single sharer_identifier
-- enable/disable sharer
--getSharerInfoById, getSharerInfoByCode
+- addSharer
+- toggleSharer
+- getSharerInfoById, getSharerInfoByCode
     gives complete info on a single sharerer, all their clicks (with info), and actions (with info)
--getAllSharers
+- getAllSharers
     gives sharer id, code link, clicks count, actions count, and enabled only
--rankSharersByAction
--getActionTypes
--doAction
+- getActionTypes
+- doAction
 
 *let them pick json vs xml
 *description is not the best name for the extra data in action.  just call it extra_data (optional)
+
+
+
+api result return 
+{
+    meta:{
+        status: "",
+        message: "",
+        timestamp: ""
+     }
+    
+    doAction
+    para:{
+        clickid:"",
+        action_type"",
+        extra_data"",
+    }
+
+    response:{
+    }   
+    
+
+    addSharer
+    para:{
+    }
+
+    response:{
+        New_Sharer_Identifier:"",
+        Code:"",
+        Redirect_Link: "",
+    }
+
+    toggleSharer
+    para:{
+        Sharer_Identifier:"",
+        Enabled:"",
+    }
+
+    response:{
+        Sharer_Identifier:"",
+        Enabled:""
+    }
+
+    getSharerInfoById(Code)
+    para:{
+        Sharer_Identifier:"",
+    }
+
+    response:{
+    }
+
+    getAllSharers
+    para:{
+    }
+
+    response:{
+    }
+
+
 

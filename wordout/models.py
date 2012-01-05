@@ -240,7 +240,7 @@ class Action_Type(models.Model):
 class Action(models.Model):
     click = models.ForeignKey(Click)
     action_type = models.ForeignKey(Action_Type)
-    description = models.CharField(max_length=250, blank=True, null=True)
+    extra_data = models.CharField(max_length=250, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):

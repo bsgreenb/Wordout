@@ -40,14 +40,13 @@ urlpatterns = patterns('',
     
     #api page
     (r'api/overview/$', api_overview_page),
-    #(r'api/overview/recordaction/$', api_overview_record_action_page),
-    #(r'api/overview/clickstats/$', api_overview_clickstats_page),
-    #(r'api/overview/actionstats/$', api_overview_actionstats_page),
-    #(r'api/overview/sharerstats/$', api_overview_sharerstats_page),
-    #(r'api/overview/plugininfo/$', api_overview_plugin_info_page),
-    #(r'api/overview/actiontypelist/$', api_overview_action_type_list_page),
-   # (r'api/overview/referrerbreakdown/$', api_overview_referrer_breakdown_page),
-
+    (r'api/doAction/$', api_do_action_page),
+    (r'api/getAllSharers/$', api_get_all_sharers_page),
+    (r'api/getSharerInfo/$', api_get_sharer_info_page),
+    (r'api/addSharer/$', api_add_sharer),
+    (r'api/toggleSharer/$', api_toggle_sharer),
+    (r'api/getActionType/$', api_get_action_type)
+    
 
 
     (r'^referrer/$', referrer_page),
