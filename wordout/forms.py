@@ -2,6 +2,7 @@ from wordout.models import *
 from django import forms
 import re
 from django.contrib.auth.models import User
+from wordout.lib import force_url_format
 #todo
 #how i can validate the user agent.
 
@@ -13,6 +14,14 @@ class CreateSharerForm(forms.Form):
     def __init__(self, user=None, *args, **kwargs):
         super(CreateSharerForm, self).__init__(*args, **kwargs)
         self._user = user
+    
+    def clean_redirect_link(self):
+        if 'redirect_link' in self.cleaned_data:
+            redirect_link = self.cleaned_data['redirect_link']
+            if force_url_format(redirect_link):
+                #regular expression testing out the format
+               return redirect_link
+        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
 
     def clean_start(self):
         #make sure the start is 1 bigger than the last numeric identifier
@@ -39,12 +48,20 @@ class CreateSharerForm(forms.Form):
             if (total + num_created) > max_users:
                 raise forms.ValidationError('The amount of sharer is limited to %s' % max_users)
 
-            if end > start:
+            if end >= start:
                 return end
         raise forms.ValidationError('The end number should be bigger than the start number.')
 
 class ChangeLinkForm(forms.Form):
     redirect_link = forms.URLField()
+
+    def clean_redirect_link(self):
+        if 'redirect_link' in self.cleaned_data:
+            redirect_link = self.cleaned_data('redirect_link')
+            if force_url_format(redirect_link):
+                #regular expression testing out the format
+               return redirect_link
+        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
 
     def __init__(self, user=None, *args, **kwargs):
         super(ChangeLinkForm, self).__init__(*args, **kwargs)

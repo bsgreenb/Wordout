@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 from urlparse import urlparse
-from lib import dictfetchall, force_subdomain, code_generator
+from lib import dictfetchall, code_generator, force_url_format
 from django.db.models import Count, Sum
 from django.db import connection
 
@@ -46,13 +46,11 @@ class Customergroup(models.Model): # identify paid/unpaid users
         return str(self.id)
 
 def get_or_create_link(url):
-    result = urlparse(url)
-    path = result.path
-    netloc = result.scheme + '://' + force_subdomain(result.netloc) #prefix www.
+    result = force_url_format(url) #regular expression forcing http(s)://subdomain
+    netloc, path = result.group(1), result.group(2)
     netloc, created = HOST.objects.get_or_create(host_name = netloc)
     link, created = Full_Link.objects.get_or_create(host = netloc, path = path)
     return (link, created)
-
 
 class Customer(models.Model):
     user = models.OneToOneField(User)

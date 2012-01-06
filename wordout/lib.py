@@ -23,12 +23,9 @@ def get_ip(request):
 def code_generator(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for i in range(size))
 
-def force_subdomain(netloc):
-    m = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9\-\.]+\.(com|org|net|mil|edu|me|ly|biz|COM|ORG|NET|MIL|EDU|ME|LY|BIZ)$')
-    search = m.search(netloc)
-    if not search:
-        netloc = 'www.' + netloc
-    return netloc
+def force_url_format(url):
+    url_format = re.compile(r'^(https?\://[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3})((/\S*)?)$')
+    return url_format.search(url)
 
 def generate_json_for_detail(ls):
     #sharer and referrer details return the same data in json format
