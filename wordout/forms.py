@@ -84,14 +84,7 @@ class RegistrationForm(forms.Form):
         raise forms.ValidationError('Email is already taken')
 
 
-class ValidateReferrer(forms.Form):
-    referrer = forms.URLField()
-
-class ValidateIP(forms.Form):
-    ip = forms.IPAddressField()
-    
 class ActionTypeForm(forms.Form):
-
     customer_action_type_identifier = forms.IntegerField()
     action_name = forms.CharField(max_length=20)
     action_description = forms.CharField(max_length=250, required=False)
@@ -108,8 +101,24 @@ class ActionTypeForm(forms.Form):
                 raise forms.ValidationError('The max number of  actions is %s' % max_actions)
             return customer_action_type_identifier
 
-
 class MessageForm(forms.Form):
     message_title = forms.CharField(max_length=200, required=False)
     message_body = forms.CharField(required=False)
+
+
+
+##### api call #####
+class DoActionForm(forms.Form):
+    click_id = forms.IntegerField(min_value=1)
+    action_type_identifier = forms.IntegerField(min_value=1, max_value=99)
+    extra_data = forms.CharField(max_length=250, required=False)
+
+
+
+class ValidateReferrer(forms.Form):
+    referrer = forms.URLField()
+
+class ValidateIP(forms.Form):
+    ip = forms.IPAddressField()
     
+

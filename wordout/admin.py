@@ -17,7 +17,7 @@ class ActionTypeAdmin(admin.ModelAdmin):
     list_display = ('customer', 'customer_action_type_identifier', 'action_name', 'description')
 
 class ActionAdmin(admin.ModelAdmin):
-    list_display =('click', 'action_type', 'description')
+    list_display =('click', 'action_type', 'extra_data')
 
 
 admin.site.register(Customer)

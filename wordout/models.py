@@ -201,6 +201,15 @@ class Customer(models.Model):
         ''', (self.id, host_id))
         return dictfetchall(cursor)
 
+
+
+    ##### api call #####
+    
+
+
+    def api_add_action(self, click, action_type, extra_data):
+        Action.objects.create(click=click, action_type=action_type, extra_data=extra_data)
+
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
     customer_sharer_identifier = models.IntegerField(max_length = 10)

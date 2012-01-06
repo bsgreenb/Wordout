@@ -10,12 +10,50 @@ from wordout.forms import *
 from wordout.models import *
 from wordout.lib import get_ip, code_generator, generate_json_for_detail
 from wordout.lib import check_session_form  #I store form error in session['form'] this function is to return the form that includes error
-from django.utils import simplejson
-from django.forms.formsets import formset_factory
 from django.db.models import Max
 from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
+from django.utils import simplejson
 
-#SHARER
+
+##### SYSTEM RELATED #####
+
+@login_required
+def logout_page(request):
+    logout(request)
+    return HttpResponseRedirect('/')
+
+def register_page(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password1'],
+                    email=form.cleaned_data['email']
+                     )
+            #this is not the best practice. I forced extra query here.  change on version 2
+            #I need create/check both client_id and api_key
+            loop  = True
+            while loop == True:
+                client_key = code_generator(9)
+                api_key = code_generator(30)
+                try:
+                    Customer.objects.get(client_key = client_key)
+                except Customer.DoesNotExist:
+                    try:
+                        Customer.objects.get(api_key = api_key)
+                    except Customer.DoesNotExist:
+                        loop = False
+            free_group = Customergroup.objects.get(id=1)
+            Customer.objects.create(user=user, client_key=client_key, api_key=api_key, customergroup=free_group )
+            new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
+            auth_login(request, new_user)
+            return HttpResponseRedirect('/')
+    else:
+        form = RegistrationForm()
+    return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
+
+##### SHARER #####
 def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
@@ -88,7 +126,7 @@ def disable_or_enable_sharer_page(request, action):
             customer.disable_or_enable_sharer(sharer_ls, True)
     return HttpResponseRedirect('/')
 
-#SHARER PAGE
+##### PLUGIN PAGE #####
 @login_required
 def sharer_plugin_page(request):
     customer = Customer.objects.get(user=request.user)
@@ -111,7 +149,7 @@ def edit_msg_page(request):
 
     return HttpResponseRedirect('/pluginpage/')
 
-#ACTION 
+##### ACTION #####
 @login_required
 def action_type_page(request):
     customer = Customer.objects.get(user=request.user)
@@ -160,15 +198,6 @@ def disable_or_enable_action_page(request, action):
             customer.disable_or_enable_action(action_type_ls, True)
     return HttpResponseRedirect('/actiontype')
 
-
-##### api overview #####
-@login_required
-def api_overview_page(request):
-    customer = Customer.objects.get(user=request.user)
-    api_key = customer.api_key
-    return render_to_response('api_overview.html', dict(api_key=api_key), context_instance=(RequestContext(request)))
-
-
 @login_required
 def referrer_page(request):
     customer = Customer.objects.get(user=request.user)
@@ -182,6 +211,35 @@ def path_page(request, host_id):
     ls = customer.display_path(host_id)
     results = generate_json_for_detail(ls)
     return HttpResponse(results, 'application/javascript')
+
+
+'''
+def api_page(request, client_key, user_id):
+    #need completely construct this page.
+    try:
+        sharer = Identifiers.objects.select_related().filter(customer__client_id = client_id, identifier = user_id) #use filter cuz aggregate works on queryset
+        points = ident_ls.aggregate(total_request = Count('request'))['total_request'] * 100
+
+        ident = ident_ls[0]
+        referral_code = ident.code
+        message_title = ident.customer.message_title
+        message_body = ident.customer.message_body
+        return render_to_response('api.html', dict(referral_code = referral_code, message_title = message_title, message_body = message_body, points = points), context_instance=RequestContext(request))
+
+    except IndexError:
+        return HttpResponseRedirect('/')
+
+
+@login_required
+def api_settings_page(request):
+    customer = Customer.objects.get(user = request.user)
+    #action_type_ls = Action_Type.objects.filter(customer=customer, enabled=True)
+    action_type_ls = customer.action_type_set.filter(enabled=True)
+    action_number = action_type_ls.count()
+    customergroup = customer.customergroup
+
+    return render_to_response('apisettings.html', dict(customer = customer,  action_type_ls = action_type_ls,  action_number = action_number, customergroup = customergroup), context_instance=RequestContext(request))
+'''
 
 def direct_page(request, code):
     try:
@@ -212,67 +270,5 @@ def direct_page(request, code):
             ip, created = IP.objects.get_or_create(address = ip)
 
     click = Click.objects.create(sharer = sharer, redirect_link = redirect_link, referrer = referrer, IP = ip, Agent = user_agent)
-    return HttpResponseRedirect(redirect_link)
-    
-@login_required
-def logout_page(request):
-    logout(request)
-    return HttpResponseRedirect('/')
-
-def register_page(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = User.objects.create_user(
-                    username=form.cleaned_data['username'],
-                    password=form.cleaned_data['password1'],
-                    email=form.cleaned_data['email']
-                     )
-            #this is not the best practice. I forced extra query here.  change on version 2
-            #I need create/check both client_id and api_key
-            loop  = True
-            while loop == True:
-                client_key = code_generator(9)
-                api_key = code_generator(30)
-                try:
-                    Customer.objects.get(client_key = client_key)
-                except Customer.DoesNotExist:
-                    try:
-                        Customer.objects.get(api_key = api_key)
-                    except Customer.DoesNotExist:
-                        loop = False
-            free_group = Customergroup.objects.get(id=1)
-            Customer.objects.create(user=user, client_key=client_key, api_key=api_key, customergroup=free_group )
-            new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
-            auth_login(request, new_user)
-            return HttpResponseRedirect('/')
-    else:
-        form = RegistrationForm()
-    return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
-
-def api_page(request, client_key, user_id):
-    #need completely construct this page.
-    try:
-        sharer = Identifiers.objects.select_related().filter(customer__client_id = client_id, identifier = user_id) #use filter cuz aggregate works on queryset
-        points = ident_ls.aggregate(total_request = Count('request'))['total_request'] * 100
-
-        ident = ident_ls[0]
-        referral_code = ident.code
-        message_title = ident.customer.message_title
-        message_body = ident.customer.message_body
-        return render_to_response('api.html', dict(referral_code = referral_code, message_title = message_title, message_body = message_body, points = points), context_instance=RequestContext(request))
-
-    except IndexError:
-        return HttpResponseRedirect('/')
-
-
-@login_required
-def api_settings_page(request):
-    customer = Customer.objects.get(user = request.user)
-    #action_type_ls = Action_Type.objects.filter(customer=customer, enabled=True)
-    action_type_ls = customer.action_type_set.filter(enabled=True)
-    action_number = action_type_ls.count()
-    customergroup = customer.customergroup
-
-    return render_to_response('apisettings.html', dict(customer = customer,  action_type_ls = action_type_ls,  action_number = action_number, customergroup = customergroup), context_instance=RequestContext(request))
-
+    url = '%s?wdcid=%s' % (redirect_link, click.id)
+    return HttpResponseRedirect(url)

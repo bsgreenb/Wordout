@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth.views import login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete, password_change, password_change_done
 from wordout.views import *
+from wordout.api_views import *
 from django.contrib import admin
 admin.autodiscover()
 from wordout.custom_decorator import anonymous_required
@@ -38,20 +39,23 @@ urlpatterns = patterns('',
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
     
-    #api page
-    (r'api/overview/$', api_overview_page),
-    (r'api/doAction/$', api_do_action_page),
-    (r'api/getAllSharers/$', api_get_all_sharers_page),
-    (r'api/getSharerInfo/$', api_get_sharer_info_page),
-    (r'api/addSharer/$', api_add_sharer),
-    (r'api/toggleSharer/$', api_toggle_sharer),
-    (r'api/getActionType/$', api_get_action_type)
     
+    #api doc page
+    #(r'^apidoc/overview/$', apidoc_overview_page),
+    #(r'^apidoc/doAction/$', apidoc_do_action_page),
+    #(r'^apidoc/getAllSharers/$', apidoc_get_all_sharers_page),
+    #(r'^apidoc/getSharerInfo/$', apidoc_get_sharer_info_page),
+    #(r'^apidoc/addSharer/$', apidoc_add_sharer),
+    #(r'^apidoc/toggleSharer/$', apidoc_toggle_sharer),
+    #(r'^apidoc/getActionType/$', apidoc_get_action_type),
+    
+    #apicall I think this could go into a subdomain. decide later
+    (r'^api/doAction/(?P<api_key>\w{30})/$', api_do_action_page),
 
 
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),
-    (r'^api/([0-9A-Za-z]{9})/([0-9]+)/$', api_page),
-    (r'^apisettings/$', api_settings_page),
+    #(r'^api/([0-9A-Za-z]{9})/([0-9]+)/$', api_page),
+    #(r'^apisettings/$', api_settings_page),
     (r'^([0-9a-z]{6})/$', direct_page)
 )

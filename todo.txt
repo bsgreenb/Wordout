@@ -32,6 +32,7 @@ PLANOUT API
 - MyActions (action table)
 
 TODO:
+- need have a better url validation
 - create_sharers take multiple queries. need fix it
 - how to replace request.user with customer while login
 - deal with successfully update update_title_and_body message
