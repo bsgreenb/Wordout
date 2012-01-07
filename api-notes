@@ -44,12 +44,12 @@ api result return
     toggleSharer
     para:{
         Sharer_Identifier:"",
-        Enabled:"",
+        Enable:"",
     }
 
     response:{
         Sharer_Identifier:"",
-        Enabled:""
+        Enable:""
     }
 
     getSharerInfoById(Code)

@@ -122,7 +122,11 @@ class MessageForm(forms.Form):
     message_title = forms.CharField(max_length=200, required=False)
     message_body = forms.CharField(required=False)
 
+class ValidateReferrer(forms.Form):
+    referrer = forms.URLField()
 
+class ValidateIP(forms.Form):
+    ip = forms.IPAddressField()
 
 ##### api call #####
 class DoActionForm(forms.Form):
@@ -141,11 +145,7 @@ class AddSharerForm(forms.Form):
                return redirect_link
         raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
 
-
-class ValidateReferrer(forms.Form):
-    referrer = forms.URLField()
-
-class ValidateIP(forms.Form):
-    ip = forms.IPAddressField()
+class ToggleSharerForm(forms.Form):
+    customer_sharer_identifier = forms.IntegerField(min_value=1)
+    enabled = forms.BooleanField(required=False)
     
-

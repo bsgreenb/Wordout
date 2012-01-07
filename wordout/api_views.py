@@ -57,7 +57,7 @@ def api_do_action_page(request, api_key):
         })
     if form.is_valid():
         data = form.cleaned_data
-        customer, result = get_customer_by_api_key(api_key) #this function is in lib.py. if customer is there, return customer, otherwise, return api fail metaset.
+        customer, result = get_customer_by_api_key(api_key) 
         if result:
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
         
@@ -74,6 +74,11 @@ def api_do_action_page(request, api_key):
             result = get_api_metaset(status, message) #return httpresponse of a json with fail message
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
         
+        if action_type.enabled == False:
+            message = 'this action type is disabled'
+            result = get_api_metaset(status, message)
+            return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
         if click.sharer.customer != customer:
             #does the click id belong to this customer
             message = 'invalid wordout click id for this api_key'
@@ -137,8 +142,61 @@ def api_add_sharer_page(request, api_key):
                 'redirect_link': redirect_link.host.host_name + redirect_link.path
                 }
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
-    else:
-        return HttpResponse('aa')
     result = get_api_metaset(status, 'invalid redirect link sent. You need match the format: http(s)://subdomain.example.com/(path)')
-    #return HttpResponse(redirect_link)
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+def api_toggle_sharer_page(request, api_key):
+    #call it enable instead of enabled.
+    enabled = request.GET.get('enabled', '')
+    if not enabled:
+        message = 'status is required.'
+        result = get_api_metaset('failed', message)
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+    customer_sharer_identifier = request.GET.get('sharer_identifier', '')
+    if not customer_sharer_identifier:
+        message = 'sharer identifier is required.'
+        result = get_api_metaset('failed', message)
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+    form = ToggleSharerForm({
+        'customer_sharer_identifier':customer_sharer_identifier,
+        'enabled':enabled
+        })
+
+    if form.is_valid():
+        #customer_sharer_identifier is one of them
+        data = form.cleaned_data
+        customer, result = get_customer_by_api_key(api_key)
+        if result:
+            return HttpResponse(simplejson.dumps(result), 'application/javascript')
+        customer_sharer_identifier = data['customer_sharer_identifier']
+        enabled = data['enabled']
+
+        try:
+            sharer = Sharer.objects.get(customer=customer, customer_sharer_identifier = customer_sharer_identifier)
+        except Sharer.DoesNotExist:
+            message = 'invalid sharer identifier.'
+            result = get_api_metaset('failed', message)
+            return HttpResponse(simplejson.dumps(result), 'application/javascript')
+        sharer.enabled=enabled
+        sharer.save()
+        #try:
+            #sharer.update(enabled = enabled)
+        #except:
+            #message = 'service is not available.'
+            #result = get_api_metaset('failed', message)
+            #return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+        status = 'OK'
+        message = 'the identifier is toggled.'
+        result = get_api_metaset(status, message)
+        result['response'] = {
+                'sharer_identifier': sharer.customer_sharer_identifier,
+                'enabled': enabled
+                }
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
+    result = get_api_metaset('failed', 'invalid data sent.')
+    return HttpResponse(simplejson.dumps(result), 'application/javascript')
+        
+
