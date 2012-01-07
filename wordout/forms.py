@@ -55,17 +55,17 @@ class CreateSharerForm(forms.Form):
 class ChangeLinkForm(forms.Form):
     redirect_link = forms.URLField()
 
+    def __init__(self, user=None, *args, **kwargs):
+        super(ChangeLinkForm, self).__init__(*args, **kwargs)
+        self._user = user
+
     def clean_redirect_link(self):
         if 'redirect_link' in self.cleaned_data:
-            redirect_link = self.cleaned_data('redirect_link')
+            redirect_link = self.cleaned_data['redirect_link']
             if force_url_format(redirect_link):
                 #regular expression testing out the format
                return redirect_link
         raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
-
-    def __init__(self, user=None, *args, **kwargs):
-        super(ChangeLinkForm, self).__init__(*args, **kwargs)
-        self._user = user
 
 
 class RegistrationForm(forms.Form):
@@ -130,6 +130,16 @@ class DoActionForm(forms.Form):
     action_type_identifier = forms.IntegerField(min_value=1, max_value=99)
     extra_data = forms.CharField(max_length=250, required=False)
 
+class AddSharerForm(forms.Form):
+    redirect_link = forms.URLField()
+    
+    def clean_redirect_link(self):
+        if 'redirect_link' in self.cleaned_data:
+            redirect_link = self.cleaned_data['redirect_link']
+            if force_url_format(redirect_link):
+                #regular expression testing out the format
+               return redirect_link
+        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
 
 
 class ValidateReferrer(forms.Form):

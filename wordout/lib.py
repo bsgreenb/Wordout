@@ -2,6 +2,7 @@ import re, string, random
 from django.utils import simplejson
 from datetime import datetime
 from django.http import HttpResponse
+
 def dictfetchall(cursor):
     #returns all rows from a cursor as a dict
     desc = cursor.description
@@ -55,14 +56,3 @@ def get_api_metaset(status, message):
             'timestamp':str(datetime.now())
             }
     return result
-
-def get_customer_by_api_key(api_key):
-    customer = ''
-    result = ''
-    try:
-        customer = Customer.objects.get(api_key = api_key)
-    except Customer.DoesNotExit:
-        result = get_api_metaset('failed', 'invalid api key')
-    return (customer, result)
-
-
