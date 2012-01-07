@@ -46,7 +46,7 @@ class Customergroup(models.Model): # identify paid/unpaid users
         return str(self.id)
 
 def get_or_create_link(url):
-    result = force_url_format(url) #regular expression forcing http(s)://subdomain
+    result = force_url_format(url) #regular expression forcing http(s)://subdomain.example.extension
     netloc, path = result.group(1), result.group(2)
     netloc, created = HOST.objects.get_or_create(host_name = netloc)
     link, created = Full_Link.objects.get_or_create(host = netloc, path = path)

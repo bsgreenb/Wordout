@@ -2,13 +2,13 @@ function load_data_to_modal(page){
     $('.label.notice').each(function(){
     	$(this).click(function(){
     		$.getJSON("/" + page + "/" + $(this).attr('id') + "/", {}, function(data){
-    			if (data[0].success === true)
+    			if (data.success === true)
     			{						
     				$('table#clickDetail tbody').empty();
-    				for (i=1; i< data.length; i++)
+    				for (i=0; i< data['response'].length; i++)
     				{
-    					link = data[i].host_name + data[i].path;
-    					html = '<tr><td><a href="' + link + '">' + link + '</a></td><td>' + data[i].clicks + '</td></tr>';
+    					link = data['response'][i].host_name + data['response'][i].path;
+    					html = '<tr><td><a href="' + link + '">' + link + '</a></td><td>' + data['response'][i].clicks + '</td></tr>';
     					$('#clickDetail tbody').append(html);
 
     				}

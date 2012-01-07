@@ -30,12 +30,13 @@ def force_url_format(url):
 
 def generate_json_for_detail(ls):
     #sharer and referrer details return the same data in json format
+    results = {}
     try:
         if ls[0]:
-            results = [{'success':True}]
-            results.extend(ls)
+            results['success'] = True
+            results['response'] = ls
     except:
-        results = [{'success':False}]
+        results['success'] = False
 
     return simplejson.dumps(results)
 
