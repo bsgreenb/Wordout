@@ -55,3 +55,14 @@ def get_api_metaset(status, message):
             'timestamp':str(datetime.now())
             }
     return result
+
+def get_customer_by_api_key(api_key):
+    customer = ''
+    result = ''
+    try:
+        customer = Customer.objects.get(api_key = api_key)
+    except Customer.DoesNotExit:
+        result = get_api_metaset('failed', 'invalid api key')
+    return (customer, result)
+
+
