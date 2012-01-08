@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     
     
     #api doc page
-    #(r'^apidoc/overview/$', apidoc_overview_page),
+    (r'^apidoc/overview/$', apidoc_overview_page),
     #(r'^apidoc/doAction/$', apidoc_do_action_page),
     #(r'^apidoc/getAllSharers/$', apidoc_get_all_sharers_page),
     #(r'^apidoc/getSharerInfo/$', apidoc_get_sharer_info_page),
@@ -53,6 +53,11 @@ urlpatterns = patterns('',
     (r'^api/doAction/(?P<api_key>\w{30})/$', api_do_action_page),
     (r'^api/addSharer/(?P<api_key>\w{30})/$', api_add_sharer_page),
     (r'^api/toggleSharer/(?P<api_key>\w{30})/$', api_toggle_sharer_page),
+    
+
+
+
+    (r'^api/getActionTypes/(?P<api_key>\w{30})/$', api_get_action_type_page),
 
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),

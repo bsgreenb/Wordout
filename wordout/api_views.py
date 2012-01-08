@@ -199,4 +199,20 @@ def api_toggle_sharer_page(request, api_key):
     result = get_api_metaset('failed', 'invalid data sent.')
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
         
-
+def api_get_action_type_page(request, api_key):
+    customer, result = get_customer_by_api_key(api_key)
+    if result:
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
+    action_type_ls = Action_Type.objects.filter(customer = customer)
+    status = 'OK'
+    message = 'your action type is listed.'
+    result = get_api_metaset(status, message)
+    result['response'] = []
+    holder = {}
+    for i in action_type_ls:
+        holder['action_type_identifier'] = i.customer_action_type_identifier
+        holder['action_name'] = i.action_name
+        holder['description'] = i.description
+        holder['enabled'] = i.enabled
+        result['response'].append(holder)
+    return HttpResponse(simplejson.dumps(result), 'application/javascript')
