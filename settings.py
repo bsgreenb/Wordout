@@ -1,6 +1,7 @@
 # Django settings for django_wordout project.
 import os.path
 
+SOUTH_TESTS_MIGRATE = False #unittest might need this
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

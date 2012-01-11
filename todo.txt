@@ -1,3 +1,8 @@
+#i have SOUTH_TESTS_MIGRATE = False on settings.py. remove it if i want to use south
+
+
+
+
 REDESIGN ALL THE PAGES
 - sharer page. this describes what is the plugin page and how to implement it.
     - if the customer has not created any sharer yet, we display the message leading him to create sharers
