@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from wordout.forms import *
 from wordout.models import *
-from wordout.lib import get_ip, code_generator, generate_json_for_detail
+from wordout.lib import get_ip, code_generator
 from wordout.lib import check_session_form  #I store form error in session['form'] this function is to return the form that includes error
 from django.db.models import Max
 from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
@@ -83,9 +83,14 @@ def main_page(request):
 @login_required
 def show_referrer_by_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
     customer = Customer.objects.get(user = request.user)
-    ls = customer.display_referrer_by_sharer(customer_sharer_identifier)
-    results = generate_json_for_detail(ls)
-    return HttpResponse(results, 'application/javascript')
+    data = customer.display_referrer_by_sharer(customer_sharer_identifier)
+    results = {}
+    if data:
+        results['success'] = True
+        results['response'] = data 
+    else:
+        results['success'] = False
+    return HttpResponse(simplejson.dumps(results), 'application/javascript')
     
 @login_required
 @transaction.commit_on_success
@@ -209,9 +214,13 @@ def referrer_page(request):
 def path_page(request, host_id):
     customer = Customer.objects.get(user=request.user)
     ls = customer.display_path(host_id)
-    results = generate_json_for_detail(ls)
-    return HttpResponse(results, 'application/javascript')
-
+    results = {}
+    if ls:
+        results['success'] = True
+        results['data'] = ls
+    else:
+        results['success'] = False
+    return HttpResponse(simplejson.dumps(results), 'application/javascript')
 
 '''
 def api_page(request, client_key, user_id):

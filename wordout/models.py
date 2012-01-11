@@ -104,24 +104,18 @@ class Customer(models.Model):
         
     def display_referrer_by_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
-        cursor = connection.cursor()
-        cursor.execute('''
-        SELECT wordout_click.id, wordout_click.referrer_id, COUNT(wordout_click.id) as clicks, wordout_host.host_name, wordout_full_link.path
-        FROM wordout_click
-        LEFT JOIN wordout_full_link
-            ON wordout_full_link.id = wordout_click.referrer_id
-        LEFT JOIN wordout_host
-            ON wordout_full_link.host_id = wordout_host.id
-        LEFT JOIN wordout_sharer
-            ON wordout_sharer.id = wordout_click.sharer_id
-        WHERE
-            wordout_sharer.customer_id = %s AND wordout_sharer.customer_sharer_identifier = %s
-        GROUP BY 
-            wordout_click.referrer_id
-        ORDER BY
-            clicks DESC
-        ''', (self.id, customer_sharer_identifier))
-        return dictfetchall(cursor)
+        sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
+        ls = Full_Link.objects.filter(click__sharer=sharer).annotate(clicks=Count('click__id')).order_by('clicks')
+        #haven't gotten the offical way to serialization models. need replace the code below in the future
+        data = []
+        if ls:
+            for i in ls:
+                holder = {}
+                holder['referrer'] = i.host.host_name + i.path
+                holder['clicks'] = i.clicks
+                data.append(holder)
+        return data
+
 
     def create_sharer(self, start, end, redirect_link):
         redirect_link, created = get_or_create_link(redirect_link)
@@ -163,41 +157,19 @@ class Customer(models.Model):
     
    
     def display_referrer(self):
-        cursor = connection.cursor()
-        cursor.execute('''
-        SELECT wordout_host.id, wordout_host.host_name, COUNT(wordout_click.id) as clicks
-        FROM wordout_host
-        LEFT JOIN wordout_full_link
-            ON wordout_full_link.host_id = wordout_host.id
-        LEFT JOIN wordout_click
-            ON wordout_full_link.id = wordout_click.referrer_id
-        LEFT JOIN wordout_sharer
-            ON wordout_click.sharer_id = wordout_sharer.id
-        WHERE
-            wordout_sharer.customer_id = %s
-        GROUP BY
-            wordout_host.id
-        ORDER BY
-            clicks DESC
-        ''', [self.id])
-        return dictfetchall(cursor)
+        ls = Full_Link.objects.filter(click__sharer__in = self.sharer_set.all()).annotate(clicks=Count('click__id')).order_by('clicks')
+        return ls
 
     def display_path(self, host_id):
-        cursor = connection.cursor()
-        cursor.execute('''
-        SELECT wordout_host.host_name, wordout_host.id, wordout_full_link.path, COUNT(wordout_click.id) as clicks
-        FROM wordout_full_link
-        LEFT JOIN wordout_host
-            ON wordout_full_link.host_id = wordout_host.id
-        LEFT JOIN wordout_click
-            ON wordout_full_link.id = wordout_click.referrer_id
-        LEFT JOIN wordout_sharer
-            ON wordout_click.sharer_id = wordout_sharer.id
-        WHERE wordout_sharer.customer_id = %s AND wordout_host.id = %s
-        GROUP BY wordout_path
-        ORDER BY clicks DESC
-        ''', (self.id, host_id))
-        return dictfetchall(cursor)
+        ls = Full_Link.objects.filter(click__sharer__in = self.sharer_set.all(), host__id = host_id).annotate(clicks=Count('click__id')).order_by('clicks')
+        data = []
+        if ls:
+            for i in ls:
+                holder = {}
+                holder['referrer'] =  i.host.host_name + i.path
+                holder['clicks'] = i.clicks
+                data.append(holder)
+        return data
 
 
 

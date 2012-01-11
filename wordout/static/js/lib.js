@@ -7,7 +7,7 @@ function load_data_to_modal(page){
     				$('table#clickDetail tbody').empty();
     				for (i=0; i< data['response'].length; i++)
     				{
-    					link = data['response'][i].host_name + data['response'][i].path;
+    					link = data['response'][i].referrer;
     					html = '<tr><td><a href="' + link + '">' + link + '</a></td><td>' + data['response'][i].clicks + '</td></tr>';
     					$('#clickDetail tbody').append(html);
 

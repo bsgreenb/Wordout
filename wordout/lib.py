@@ -28,18 +28,6 @@ def force_url_format(url):
     url_format = re.compile(r'^(https?\://[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3})((/\S*)?)$')
     return url_format.search(url)
 
-def generate_json_for_detail(ls):
-    #sharer and referrer details return the same data in json format
-    results = {}
-    try:
-        if ls[0]:
-            results['success'] = True
-            results['response'] = ls
-    except:
-        results['success'] = False
-
-    return simplejson.dumps(results)
-
 def check_session_form(request):
     if request.session.get('form', ''):
         form = request.session['form']
