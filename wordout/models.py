@@ -65,6 +65,39 @@ class Customer(models.Model):
  
     
     def display_sharers(self):
+        action_type_set = self.action_type_set.all().order_by('-created')
+        sharer_ls = Sharer.objects.select_related().filter(customer = self).annotate(click_total = Count('click__id')).order_by('-created')
+        results = []
+        for i in sharer_ls:
+            
+            sharer_identifier = i.customer_sharer_identifier
+            code = i.code
+            redirect_link = i.redirect_link
+            enabled = i.enabled
+            click_total = i.click_total
+
+            action_type = []
+            for a in i.customer.action_type_set.all().annotate(action_total = Count('action__id')).order_by('-created'):
+                holder = {}
+                holder['name'] = a.action_name
+                holder['action_total'] = a.action_total
+                action_type.append(holder)
+            
+            results.append({
+                'sharer_identifier':sharer_identifier,
+                'code':code,
+                'redirect_link':redirect_link,
+                'enabled':enabled,
+                'click_total':click_total,
+
+                'action_type':action_type
+                })
+
+        return (action_type_set, results)
+
+
+        
+
         
         #######I NEED EITHER BEN OR ERIN'S HELP ON THIS 
         ls = Sharer.objects.select_related().filter(customer = self).annotate(num = Count('click')).order_by('-created')
