@@ -57,7 +57,7 @@ def register_page(request):
 def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
-        action_type_set, ls = customer.display_sharers()
+        ls = customer.display_sharers()
 
         #get default start value for create numeric identifiers
         try:
@@ -70,7 +70,7 @@ def main_page(request):
         
         #error msg, such as invalidate redirect link, is in the form. 
         form = check_session_form(request)
-        return render_to_response('sharer.html', dict(action_type_set=action_type_set, ls=ls, default_start = default_start, form=form), context_instance=RequestContext(request))
+        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form=form), context_instance=RequestContext(request))
 
     else:
         form = RegistrationForm()

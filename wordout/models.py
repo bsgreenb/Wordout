@@ -65,7 +65,6 @@ class Customer(models.Model):
  
     
     def display_sharers(self):
-        action_type_set = self.action_type_set.all().order_by('-created')
         sharer_ls = Sharer.objects.select_related().filter(customer = self).annotate(click_total = Count('click__id')).order_by('-created')
         results = []
         for i in sharer_ls:
@@ -77,10 +76,11 @@ class Customer(models.Model):
             click_total = i.click_total
 
             action_type = []
-            for a in i.customer.action_type_set.all().annotate(action_total = Count('action__id')).order_by('-created'):
+            for a in i.customer.action_type_set.all().annotate(group_placeholder = Count('action__id')).order_by('-created'):
+                #I am not using group_placeholder but not sure whether i have to use it for grouping
                 holder = {}
-                holder['name'] = a.action_name
-                holder['action_total'] = a.action_total
+                holder['action_name'] = a.action_name
+                holder['action_total'] = a.action_set.filter(click__sharer = i).count()
                 action_type.append(holder)
             
             results.append({
@@ -90,14 +90,10 @@ class Customer(models.Model):
                 'enabled':enabled,
                 'click_total':click_total,
 
-                'action_type':action_type
+                'action_type_set':action_type
                 })
 
-        return (action_type_set, results)
-
-
-        
-
+        return results
         
         #######I NEED EITHER BEN OR ERIN'S HELP ON THIS 
         ls = Sharer.objects.select_related().filter(customer = self).annotate(num = Count('click')).order_by('-created')

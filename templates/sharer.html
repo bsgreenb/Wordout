@@ -110,7 +110,6 @@ div#action #enable, div#action #disable{
 
 {% block content %}
 {% include 'backbone/form_errors.html' %}
-
 {% if ls %}
 <div id="action">
 
@@ -129,22 +128,30 @@ div#action #enable, div#action #disable{
 			<th class="header">Sharer ID</th>
 			<th class="blue header">Link</th>
 			<th class="yellow header headerSortDown">Clicks</th>
+			{% if ls.0.action_type_set %}
+				{% for action_type in ls.0.action_type_set %}
+					<th class="header">{{action_type.action_name}}</th>
+				{% endfor %}
+			{% endif %}
 			<th class="green header">Enable</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for l in ls%}
 			<tr>
-				<td><input class="checkbox" type="checkbox" name="sharer_id" value="{{l.customer_sharer_identifier}}"/>{{ l.customer_sharer_identifier }}</td>
+				<td><input class="checkbox" type="checkbox" name="sharer_id" value="{{l.customer_sharer_identifier}}"/>{{ l.sharer_identifier }}</td>
 				<td>
 					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
 					<div>{{ l.redirect_link }}</div>
 				</td>
-				<td>{{ l.num }} 
-					{% if l.num > 0 %}
-						<span class="label notice" id="{{l.id}}">detail</span>
+				<td>{{ l.click_total }} 
+					{% if l.click_total > 0 %}
+						<span class="label notice" id="{{l.sharer_identifier}}">detail</span>
 					{% endif %}		
 				</td>
+				{% for action_type in l.action_type_set %}
+					<td>{{ action_type.action_total }}</td>
+				{% endfor %}
 				<td>{{ l.enabled }}</td>
 			</tr>
 		{% endfor %}
