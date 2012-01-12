@@ -29,7 +29,7 @@ def apidoc_overview_page(request):
     api_key = customer.api_key
     return render_to_response('api_overview.html', dict(api_key=api_key), context_instance=(RequestContext(request)))
 
-##### above is for apidoc #####
+##### actual api request ####
 def api_do_action_page(request, api_key):
     #all data valid?
     #api matches a user?
@@ -181,13 +181,6 @@ def api_toggle_sharer_page(request, api_key):
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
         sharer.enabled=enabled
         sharer.save()
-        #try:
-            #sharer.update(enabled = enabled)
-        #except:
-            #message = 'service is not available.'
-            #result = get_api_metaset('failed', message)
-            #return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
         status = 'OK'
         message = 'the identifier is toggled.'
         result = get_api_metaset(status, message)
