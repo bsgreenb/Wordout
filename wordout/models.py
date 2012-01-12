@@ -95,42 +95,6 @@ class Customer(models.Model):
 
         return results
         
-        #######I NEED EITHER BEN OR ERIN'S HELP ON THIS 
-        ls = Sharer.objects.select_related().filter(customer = self).annotate(num = Count('click')).order_by('-created')
-        return ls
-
-    def display_sharers2(self):
-        cursor = connection.cursor()
-        #todo
-        #only give redirect_link_id. need get the full redirect link
-        #need get max sharer_id for the modal
-        cursor.execute('''
-        SELECT wordout_sharer.customer_sharer_id, wordout_sharer.code, wordout_sharer.redirect_link_id, wordout_sharer.enabled, COUNT(*) AS total_clicks, actions_groupwise.action_id, actions_groupwise.action_name, action_total
-        FROM
-            wordout_sharer
-        INNER JOIN
-            wordout_click
-        ON wordout_sharer.id = wordout_click.sharer_id
-        LEFT JOIN
-        (
-            SELECT wordout_action_type.action_id, wordout_action_type.action_name, wordout_action.click_id, COUNT(*) as action_total
-            FROM
-                wordout_action
-            INNER JOIN
-                wordout_action_type
-            ON
-                wordout_action.action_id = wordout_action_type.id
-	    GROUP BY wordout_action_type.action_id
-	) AS actions_groupwise
-        ON
-            (actions_groupswise.click_id = wordout_click.id)
-        WHERE wordout_sharer.customer_id = %s 
-	GROUP BY wordout_sharer.id, actions_groupwise.action_id
-	''', [self.id])
-        
-        return dictfetchall(cursor)
-
-        
     def display_referrer_by_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
         sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
