@@ -207,3 +207,17 @@ def api_get_action_type_page(request, api_key):
         holder['enabled'] = i.enabled
         result['response'].append(holder)
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+def api_get_all_sharers_page(request, api_key):
+    customer, result = get_customer_by_api_key(api_key)
+    if result:
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+    ls = customer.display_sharers()
+    status = 'OK'
+    message = 'query succeed.'
+    result = get_api_metaset(status, message)
+    result['response'] = ls
+    return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+

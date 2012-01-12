@@ -86,7 +86,7 @@ class Customer(models.Model):
             results.append({
                 'sharer_identifier':sharer_identifier,
                 'code':code,
-                'redirect_link':redirect_link,
+                'redirect_link':redirect_link.host.host_name + redirect_link.path,
                 'enabled':enabled,
                 'click_total':click_total,
 
