@@ -164,14 +164,13 @@ class Customer(models.Model):
                 data.append(holder)
         return data
 
-
-
     ##### api call #####
-    
-
-
     def api_add_action(self, click, action_type, extra_data):
-        Action.objects.create(click=click, action_type=action_type, extra_data=extra_data)
+        action = Action.objects.create(click=click, action_type=action_type, extra_data=extra_data)
+
+    #api_create_sharer.  this uses the same method as create the sharer
+
+
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)

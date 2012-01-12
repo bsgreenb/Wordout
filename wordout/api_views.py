@@ -86,7 +86,7 @@ def api_do_action_page(request, api_key):
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
         else:
             try:
-                action = Action.objects.create(click = click, action_type = action_type, extra_data = data['extra_data'])
+                action = customer.api_add_action(click = click, action_type = action_type, extra_data = data['extra_data'])
             except:
                 messasge = 'service is not available.'
                 result = get_api_metaset(status, message) #return httpresponse of a json with fail message
@@ -99,7 +99,6 @@ def api_do_action_page(request, api_key):
                 return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
     #failed
-
     message = 'Invalid data sent.'
     result = get_api_metaset(status, message)
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
@@ -122,17 +121,16 @@ def api_add_sharer_page(request, api_key):
         customer, result = get_customer_by_api_key(api_key)
         if result:
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
-        redirect_link, created = get_or_create_link(data['redirect_link'])
-        
+
         next_customer_sharer_identifier = Sharer.objects.filter(customer=customer).aggregate(current_identifier=Max('customer_sharer_identifier'))['current_identifier'] + 1
-        loop = True
-        while loop == True:
-            code = code_generator()
-            try:
-                Sharer.objects.get(code=code)
-            except Sharer.DoesNotExist:
-                loop = False
-                sharer = Sharer.objects.create(customer = customer, customer_sharer_identifier = next_customer_sharer_identifier, code = code, redirect_link = redirect_link)
+        
+        try: 
+            customer.create_sharer(start = next_customer_sharer_identifier, end = next_customer_sharer_identifier, redirect_link = data['redirect_link'])
+        except:
+            message = 'the service is not avaible.'
+            result = get_api_metaset(status, message)
+            return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
         status = 'OK'
         message = 'The new sharer is added'
         result = get_api_metaset(status, message)
