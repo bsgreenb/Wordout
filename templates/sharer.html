@@ -139,7 +139,7 @@ div#action #enable, div#action #disable{
 	<tbody>
 		{% for l in ls%}
 			<tr>
-				<td><input class="checkbox" type="checkbox" name="sharer_id" value="{{l.customer_sharer_identifier}}"/>{{ l.sharer_identifier }}</td>
+				<td><input class="checkbox" type="checkbox" name="sharer_id" value="{{l.sharer_identifier}}"/>{{ l.sharer_identifier }}</td>
 				<td>
 					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
 					<div>{{ l.redirect_link }}</div>
