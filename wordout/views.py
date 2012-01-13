@@ -1,18 +1,17 @@
-from datetime import datetime
 from django.shortcuts import render_to_response
 from django.contrib.auth import logout
-from django.contrib.auth.models import User
 from django.template import RequestContext
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
+from django.db.models import Max
+from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
+from django.utils import simplejson
+
 from wordout.forms import *
 from wordout.models import *
 from wordout.lib import get_ip, code_generator
 from wordout.lib import check_session_form  #I store form error in session['form'] this function is to return the form that includes error
-from django.db.models import Max
-from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
-from django.utils import simplejson
 
 
 ##### SYSTEM RELATED #####
@@ -33,8 +32,7 @@ def register_page(request):
                      )
             #this is not the best practice. I forced extra query here.  change on version 2
             #I need create/check both client_id and api_key
-            loop  = True
-            while loop == True:
+            while True:
                 client_key = code_generator(9)
                 api_key = code_generator(30)
                 try:
@@ -43,7 +41,7 @@ def register_page(request):
                     try:
                         Customer.objects.get(api_key = api_key)
                     except Customer.DoesNotExist:
-                        loop = False
+                        break
             free_group = Customergroup.objects.get(id=1)
             Customer.objects.create(user=user, client_key=client_key, api_key=api_key, customergroup=free_group )
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])

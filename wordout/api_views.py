@@ -1,15 +1,13 @@
-from datetime import datetime
 from django.shortcuts import render_to_response
-from django.contrib.auth import logout
-from django.contrib.auth.models import User
 from django.template import RequestContext
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from wordout.forms import *
-from wordout.models import *
-from wordout.lib import code_generator, get_api_metaset
 from django.utils import simplejson
 from django.db.models import Max
+
+from wordout.forms import *
+from wordout.models import *
+from wordout.lib import get_api_metaset
 
 
 #i tried to have the following function in lib.py but it wouldn't work. not sure why.

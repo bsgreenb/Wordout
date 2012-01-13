@@ -1,14 +1,10 @@
 from django.db import models
+from django.db.models import Count
 from django.contrib.auth.models import User
-from datetime import datetime
-from urlparse import urlparse
-from lib import dictfetchall, code_generator, force_url_format
-from django.db.models import Count, Sum
-from django.db import connection
+
+from lib import code_generator, force_url_format
 
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
-
-
 class HOST(models.Model):
     host_name = models.URLField()
     created = models.DateTimeField(auto_now_add = True)
@@ -78,9 +74,10 @@ class Customer(models.Model):
             action_type = []
             for a in i.customer.action_type_set.all().annotate(group_placeholder = Count('action__id')).order_by('-created'):
                 #I am not using group_placeholder but not sure whether i have to use it for grouping
-                holder = {}
-                holder['action_name'] = a.action_name
-                holder['action_total'] = a.action_set.filter(click__sharer = i).count()
+                holder = {
+                    'action_name':a.action_name,
+                    'action_total':a.action_set.filter(click__sharer = i).count()
+                }
                 action_type.append(holder)
             
             results.append({
@@ -103,9 +100,10 @@ class Customer(models.Model):
         data = []
         if ls:
             for i in ls:
-                holder = {}
-                holder['referrer'] = i.host.host_name + i.path
-                holder['clicks'] = i.clicks
+                holder = {
+                    'referrer':i.host.host_name + i.path,
+                    'clicks':i.clicks
+                }
                 data.append(holder)
         return data
 
@@ -114,14 +112,13 @@ class Customer(models.Model):
         redirect_link, created = get_or_create_link(redirect_link)
 
         for i in range(start, end+1):
-            loop = True
-            while loop == True:
+            while True:
                 code = code_generator()
                 try:
                     Sharer.objects.get(code = code)
                 except Sharer.DoesNotExist:
-                    loop = False
                     Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
+                    break
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
@@ -158,18 +155,16 @@ class Customer(models.Model):
         data = []
         if ls:
             for i in ls:
-                holder = {}
-                holder['referrer'] =  i.host.host_name + i.path
-                holder['clicks'] = i.clicks
+                holder = {
+                    'referrer':i.host.host_name + i.path,
+                    'clicks':i.clicks
+                }
                 data.append(holder)
         return data
 
     ##### api call #####
     def api_add_action(self, click, action_type, extra_data):
         action = Action.objects.create(click=click, action_type=action_type, extra_data=extra_data)
-
-    #api_create_sharer.  this uses the same method as create the sharer
-
 
 
 class Sharer(models.Model):

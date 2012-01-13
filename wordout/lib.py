@@ -1,7 +1,5 @@
 import re, string, random
-from django.utils import simplejson
 from datetime import datetime
-from django.http import HttpResponse
 
 def dictfetchall(cursor):
     #returns all rows from a cursor as a dict
@@ -38,10 +36,11 @@ def check_session_form(request):
 
 def get_api_metaset(status, message):
     #if the api call fail, we simply return the following dict in json format. if the call is valid, we add data to result['response']
-    result = {}
-    result['meta'] = {
+    result = {
+        'meta':{
             'status':status,
             'message':message,
             'timestamp':str(datetime.now())
-            }
+        }
+    }
     return result
