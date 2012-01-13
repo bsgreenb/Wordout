@@ -1,11 +1,11 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth.views import login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete, password_change, password_change_done
-from wordout.views import *
-from wordout.api_views import *
 from django.contrib import admin
 admin.autodiscover()
 from wordout.custom_decorator import anonymous_required
 from django.contrib.auth.decorators import login_required
+from wordout.views import *
+from wordout.api_views import *
 
 urlpatterns = patterns('',
     (r'^$', main_page),
@@ -32,6 +32,7 @@ urlpatterns = patterns('',
     #sharer plugin page
     (r'^pluginpage/$', sharer_plugin_page),
     (r'^editmsg/$', edit_msg_page),
+
     #action page
     (r'^actiontype/$', action_type_page),
     (r'^createactiontype/$', create_action_type_page),
@@ -39,7 +40,10 @@ urlpatterns = patterns('',
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
     
-    
+
+    #sharer page (the actual promote page plus this sharer's analysis)
+    (r'^share/(?P<client_key>\w{9})/(?P<sharer_identifier>[0-9]+)/$', share_page),
+
     #api doc page
     (r'^apidoc/overview/$', apidoc_overview_page),
     #(r'^apidoc/doAction/$', apidoc_do_action_page),
@@ -54,15 +58,10 @@ urlpatterns = patterns('',
     (r'^api/addSharer/(?P<api_key>\w{30})/$', api_add_sharer_page),
     (r'^api/toggleSharer/(?P<api_key>\w{30})/$', api_toggle_sharer_page),
     (r'^api/getAllSharers/(?P<api_key>\w{30})/$', api_get_all_sharers_page),
-    
-
-
-
+    (r'^api/getSharerInfoById/(?P<api_key>\w{30})/$', api_get_sharer_by_identifier),
     (r'^api/getActionTypes/(?P<api_key>\w{30})/$', api_get_action_type_page),
 
     (r'^referrer/$', referrer_page),
     (r'^referrer/([0-9]+)/$', path_page),
-    #(r'^api/([0-9A-Za-z]{9})/([0-9]+)/$', api_page),
-    #(r'^apisettings/$', api_settings_page),
     (r'^([0-9a-z]{6})/$', direct_page)
 )

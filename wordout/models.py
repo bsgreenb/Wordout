@@ -60,8 +60,14 @@ class Customer(models.Model):
         return str(self.user)
  
     
-    def display_sharers(self):
-        sharer_ls = Sharer.objects.select_related().filter(customer = self).annotate(click_total = Count('click__id')).order_by('-created')
+    def display_sharers(self, sharer_identifier = None):
+        sharer_ls = Sharer.objects.select_related().filter(customer = self)
+
+        if sharer_identifier:  #
+            sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_id)
+
+        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created')
+
         results = []
         for i in sharer_ls:
             

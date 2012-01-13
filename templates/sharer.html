@@ -98,6 +98,10 @@ div#action #enable, div#action #disable{
 	float: right;
 }
 
+th.action-label, td.action-row{
+    width: 50px;
+}
+
 #pager button, #pager input{
 	margin-left: 3px;
 }
@@ -130,7 +134,7 @@ div#action #enable, div#action #disable{
 			<th class="yellow header headerSortDown">Clicks</th>
 			{% if ls.0.action_type_set %}
 				{% for action_type in ls.0.action_type_set %}
-					<th class="header">{{action_type.action_name}}</th>
+					<th class="header action-label">{{action_type.action_name}}</th>
 				{% endfor %}
 			{% endif %}
 			<th class="green header">Enable</th>
@@ -150,7 +154,7 @@ div#action #enable, div#action #disable{
 					{% endif %}		
 				</td>
 				{% for action_type in l.action_type_set %}
-					<td>{{ action_type.action_total }}</td>
+					<td class="action-row">{{ action_type.action_total }}</td>
 				{% endfor %}
 				<td>{{ l.enabled }}</td>
 			</tr>

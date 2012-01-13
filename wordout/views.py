@@ -43,7 +43,7 @@ def register_page(request):
                     except Customer.DoesNotExist:
                         break
             free_group = Customergroup.objects.get(id=1)
-            Customer.objects.create(user=user, client_key=client_key, api_key=api_key, customergroup=free_group )
+            Customer.objects.create(user=user, client_key = client_key, api_key = api_key, customergroup=free_group )
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
             auth_login(request, new_user)
             return HttpResponseRedirect('/')
@@ -136,7 +136,7 @@ def sharer_plugin_page(request):
     message_title = customer.message_title
     message_body = customer.message_body
     form = check_session_form(request)
-    return render_to_response('sharer_plugin_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
+    return render_to_response('plugin_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
 
 @login_required
 def edit_msg_page(request):
@@ -218,33 +218,19 @@ def path_page(request, host_id):
         results['success'] = False
     return HttpResponse(simplejson.dumps(results), 'application/javascript')
 
-'''
-def api_page(request, client_key, user_id):
+def share_page(request, client_key, sharer_identifier):
     #need completely construct this page.
     try:
-        sharer = Identifiers.objects.select_related().filter(customer__client_id = client_id, identifier = user_id) #use filter cuz aggregate works on queryset
-        points = ident_ls.aggregate(total_request = Count('request'))['total_request'] * 100
-
-        ident = ident_ls[0]
-        referral_code = ident.code
-        message_title = ident.customer.message_title
-        message_body = ident.customer.message_body
-        return render_to_response('api.html', dict(referral_code = referral_code, message_title = message_title, message_body = message_body, points = points), context_instance=RequestContext(request))
-
-    except IndexError:
+        customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = sharer_identifier)
+    except Customer.DoesNotExist:
         return HttpResponseRedirect('/')
 
+    ls = customer.display_sharers(sharer_identifier = sharer_identifier)
 
-@login_required
-def api_settings_page(request):
-    customer = Customer.objects.get(user = request.user)
-    #action_type_ls = Action_Type.objects.filter(customer=customer, enabled=True)
-    action_type_ls = customer.action_type_set.filter(enabled=True)
-    action_number = action_type_ls.count()
-    customergroup = customer.customergroup
+    message_title = customer.message_title
+    message_body = customer.message_body
 
-    return render_to_response('apisettings.html', dict(customer = customer,  action_type_ls = action_type_ls,  action_number = action_number, customergroup = customergroup), context_instance=RequestContext(request))
-'''
+    return render_to_response('plugin_page.html', dict(ls= ls, message_title = message_title, message_body = message_body), context_instance = RequestContext(request))
 
 def direct_page(request, code):
     try:
