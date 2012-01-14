@@ -39,19 +39,18 @@ urlpatterns = patterns('',
     (r'^editactiontype/$', edit_action_type_page),
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
-    
 
     #sharer page (the actual promote page plus this sharer's analysis)
     (r'^share/(?P<client_key>\w{9})/(?P<sharer_identifier>[0-9]+)/$', share_page),
 
     #api doc page
     (r'^apidoc/overview/$', apidoc_overview_page),
-    #(r'^apidoc/doAction/$', apidoc_do_action_page),
-    #(r'^apidoc/getAllSharers/$', apidoc_get_all_sharers_page),
-    #(r'^apidoc/getSharerInfo/$', apidoc_get_sharer_info_page),
-    #(r'^apidoc/addSharer/$', apidoc_add_sharer),
-    #(r'^apidoc/toggleSharer/$', apidoc_toggle_sharer),
-    #(r'^apidoc/getActionType/$', apidoc_get_action_type),
+    (r'^apidoc/doAction/$', apidoc_do_action_page),
+    (r'^apidoc/getAllSharers/$', apidoc_get_all_sharers_page),
+    (r'^apidoc/getSharerInfo/$', apidoc_get_sharer_info_page),
+    (r'^apidoc/addSharer/$', apidoc_add_sharer),
+    (r'^apidoc/toggleSharer/$', apidoc_toggle_sharer),
+    (r'^apidoc/getActionType/$', apidoc_get_action_type),
     
     #apicall I think this could go into a subdomain. decide later
     (r'^api/doAction/(?P<api_key>\w{30})/$', api_do_action_page),

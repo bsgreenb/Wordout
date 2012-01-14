@@ -25,7 +25,49 @@ def get_customer_by_api_key(api_key):
 def apidoc_overview_page(request):
     customer = Customer.objects.get(user=request.user)
     api_key = customer.api_key
-    return render_to_response('api_overview.html', dict(api_key=api_key), context_instance=(RequestContext(request)))
+    return render_to_response('apidoc/apidoc_overview.html', dict(api_key=api_key), context_instance=RequestContext(request))
+
+def apidoc_do_action_page(request):
+
+
+    return render_to_response('apidoc/apidoc_doaction.html', dict(), context_instance = RequestContext(request))
+
+
+
+def apidoc_get_all_sharers_page(request):
+
+
+    return render_to_response('apidoc/apidoc_getallsharer.html', dict(), context_instance = RequestContext(request))
+
+
+
+def apidoc_get_sharer_info_page(request):
+
+
+    return render_to_response('apidoc/apidoc_getsharerinfo.html', dict(), context_instance = RequestContext(request))
+
+
+
+def apidoc_add_sharer(request):
+
+
+    return render_to_response('apidoc/apidoc_addsharer.html', dict(), context_instance = RequestContext(request))
+
+
+
+def apidoc_toggle_sharer(request):
+
+
+    return render_to_response('apidoc/apidoc_togglesharer.html', dict(), context_instance = RequestContext(request))
+
+
+
+def apidoc_get_action_type(request):
+
+
+    return render_to_response('apidoc/apidoc_getactiontype.html', dict(), context_instance = RequestContext(request))
+
+
 
 ##### actual api request ####
 def api_do_action_page(request, api_key):
