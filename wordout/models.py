@@ -67,20 +67,20 @@ class Customer(models.Model):
     def display_sharers(self):
         sharer_ls = Sharer.objects.select_related().filter(customer = self).annotate(click_total = Count('click__id')).order_by('-created')
         results = []
-        for i in sharer_ls:
+        for sharer in sharer_ls:
             
-            sharer_identifier = i.customer_sharer_identifier
-            code = i.code
-            redirect_link = i.redirect_link
-            enabled = i.enabled
-            click_total = i.click_total
+            sharer_identifier = sharer.customer_sharer_identifier
+            code = sharer.code
+            redirect_link = sharer.redirect_link
+            enabled = sharer.enabled
+            click_total = sharer.click_total
 
             action_type = []
-            for a in i.customer.action_type_set.all().annotate(group_placeholder = Count('action__id')).order_by('-created'):
+            for a in sharer.customer.action_type_set.all().annotate(group_placeholder = Count('action__id')).order_by('-created'):
                 #I am not using group_placeholder but not sure whether i have to use it for grouping
                 holder = {}
                 holder['action_name'] = a.action_name
-                holder['action_total'] = a.action_set.filter(click__sharer = i).count()
+                holder['action_total'] = a.action_set.filter(click__sharer = sharer).count()
                 action_type.append(holder)
             
             results.append({
@@ -115,13 +115,13 @@ class Customer(models.Model):
 
         for i in range(start, end+1):
             loop = True
-            while loop == True:
+            while True:
                 code = code_generator()
                 try:
                     Sharer.objects.get(code = code)
                 except Sharer.DoesNotExist:
-                    loop = False
                     Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
+                    break
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
