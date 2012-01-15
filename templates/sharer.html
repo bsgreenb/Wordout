@@ -135,7 +135,7 @@ div#action #enable, div#action #disable{
 			<th class="yellow header headerSortDown">Clicks</th>
 			{% if ls.0.action_type_set %}
 				{% for action_type in ls.0.action_type_set %}
-					<th class="header green">{{action_type.action_name}}</th>
+					<th class="header green">{{action_type.action_type_name}}</th>
 				{% endfor %}
 			{% endif %}
 		</tr>
@@ -148,7 +148,7 @@ div#action #enable, div#action #disable{
                     {% if not sharer.enabled  %}
                         <strike>
                     {%  endif %}
-                        <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.sharer_identifier}}"/>{{ sharer.sharer_identifier }}
+                        <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.customer_sharer_identifier}}"/>{{ sharer.customer_sharer_identifier }}
                     {%  if not sharer.enabled  %}
                         </strike>
                     {%  endif %}
@@ -159,7 +159,7 @@ div#action #enable, div#action #disable{
 				</td>
 				<td>{{ sharer.click_total }}
 					{% if sharer.click_total > 0 %}
-						<span class="label notice" id="{{sharer.sharer_identifier}}">detail</span>
+						<span class="label notice" id="{{sharer.customer_sharer_identifier}}">detail</span>
 					{% endif %}		
 				</td>
 				{% for action_type in sharer.action_type_set %}
