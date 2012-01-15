@@ -77,6 +77,11 @@ $(function() {
 {% endblock %}
 
 {% block css %}
+
+strike{
+    color: red;
+}
+
 input[type="checkbox"]{
 	margin-right: 15px;
 }
@@ -130,29 +135,36 @@ div#action #enable, div#action #disable{
 			<th class="yellow header headerSortDown">Clicks</th>
 			{% if ls.0.action_type_set %}
 				{% for action_type in ls.0.action_type_set %}
-					<th class="header">{{action_type.action_name}}</th>
+					<th class="header green">{{action_type.action_name}}</th>
 				{% endfor %}
 			{% endif %}
-			<th class="green header">Enable</th>
 		</tr>
 	</thead>
 	<tbody>
-		{% for l in ls%}
+		{% for sharer in ls%}
+
 			<tr>
-				<td><input class="checkbox" type="checkbox" name="sharer_id" value="{{l.sharer_identifier}}"/>{{ l.sharer_identifier }}</td>
 				<td>
-					<div><a href="http://wordout.me/{{l.code}}">wordout.me/{{ l.code }}</a></div>
-					<div>{{ l.redirect_link }}</div>
+                    {% if not sharer.enabled  %}
+                        <strike>
+                    {%  endif %}
+                        <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.sharer_identifier}}"/>{{ sharer.sharer_identifier }}
+                    {%  if not sharer.enabled  %}
+                        </strike>
+                    {%  endif %}
+                </td>
+				<td>
+					<div><a href="http://wordout.me/{{sharer.code}}">wordout.me/{{ sharer.code }}</a></div>
+					<div>{{ sharer.redirect_link }}</div>
 				</td>
-				<td>{{ l.click_total }} 
-					{% if l.click_total > 0 %}
-						<span class="label notice" id="{{l.sharer_identifier}}">detail</span>
+				<td>{{ sharer.click_total }}
+					{% if sharer.click_total > 0 %}
+						<span class="label notice" id="{{sharer.sharer_identifier}}">detail</span>
 					{% endif %}		
 				</td>
-				{% for action_type in l.action_type_set %}
+				{% for action_type in sharer.action_type_set %}
 					<td>{{ action_type.action_total }}</td>
 				{% endfor %}
-				<td>{{ l.enabled }}</td>
 			</tr>
 		{% endfor %}
 	</tbody>

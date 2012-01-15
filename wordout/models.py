@@ -64,40 +64,49 @@ class Customer(models.Model):
         sharer_ls = Sharer.objects.select_related().filter(customer = self)
 
         if sharer_identifier:  #
-            sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_id)
+            sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_identifier) #for api_get_sharer_by_identifier
 
-        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created')
+        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created') #this returns sharer info and total clicks
+
+
+        action_type_queryset = Action_Type.objects.filter(customer = self).order_by('-created')
+
+
+        action_type_ls = []  #customer's all actions. need this because we want to show total number - 0 if no action has been taken when we loop through the results
+        for action_type in action_type_queryset:
+            action_type_dict = {
+                'action_type_identifier': action_type.customer_action_type_identifier,
+                'action_name': action_type.action_name,
+                'action_total': 0
+            }
+            action_type_ls.append(action_type_dict)
 
         results = []
-        for i in sharer_ls:
-            
-            sharer_identifier = i.customer_sharer_identifier
-            code = i.code
-            redirect_link = i.redirect_link
-            enabled = i.enabled
-            click_total = i.click_total
+        for sharer in sharer_ls:
+            each_sharer_info = {
+                'sharer_identifier': sharer.customer_sharer_identifier,
+                'code': sharer.code,
+                'redirect_link': sharer.redirect_link.host.host_name + sharer.redirect_link.path,
+                'enabled': sharer.enabled,
+                'click_total': sharer.click_total,
+                'action_type_set': action_type_ls,  #a list of {'action_name':'', 'action_total'}
+            }
+            results.append(each_sharer_info)
 
-            action_type = []
-            for a in i.customer.action_type_set.all().annotate(group_placeholder = Count('action__id')).order_by('-created'):
-                #I am not using group_placeholder but not sure whether i have to use it for grouping
-                holder = {
-                    'action_name':a.action_name,
-                    'action_total':a.action_set.filter(click__sharer = i).count()
-                }
-                action_type.append(holder)
-            
-            results.append({
-                'sharer_identifier':sharer_identifier,
-                'code':code,
-                'redirect_link':redirect_link.host.host_name + redirect_link.path,
-                'enabled':enabled,
-                'click_total':click_total,
+        #build the dictionary for loop. also, since this is no an official way to serialize json, I currently used dict.
+        action_ls = Action.objects.select_related().filter(action_type__customer = self)
 
-                'action_type_set':action_type
-                })
+
+        for action in action_ls:
+            for sharer in results:
+                if sharer['sharer_identifier'] == action.click.sharer.customer_sharer_identifier:
+                    for sharer_action in sharer['action_type_set']:
+                        if sharer_action['action_type_identifier'] == action.action_type.customer_action_type_identifier:
+                            sharer_action['action_total'] += 1
 
         return results
-        
+
+
     def display_referrer_by_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
         sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
