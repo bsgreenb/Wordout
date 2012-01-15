@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6ed5bf80-e84e-4601-a1f1-e1794c78e406" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/sharer.html" afterPath="$PROJECT_DIR$/templates/sharer.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wordout/models.py" afterPath="$PROJECT_DIR$/wordout/models.py" />
@@ -30,7 +29,7 @@
     <favorites_list name="django_wordout" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.525816">
+    <splitter split-orientation="horizontal" split-proportion="0.5168605">
       <split-first>
         <leaf>
           <file leaf-file-name="apidoc_overview_base.html" pinned="false" current="false" current-in-tab="false">
@@ -63,19 +62,17 @@
           <file leaf-file-name="urls.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/urls.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="27" column="26" selection-start="1246" selection-end="1246" vertical-scroll-proportion="0.0">
+                <state line="58" column="26" selection-start="2716" selection-end="2734" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="models.py" pinned="false" current="true" current-in-tab="true">
+          <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/wordout/models.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="90" column="0" selection-start="3514" selection-end="3514" vertical-scroll-proportion="0.6291946">
-                  <folding>
-                    <element signature="e#0#28#0" expanded="true" />
-                  </folding>
+                <state line="61" column="4" selection-start="2112" selection-end="2112" vertical-scroll-proportion="0.16946308">
+                  <folding />
                 </state>
               </provider>
             </entry>
@@ -87,7 +84,7 @@
           <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/wordout/models.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="129" column="4" selection-start="5306" selection-end="5306" vertical-scroll-proportion="0.0">
+                <state line="178" column="34" selection-start="7592" selection-end="7592" vertical-scroll-proportion="0.0">
                   <folding />
                 </state>
               </provider>
@@ -105,16 +102,25 @@
           <file leaf-file-name="apidoc_getallsharer.html" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_getallsharer.html">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="1" column="0" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0">
+                <state line="23" column="20" selection-start="360" selection-end="360" vertical-scroll-proportion="-14.375">
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="sharer.html" pinned="false" current="false" current-in-tab="true">
+          <file leaf-file-name="sharer.html" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/templates/sharer.html">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="155" column="20" selection-start="3977" selection-end="3977" vertical-scroll-proportion="0.57791096">
+                <state line="156" column="51" selection-start="4101" selection-end="4101" vertical-scroll-proportion="-29.375">
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="api_views.py" pinned="false" current="true" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/wordout/api_views.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state line="259" column="27" selection-start="10499" selection-end="10499" vertical-scroll-proportion="0.4966443">
                   <folding />
                 </state>
               </provider>
@@ -140,7 +146,6 @@
         <option value="$PROJECT_DIR$/urls.py" />
         <option value="$PROJECT_DIR$/templates/apidoc_doaction.html" />
         <option value="$PROJECT_DIR$/templates/apidoc/togglesharer.html" />
-        <option value="$PROJECT_DIR$/wordout/api_views.py" />
         <option value="$PROJECT_DIR$/templates/backbone/apidoc_overview_base.html" />
         <option value="$PROJECT_DIR$/templates/apidoc/apidoc_getsharerinfo.html" />
         <option value="$PROJECT_DIR$/templates/plugin_page.html" />
@@ -149,17 +154,18 @@
         <option value="$PROJECT_DIR$/templates/apidoc/apidoc_doaction.html" />
         <option value="$PROJECT_DIR$/templates/apidoc/apidoc_togglesharer.html" />
         <option value="$PROJECT_DIR$/templates/apidoc/apidoc_getactiontype.html" />
-        <option value="$PROJECT_DIR$/templates/apidoc/apidoc_getallsharer.html" />
         <option value="$PROJECT_DIR$/wordout/views.py" />
-        <option value="$PROJECT_DIR$/templates/sharer.html" />
+        <option value="$PROJECT_DIR$/templates/apidoc/apidoc_getallsharer.html" />
         <option value="$PROJECT_DIR$/wordout/models.py" />
+        <option value="$PROJECT_DIR$/templates/sharer.html" />
+        <option value="$PROJECT_DIR$/wordout/api_views.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-61" />
-    <option name="y" value="161" />
-    <option name="width" value="2518" />
+    <option name="x" value="453" />
+    <option name="y" value="22" />
+    <option name="width" value="2107" />
     <option name="height" value="1351" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -188,7 +194,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -273,11 +278,13 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="recentsLimit" value="5" />
+    <property name="FullScreen" value="false" />
     <property name="DefaultHtmlFileTemplate" value="Html" />
   </component>
   <component name="RunManager" selected="Django server.django_wordout">
@@ -295,25 +302,6 @@
       <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
       <option name="MULTIPROCESS" value="false" />
-      <method />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="Unittests">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <module name="django_wordout" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
       <method />
     </configuration>
     <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
@@ -335,6 +323,25 @@
       <option name="useCustomRunCommand" value="false" />
       <option name="customRunCommand" value="" />
       <option name="launchJavascriptDebuger" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <module name="django_wordout" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
       <method />
     </configuration>
     <configuration default="true" type="JavascriptDebugSession" factoryName="Local">
@@ -379,14 +386,14 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-61" y="161" width="2518" height="1351" extended-state="0" />
+    <frame x="453" y="22" width="2107" height="1351" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32961783" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.108097166" sideWeight="0.9967533" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.10636231" sideWeight="0.0" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -460,108 +467,84 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_overview.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="14" selection-start="196" selection-end="196" vertical-scroll-proportion="0.16511431">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wordout/api_views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="251" column="36" selection-start="10225" selection-end="10225" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="13" column="14" selection-start="196" selection-end="196" vertical-scroll-proportion="0.16511431" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_doaction.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="0" selection-start="152" selection-end="455" vertical-scroll-proportion="0.4431818">
-          <folding />
-        </state>
+        <state line="13" column="0" selection-start="152" selection-end="455" vertical-scroll-proportion="0.4431818" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_togglesharer.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="28" selection-start="389" selection-end="389" vertical-scroll-proportion="0.7467533">
-          <folding />
-        </state>
+        <state line="23" column="28" selection-start="389" selection-end="389" vertical-scroll-proportion="0.7467533" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_getsharerinfo.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="21" selection-start="150" selection-end="150" vertical-scroll-proportion="0.3409091">
-          <folding />
-        </state>
+        <state line="11" column="21" selection-start="150" selection-end="150" vertical-scroll-proportion="0.3409091" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_addsharer.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="13" selection-start="294" selection-end="294" vertical-scroll-proportion="0.5928854">
-          <folding />
-        </state>
+        <state line="20" column="13" selection-start="294" selection-end="294" vertical-scroll-proportion="0.5928854" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_getactiontype.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="10" selection-start="496" selection-end="496" vertical-scroll-proportion="0.79545456">
-          <folding />
-        </state>
+        <state line="28" column="10" selection-start="496" selection-end="496" vertical-scroll-proportion="0.79545456" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/backbone/apidoc_overview_base.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="6" selection-start="790" selection-end="790" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="47" column="6" selection-start="790" selection-end="790" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/api.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/plugin_page.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="18" selection-start="1158" selection-end="1158" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="34" column="18" selection-start="1158" selection-end="1158" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="26" selection-start="1246" selection-end="1246" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_getallsharer.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="0" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="58" column="26" selection-start="2716" selection-end="2734" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wordout/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="39" selection-start="2524" selection-end="2524" vertical-scroll-proportion="0.0">
+        <state line="57" column="39" selection-start="2524" selection-end="2524" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/apidoc/apidoc_getallsharer.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="23" column="20" selection-start="360" selection-end="360" vertical-scroll-proportion="-14.375">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/sharer.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="155" column="20" selection-start="3977" selection-end="3977" vertical-scroll-proportion="0.57791096">
+        <state line="156" column="51" selection-start="4101" selection-end="4101" vertical-scroll-proportion="-29.375">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wordout/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="90" column="0" selection-start="3514" selection-end="3514" vertical-scroll-proportion="0.6291946">
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
+        <state line="178" column="34" selection-start="7592" selection-end="7592" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wordout/api_views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="259" column="27" selection-start="10499" selection-end="10499" vertical-scroll-proportion="0.4966443">
+          <folding />
         </state>
       </provider>
     </entry>

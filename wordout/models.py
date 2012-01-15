@@ -61,6 +61,7 @@ class Customer(models.Model):
  
     
     def display_sharers(self, sharer_identifier = None):
+
         results = []
 
         # Create a dictionary of this Customer's actions
@@ -72,22 +73,32 @@ class Customer(models.Model):
         if sharer_identifier:  #
             sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_identifier) # for api_get_sharer_by_identifier
 
-        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created').values() # this returns sharer info and total clicks
+        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created') # this returns sharer info and total clicks
 
         action_ls = Action.objects.select_related().filter(action_type__customer = self) # A list of all actions by this customer's sharers
 
-        #What will we do next: loop through sharer_ls, then use filter on sharer and action type to get the # of actions for that one
+        # What will we do next: loop through sharer_ls, then use filter on sharer and action type to get the # of actions for that one
 
         for sharer in sharer_ls:
-            sharer['action_type_set'] = []
+            # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
+
+            sharer_dict = {
+                'sharer_identifier': sharer.customer_sharer_identifier,
+                'code': sharer.code,
+                'redirect_link': sharer.redirect_link.host.host_name + sharer.redirect_link.path,
+                'enabled': sharer.enabled,
+                'click_total': sharer.click_total
+            }
+
+            sharer_dict['action_type_set'] = []
             for action_type in action_type_ls:
-                action_count = action_ls.filter(click__sharer=sharer['id'], action_type=action_type).count()
-                sharer['action_type_set'].append({
-                    'action_type_name': action_type.action_name,
+                action_count = action_ls.filter(click__sharer=sharer.id, action_type=action_type).count()
+                sharer_dict['action_type_set'].append({
+                    'action_name': action_type.action_name,
                     'action_total': action_count
                 })
 
-            results.append(sharer)
+            results.append(sharer_dict)
 
         return results
 
