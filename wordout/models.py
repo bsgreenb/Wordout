@@ -75,7 +75,7 @@ class Customer(models.Model):
 
         sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created')[0:10] # this returns sharer info and total clicks
 
-        action_ls = Action.objects.filter(click__sharer=sharer_ls)
+        action_ls = list(Action.objects.filter(click__sharer=sharer_ls))
         #action_ls = Action.objects.select_related().filter(action_type__customer = self) # A list of all actions by this customer's sharers
 
         # What will we do next: loop through sharer_ls, then use filter on sharer and action type to get the # of actions for that one
