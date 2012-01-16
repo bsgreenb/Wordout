@@ -62,23 +62,28 @@ class Customer(models.Model):
     
     def display_sharers(self, sharer_identifier = None):
 
-        results = []
+
 
         # Create a dictionary of this Customer's actions
         action_type_ls = Action_Type.objects.filter(customer = self).order_by('-created')
 
-        # Next we get a list of their sharers and total clicks
+        # Next we get a list of their sharers..
         sharer_ls = Sharer.objects.filter(customer = self)
 
         if sharer_identifier:  #
             sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_identifier) # for api_get_sharer_by_identifier
 
-        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created')[0:10] # this returns sharer info and total clicks
+        #..and total clicks (TODO: you can replace the order_by and limit here with vars)
+        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created')[:10] # this returns sharer info and total clicks
 
-        action_ls = list(Action.objects.filter(click__sharer=sharer_ls))
-        #action_ls = Action.objects.select_related().filter(action_type__customer = self) # A list of all actions by this customer's sharers
+        # A list of all actions by this customer's sharers.  We force it to execute with list().  We also make it match the sharers limited by the previous query
+        action_ls = list(Action.objects.select_related().filter(click__sharer=sharer_ls))
 
-        # What will we do next: loop through sharer_ls, then use filter on sharer and action type to get the # of actions for that one
+        # What will we do next: loop through sharer_ls to build an initial results dictionary, with sharer.id as key...
+
+        action_type_arr = {action_name: 0 for action_name in action_type_ls} # A dictionary for all the action_names, with counts as values initialized to 0.
+
+        results = {}
 
         for sharer in sharer_ls:
             # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
@@ -88,21 +93,15 @@ class Customer(models.Model):
                 'code': sharer.code,
                 'redirect_link': sharer.redirect_link.host.host_name + sharer.redirect_link.path,
                 'enabled': sharer.enabled,
-                'click_total': sharer.click_total
+                'click_total': sharer.click_total,
+                'action_type_set': action_type_arr
             }
 
+            results[sharer.id] = sharer_dict
 
-            sharer_dict['action_type_set'] = []
-            for action_type in action_type_ls:
-                action_count = action_ls.filter(click__sharer=sharer.id, action_type=action_type).count()
-                sharer_dict['action_type_set'].append({
-                    'action_name': action_type.action_name,
-                    'action_total': action_count
-                })
-
-            break #for debugging
-
-            results.append(sharer_dict)
+        #Next we just need to loop through action_ls to add to thi
+        for action in action_ls:
+            results[action.click.sharer.id]['action_type_set'][action.action_name] += 1
 
         return results
 
