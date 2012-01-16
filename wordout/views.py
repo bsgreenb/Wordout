@@ -150,6 +150,14 @@ def edit_msg_page(request):
 
     return HttpResponseRedirect('/pluginpage/')
 
+def display_sharer_plugin_page(request, client_key, sharer_identifier):
+    try:
+        customer = Customer.objects.get(client_key = client_key, sharer__customer._sharer_identifier = sharer_identifier)
+    except Customer.DoesNotExist:
+        return Http404
+
+
+
 ##### ACTION #####
 @login_required
 def action_type_page(request):
