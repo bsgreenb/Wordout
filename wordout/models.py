@@ -93,13 +93,12 @@ class Customer(models.Model):
 
             sharer_dict['action_type_set'] = []
             for action_type in action_type_ls:
-                action_count = action_ls.filter(click__sharer=sharer.id, action_type=action_type).count()
+
+                #action_count = action_ls.filter(click__sharer=sharer.id, action_type=action_type).count()
                 sharer_dict['action_type_set'].append({
                     'action_name': action_type.action_name,
                     'action_total': action_count
                 })
-
-            break #for debugging
 
             results.append(sharer_dict)
 

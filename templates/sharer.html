@@ -147,7 +147,7 @@ div#action #enable, div#action #disable{
                     {% if not sharer.enabled  %}
                         <strike>
                     {%  endif %}
-                        <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.customer_sharer_identifier}}"/>{{ sharer.customer_sharer_identifier }}
+                        <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.sharer_identifier}}"/>{{ sharer.sharer_identifier }}
                     {%  if not sharer.enabled  %}
                         </strike>
                     {%  endif %}

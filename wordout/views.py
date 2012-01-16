@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from django.contrib.auth import logout
 from django.template import RequestContext
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
@@ -130,6 +130,8 @@ def disable_or_enable_sharer_page(request, action):
 ##### PLUGIN PAGE #####
 @login_required
 def sharer_plugin_page(request):
+    # this is the config page.
+
     customer = Customer.objects.select_related().get(user=request.user)
     customer_sharer_ls = customer.sharer_set.all()
     client_key = customer.client_key
@@ -151,11 +153,17 @@ def edit_msg_page(request):
     return HttpResponseRedirect('/pluginpage/')
 
 def display_sharer_plugin_page(request, client_key, sharer_identifier):
+    # this is the actual promote page the customers link on their websites
+
     try:
-        customer = Customer.objects.get(client_key = client_key, sharer__customer._sharer_identifier = sharer_identifier)
+        customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = sharer_identifier)
     except Customer.DoesNotExist:
         return Http404
 
+    sharer_detail = customer.display_sharers(sharer_identifier = sharer_identifier)
+    message_title = customer.message_title
+    message_body = customer.message_body
+    return render_to_response('display_plugin_page.html', dict(sharer_detail = sharer_detail, message_title = message_title, message_body = message_body), context_instance = RequestContext(request))
 
 
 ##### ACTION #####

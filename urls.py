@@ -33,6 +33,10 @@ urlpatterns = patterns('',
     (r'^pluginpage/$', sharer_plugin_page),
     (r'^editmsg/$', edit_msg_page),
 
+
+    #display sharer page (the actual promote page plus this sharer's analysis)
+    (r'^share/(?P<client_key>\w{9})/(?P<sharer_identifier>[0-9]+)/$', display_sharer_plugin_page),
+
     #action page
     (r'^actiontype/$', action_type_page),
     (r'^createactiontype/$', create_action_type_page),
@@ -40,8 +44,6 @@ urlpatterns = patterns('',
     (r'^disableaction/$', disable_or_enable_action_page, {'action':'disable'}),
     (r'^enableaction/$', disable_or_enable_action_page, {'action':'enable'}),
 
-    #sharer page (the actual promote page plus this sharer's analysis)
-    (r'^share/(?P<client_key>\w{9})/(?P<sharer_identifier>[0-9]+)/$', share_page),
 
     #api doc page
     (r'^apidoc/overview/$', apidoc_overview_page),
