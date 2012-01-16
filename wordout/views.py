@@ -130,7 +130,7 @@ def disable_or_enable_sharer_page(request, action):
 ##### PLUGIN PAGE #####
 @login_required
 def sharer_plugin_page(request):
-    customer = Customer.objects.get(user=request.user)
+    customer = Customer.objects.select_related().get(user=request.user)
     customer_sharer_ls = customer.sharer_set.all()
     client_key = customer.client_key
     message_title = customer.message_title
