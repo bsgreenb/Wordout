@@ -1,9 +1,10 @@
+#from django.conf import settings
 from django.conf.urls.defaults import patterns, include, url
-from django.contrib.auth.views import login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete, password_change, password_change_done
+from django.contrib.auth.views import login, password_reset, password_reset_done, password_reset_confirm, password_reset_complete, password_change, password_change_done
 from django.contrib import admin
 admin.autodiscover()
+
 from wordout.custom_decorator import anonymous_required
-from django.contrib.auth.decorators import login_required
 from wordout import views, api_views
 
 urlpatterns = patterns('',
@@ -65,3 +66,11 @@ urlpatterns = patterns('',
     (r'^referrer/([0-9]+)/$', views.path_page),
     (r'^([0-9a-z]{6})/$', views.direct_page)
 )
+
+'''
+if settings.DEBUG:
+    # some debug pages
+    urlpatterns += patterns('',
+        (r'^debuginfo/$', ''),
+    )
+'''

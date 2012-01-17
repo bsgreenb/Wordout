@@ -55,7 +55,8 @@ def register_page(request):
 def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
-        ls = customer.display_sharers()
+        ls = customer.display_sharers(action_type_id=1)
+        return HttpResponse(ls)
 
         #get default start value for create numeric identifiers
         try:

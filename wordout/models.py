@@ -60,26 +60,68 @@ class Customer(models.Model):
         return str(self.user)
  
     
-    def display_sharers(self, sharer_identifier = None):
+    def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
+
+        def sharers_by_action_count(action_type_id):
+            """Returns a QuerySet with Action_Count for Sharers on the specified action_type_id"""
+            return Sharer.objects.raw('''
+            SELECT wordout_sharer.id, wordout_sharer.enabled, wordout_sharer.created, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_full_link.path, worddout_host.host_name, COUNT(actions_of_type.id) AS action_count
+            FROM
+            wordout_customer
+            INNER JOIN wordout_sharer
+             ON (wordout_sharer.customer_id = wordout_customer.id)
+            INNER JOIN wordout_redirect_link
+             ON (wordout_full_link.id = wordout_sharer.redirect_link_id)
+            INNER wordout_host
+             ON (wordout_host.id = wordout_full_link.host_id)
+            LEFT JOIN wordout_click
+            ON (wordout_sharer.id = wordout_click.sharer_id)
+            LEFT JOIN
+            (SELECT wordout_action.id, wordout_action.click_id
+            FROM wordout_action
+            WHERE
+            wordout_action.action_type_id = %s) as actions_of_type
+            ON actions_of_type.click_id = wordout_click.id
+            GROUP BY wordout_sharer.id
+            ''', [action_type_id])
 
         results = []
+        if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
+            try:
+                sharer_ls = Sharer.objects.get(customer=self,customer_sharer_identifier=customer_sharer_identifier)
+            except Sharer.DoesNotExist:
+                return [] # Most likely either a hacker, or they sent an incorrect sharer_identifier through the API
+        else: #We are to return a page of sharers sorted in the specified fashion.
+            if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
+                sharer_ls = sharers_by_action_count(action_type_id)
+            else:
+                sharer_ls = Sharer.objects.select_related()
 
-        # Create a dictionary of this Customer's actions
-        action_type_ls = Action_Type.objects.filter(customer = self).order_by('-created')
+            sharer_ls.filter(customer=self) #we want to filter on the customer (WHERE customer = self)
 
-        # Next we get a list of their sharers and total clicks
-        sharer_ls = Sharer.objects.select_related().filter(customer = self)
+        sharer_ls_with_total_clicks = sharer_ls.annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer
 
-        if sharer_identifier:  #
-            sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_identifier) # for api_get_sharer_by_identifier
+        #order by the specified field
+        if desc:
+            order_by = '-' + order_by
+        sharer_ls_with_total_clicks.order_by(order_by)
 
-        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created') # this returns sharer info and total clicks
+        # Now it's time to slice
+        page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
+        start = results_per_page * page_number
+        end = results_per_page * (page_number + 1)
+        sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
-        action_ls = Action.objects.select_related().filter(action_type__customer = self) # A list of all actions by this customer's sharers
+        #Next we want to get the total # of each of type of action for these sharers.  We force it to a list right array so we don't need to requery every time to match it to the sharers
+        sharer_action_counts = Action.objects.select_related().filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id').annotate(action_total=Count('id'))
 
-        # What will we do next: loop through sharer_ls, then use filter on sharer and action type to get the # of actions for that one
+        #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
 
-        for sharer in sharer_ls:
+        # First, create a dictionary of this Customer's actions for storing this stuff
+        action_type_ls = Action_Type.objects.filter(customer = self)
+        action_type_arr = {action_type.action_name: 0 for action_type in action_type_ls} # A dictionary for all the action_names, with counts as values initialized to 0.
+
+        for sharer in sharer_ls_with_total_clicks:
             # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
 
             sharer_dict = {
@@ -87,18 +129,13 @@ class Customer(models.Model):
                 'code': sharer.code,
                 'redirect_link': sharer.redirect_link.host.host_name + sharer.redirect_link.path,
                 'enabled': sharer.enabled,
-                'click_total': sharer.click_total
+                'click_total': sharer.click_total,
+                'action_type_set': action_type_arr
             }
 
-
-            sharer_dict['action_type_set'] = []
-            for action_type in action_type_ls:
-
-                #action_count = action_ls.filter(click__sharer=sharer.id, action_type=action_type).count()
-                sharer_dict['action_type_set'].append({
-                    'action_name': action_type.action_name,
-                    'action_total': action_count
-                })
+            for sharer_action_count in sharer_action_counts:
+                if sharer_action_count.sharer_id == sharer.id:
+                    sharer_dict['action_type_set'][sharer_action_count.action_name] = sharer_action_count.action_total
 
             results.append(sharer_dict)
 
@@ -191,7 +228,7 @@ class Sharer(models.Model):
     created = models.DateTimeField(auto_now_add = True)
 
     def __unicode__(self):
-        return self.code
+        return unicode(self.id)
 
 class Click(models.Model):
     sharer = models.ForeignKey(Sharer)
