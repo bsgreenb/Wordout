@@ -7,7 +7,7 @@
 		<ul>
 			{% for field in form %}
 				{% if field.errors %}
-					<li>{{field.name}}: {{ field.errors|striptags }}</li>
+					<li>{{ field.errors|striptags }}</li>
 				{% endif %}
 			{% endfor %}
 		</ul>

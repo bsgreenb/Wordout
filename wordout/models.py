@@ -35,8 +35,8 @@ class Full_Link(models.Model):
         return '%s%s' % (self.host, self.path)
 
 class Customergroup(models.Model): # identify paid/unpaid users
-    max_users = models.IntegerField(max_length = 10)
-    max_actions = models.IntegerField(max_length = 2)
+    max_users = models.PositiveIntegerField(max_length = 10)
+    max_actions = models.PositiveIntegerField(max_length = 2)
     
     def __unicode__(self):
         return str(self.id)
@@ -220,7 +220,7 @@ class Customer(models.Model):
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_sharer_identifier = models.IntegerField(max_length = 10)
+    customer_sharer_identifier = models.PositiveIntegerField(max_length = 10)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)
@@ -244,7 +244,7 @@ class Click(models.Model):
 
 class Action_Type(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_action_type_identifier = models.IntegerField(max_length=2)
+    customer_action_type_identifier = models.PositiveIntegerField(max_length=2)
     action_name = models.CharField(max_length=20)
     description = models.CharField(max_length=250, blank=True, null=True)
     enabled = models.BooleanField(default = True)

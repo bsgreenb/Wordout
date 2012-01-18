@@ -1,8 +1,8 @@
 from django.shortcuts import render_to_response
-from django.contrib.auth import logout
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
@@ -56,7 +56,7 @@ def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
         ls = customer.display_sharers(action_type_id=1)
-        return HttpResponse(ls)
+        #return HttpResponse(ls)
 
         #get default start value for create numeric identifiers
         try:
@@ -66,10 +66,9 @@ def main_page(request):
             last = 0
 
         default_start = last + 1
-        
-        #error msg, such as invalidate redirect link, is in the form. 
-        form = check_session_form(request)
-        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form=form), context_instance=RequestContext(request))
+
+        form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
+        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form = form), context_instance=RequestContext(request))
 
     else:
         form = RegistrationForm()
