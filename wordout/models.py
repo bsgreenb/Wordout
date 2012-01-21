@@ -62,11 +62,12 @@ class Customer(models.Model):
     #TODO: We need to not assume that a user has sharers.  Make sure it can handle it that situation.
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
-        def sharers_by_action_count_with_total_clicks(action_type_id):
+        def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
 
-            #TODO: Write big ass query
-            queryString = '''SELECT wordout_sharer.id, COUNT(actions_of_type.id) AS action_count
+            #This big query returns the sharers, ordered by the provided action type, and LEFT JOINEd to the total number of clicks
+            queryString = '''
+            SELECT wordout_sharer.id, COUNT(actions_of_type.id) AS action_count, COUNT(click_totals.id) as click_total
             FROM
             wordout_customer
             INNER JOIN wordout_sharer
@@ -79,9 +80,16 @@ class Customer(models.Model):
             WHERE
             wordout_action.action_type_id = %s) as actions_of_type
              ON actions_of_type.click_id = wordout_click.id
+            LEFT JOIN
+            (SELECT wordout_click.sharer_id, wordout_click.id
+            FROM
+            wordout_click
+            GROUP BY wordout_click.sharer_id) as click_totals
+             ON click_totals.sharer_id = wordout_sharer.id
             WHERE wordout_customer.id = %s
             GROUP BY wordout_sharer.id
-            ORDER BY action_count '''
+            ORDER BY action_count
+            '''
 
             #We have to do a workaround cus SQL-Lite is not cool about using parameters in ORDER BY clauses
             if desc:
@@ -89,10 +97,7 @@ class Customer(models.Model):
             else:
                 queryString += 'ASC'
 
-            sharers_by_action_count = Sharer.objects.raw(queryString, [action_type_id, self.id])
-
-            sharer_ids = [sharer.id for sharer in sharers_by_action_count]
-            return Sharer.objects.select_related().filter(id__in=sharer_ids).annotate(click_total = Count('click__id')) #Note: we select_related() so that we can access everything we need later
+           return Sharer.objects.raw(queryString, [action_type_id, self.id])
 
         results = []
         if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
@@ -102,8 +107,7 @@ class Customer(models.Model):
                 return [] # Most likely either a hacker, or they sent an incorrect sharer_identifier through the API
         else: #We are to return a page of sharers sorted in the specified fashion.
             if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
-                sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks(action_type_id)
-                #TODO: In this case I will need to pass a list to the actions __in thing later
+                sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks() #Note that this is a RawQuerySet
             else:
                 #Note: we select_related() so that we can access everything we need later
                 sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
