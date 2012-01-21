@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Count
 from django.contrib.auth.models import User
 
-from django.db import connection #for debug
+#from django.db import connection #for debugging
 
 from lib import code_generator, force_url_format
 
@@ -80,7 +80,7 @@ class Customer(models.Model):
             LEFT JOIN wordout_click
              ON wordout_sharer.id = wordout_click.sharer_id
             LEFT JOIN wordout_full_link
-             ON wordout_full_link.id = wordout_click.redirect_link_id
+             ON wordout_full_link.id = wordout_sharer.redirect_link_id
             LEFT JOIN wordout_host
              ON wordout_host.id = wordout_full_link.host_id
             LEFT JOIN
@@ -134,29 +134,33 @@ class Customer(models.Model):
 
         #Next we want to get the total # of each of type of action for these sharers.
 
-        sharer_action_counts = Action.objects.select_related().filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #We add action_name to the values() group by just so we can get it later.  NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
+        sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
 
         #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
 
         # First, create a dictionary of this Customer's actions for storing this stuff
-        action_type_ls = Action_Type.objects.filter(customer = self)
+        action_type_ls = list(Action_Type.objects.filter(customer = self)) #force it to be alist so we don't query it each time through
         for sharer in sharer_ls_with_total_clicks:
             # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
+
+            if order_by == 'action_count':
+                redirect_link = sharer.host_name + sharer.path #Because it was raw, not select_related()
+            else:
+                redirect_link = sharer.redirect_link.host.host_name + sharer.redirect_link.path #select_related gives you objects which you follow rather than direct fields
+
             sharer_dict = {
                 'sharer_identifier': sharer.customer_sharer_identifier,
                 'code': sharer.code,
-                'redirect_link': sharer.redirect_link.host.host_name + sharer.redirect_link.path,
+                'redirect_link': redirect_link,
                 'enabled': sharer.enabled,
                 'click_total': sharer.click_total,
                 'action_type_set': {action_type.action_name: 0 for action_type in action_type_ls} #we have to pass it a dictionary literal each time cus python is ornery about this
             }
 
-
             for sharer_action_count in sharer_action_counts:
                 if sharer_action_count['click__sharer_id'] == sharer.id:
                     sharer_dict['action_type_set'][sharer_action_count['action_type__action_name']] = sharer_action_count['action_total']
 
-            #print sharer_dict #DEBUG
             results.append(sharer_dict)
         return results
 
