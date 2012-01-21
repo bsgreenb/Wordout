@@ -59,58 +59,62 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    #TODO: Proly makes sense to have seperate functions that use an abstracted core.  Too many parameters here..
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
-        def sharers_by_action_count(action_type_id):
-            """Returns a QuerySet with Action_Count for Sharers on the specified action_type_id"""
-            return Sharer.objects.raw('''
-            SELECT wordout_sharer.id, wordout_sharer.enabled, wordout_sharer.created, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_full_link.path, worddout_host.host_name, COUNT(actions_of_type.id) AS action_count
+        def sharers_by_action_count_with_total_clicks(action_type_id):
+            """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
+            if desc:
+                direction = 'DESC'
+            else:
+                direction = 'ASC'
+
+            sharers_by_action_count = Sharer.objects.raw('''
+            SELECT wordout_sharer.id COUNT(actions_of_type.id) AS action_count
             FROM
             wordout_customer
             INNER JOIN wordout_sharer
-            ON (wordout_sharer.customer_id = wordout_customer.id)
-            INNER JOIN wordout_redirect_link
-            ON (wordout_full_link.id = wordout_sharer.redirect_link_id)
-            INNER wordout_host
-            ON (wordout_host.id = wordout_full_link.host_id)
+             ON wordout_sharer.customer_id = wordout_customer.id
             LEFT JOIN wordout_click
-            ON (wordout_sharer.id = wordout_click.sharer_id)
+             ON wordout_sharer.id = wordout_click.sharer_id
             LEFT JOIN
             (SELECT wordout_action.id, wordout_action.click_id
             FROM wordout_action
             WHERE
             wordout_action.action_type_id = %s) as actions_of_type
-            ON actions_of_type.click_id = wordout_click.id
+             ON actions_of_type.click_id = wordout_click.id
+            WHERE wordout_customer.id = %s
             GROUP BY wordout_sharer.id
-            ''', [action_type_id])
+            ORDER BY action_count %s
+            ''', [action_type_id, self.id, direction])
+
+            sharers_by_action_count = (sharer.id for sharer in sharers_by_action_count)
+
+            return Sharer.objects.select_related().filter(id__in=sharers_by_action_count).annotate(click_total = Count('click__id')) #Note: we select_related() so that we can access everything we need later
 
         results = []
         if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
             try:
-                sharer_ls = Sharer.objects.get(customer=self,customer_sharer_identifier=customer_sharer_identifier)
+                sharer_ls_with_total_clicks = Sharer.objects.get(customer=self,customer_sharer_identifier=customer_sharer_identifier).annotate(click_total = Count('click__id'))
             except Sharer.DoesNotExist:
                 return [] # Most likely either a hacker, or they sent an incorrect sharer_identifier through the API
         else: #We are to return a page of sharers sorted in the specified fashion.
             if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
-                sharer_ls = sharers_by_action_count(action_type_id)
+                sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks(action_type_id)
             else:
-                sharer_ls = Sharer.objects.select_related()
+                #TODO: Write this part out once I'm done with the action_count logic
+                #Note: we select_related() so that we can access everything we need later
+                sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
 
-            sharer_ls.filter(customer=self) #we want to filter on the customer (WHERE customer = self)
+                #order by the specified field
+                if desc:
+                    order_by = '-' + order_by
+                sharer_ls_with_total_clicks.order_by(order_by)
 
-        sharer_ls_with_total_clicks = sharer_ls.annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer
-
-        #order by the specified field
-        if desc:
-            order_by = '-' + order_by
-        sharer_ls_with_total_clicks.order_by(order_by)
-
-        # Now it's time to slice
-        page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
-        start = results_per_page * page_number
-        end = results_per_page * (page_number + 1)
-        sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
+            # Now it's time to slice (regardless of what they're ordering by)
+            page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
+            start = results_per_page * page_number
+            end = results_per_page * (page_number + 1)
+            sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
         #Next we want to get the total # of each of type of action for these sharers. We force it to a list right array so we don't need to requery every time to match it to the sharers
         sharer_action_counts = Action.objects.select_related().filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id').annotate(action_total=Count('id'))
