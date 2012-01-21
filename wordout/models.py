@@ -59,17 +59,14 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
+    #TODO: We need to not assume that a user has sharers.  Make sure it can handle it that situation.
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
         def sharers_by_action_count_with_total_clicks(action_type_id):
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
-            if desc:
-                direction = 'DESC'
-            else:
-                direction = 'ASC'
 
-            sharers_by_action_count = Sharer.objects.raw('''
-            SELECT wordout_sharer.id COUNT(actions_of_type.id) AS action_count
+            #TODO: Write big ass query
+            queryString = '''SELECT wordout_sharer.id, COUNT(actions_of_type.id) AS action_count
             FROM
             wordout_customer
             INNER JOIN wordout_sharer
@@ -84,12 +81,19 @@ class Customer(models.Model):
              ON actions_of_type.click_id = wordout_click.id
             WHERE wordout_customer.id = %s
             GROUP BY wordout_sharer.id
-            ORDER BY action_count %s
-            ''', [action_type_id, self.id, direction])
+            ORDER BY action_count '''
 
-            sharers_by_action_count = (sharer.id for sharer in sharers_by_action_count)
+            #We have to do a workaround cus SQL-Lite is not cool about using parameters in ORDER BY clauses
+            if desc:
+                queryString += 'DESC'
+            else:
+                queryString += 'ASC'
 
-            return Sharer.objects.select_related().filter(id__in=sharers_by_action_count).annotate(click_total = Count('click__id')) #Note: we select_related() so that we can access everything we need later
+            sharers_by_action_count = Sharer.objects.raw(queryString, [action_type_id, self.id])
+
+            sharer_ids = [sharer.id for sharer in sharers_by_action_count]
+            print sharer_ids
+            return Sharer.objects.select_related().filter(id__in=sharer_ids).annotate(click_total = Count('click__id')) #Note: we select_related() so that we can access everything we need later
 
         results = []
         if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
@@ -100,8 +104,8 @@ class Customer(models.Model):
         else: #We are to return a page of sharers sorted in the specified fashion.
             if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
                 sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks(action_type_id)
+                #TODO: In this case I will need to pass a list to the actions __in thing later
             else:
-                #TODO: Write this part out once I'm done with the action_count logic
                 #Note: we select_related() so that we can access everything we need later
                 sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
 
@@ -116,7 +120,7 @@ class Customer(models.Model):
             end = results_per_page * (page_number + 1)
             sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
-        #Next we want to get the total # of each of type of action for these sharers. We force it to a list right array so we don't need to requery every time to match it to the sharers
+        #Next we want to get the total # of each of type of action for these sharers.
         sharer_action_counts = Action.objects.select_related().filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id').annotate(action_total=Count('id'))
 
         #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
