@@ -4,12 +4,12 @@ import re
 from django.contrib.auth.models import User
 from wordout.lib import force_url_format
 #todo
-#how i can validate the user agent.
-
+# how i can validate the user agent.
+# customize each error messages and all ValidationError
 class CreateSharerForm(forms.Form):
-    start = forms.IntegerField()
-    end = forms.IntegerField()
-    redirect_link = forms.URLField()
+    start = forms.IntegerField(error_messages={'required':'', 'invalid':''})
+    end = forms.IntegerField(error_messages={'required':'', 'invalid':''})
+    redirect_link = forms.URLField(error_messages={'required':'', 'invalid':''})
 
     def __init__(self, user=None, *args, **kwargs):
         super(CreateSharerForm, self).__init__(*args, **kwargs)
@@ -53,7 +53,7 @@ class CreateSharerForm(forms.Form):
         raise forms.ValidationError('The end number should be bigger than the start number.')
 
 class ChangeLinkForm(forms.Form):
-    redirect_link = forms.URLField()
+    redirect_link = forms.URLField(error_messages={'required':'', 'invalid':''})
 
     def __init__(self, user=None, *args, **kwargs):
         super(ChangeLinkForm, self).__init__(*args, **kwargs)
@@ -69,10 +69,10 @@ class ChangeLinkForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    username = forms.CharField(label=u'Username', max_length = 30)
-    email = forms.EmailField(label=u'Email')
-    password1 = forms.CharField(label=u'Password', widget=forms.PasswordInput())
-    password2 = forms.CharField(label=u'Confirm Password', widget=forms.PasswordInput()) 
+    username = forms.CharField(label=u'Username', max_length = 30, error_messages={'required':'', 'invalid':''})
+    email = forms.EmailField(label=u'Email', error_messages={'required':'', 'invalid':''})
+    password1 = forms.CharField(label=u'Password', widget=forms.PasswordInput(), error_messages={'required':'', 'invalid':''})
+    password2 = forms.CharField(label=u'Confirm Password', widget=forms.PasswordInput(), error_messages={'required':'', 'invalid':''})
     def clean_password2(self):
         if 'password1' in self.cleaned_data:
             password1 = self.cleaned_data['password1']
@@ -102,9 +102,9 @@ class RegistrationForm(forms.Form):
 
 
 class ActionTypeForm(forms.Form):
-    customer_action_type_identifier = forms.IntegerField()
-    action_name = forms.CharField(max_length=20)
-    action_description = forms.CharField(max_length=250, required=False)
+    customer_action_type_identifier = forms.IntegerField(error_messages={'required':'', 'invalid':''})
+    action_name = forms.CharField(max_length=20, error_messages={'required':'', 'invalid':''})
+    action_description = forms.CharField(max_length=250, required=False, error_messages={'invalid':''})
     
     def __init__(self, user=None, *args, **kwargs):
         super(ActionTypeForm, self).__init__(*args, **kwargs)
@@ -119,16 +119,18 @@ class ActionTypeForm(forms.Form):
             return customer_action_type_identifier
 
 class MessageForm(forms.Form):
-    message_title = forms.CharField(max_length=200, required=False)
-    message_body = forms.CharField(required=False)
+    message_title = forms.CharField(max_length=200, required=False, error_messages={'invalid':''})
+    message_body = forms.CharField(required=False, error_messages={'invalid':''})
 
 class ValidateReferrer(forms.Form):
-    referrer = forms.URLField()
+    referrer = forms.URLField(error_messages={'required':'', 'invalid':''})
 
 class ValidateIP(forms.Form):
-    ip = forms.IPAddressField()
+    ip = forms.IPAddressField(error_messages={'required':'', 'invalid':''})
 
 ##### api call #####
+
+# I am not returning form error through api calls, instead, I use all customized errors.
 class DoActionForm(forms.Form):
     click_id = forms.IntegerField(min_value=1)
     action_type_identifier = forms.IntegerField(min_value=1, max_value=99)

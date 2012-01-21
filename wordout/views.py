@@ -1,8 +1,8 @@
 from django.shortcuts import render_to_response
-from django.contrib.auth import logout
 from django.template import RequestContext
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import authenticate, login as auth_login
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
@@ -55,7 +55,8 @@ def register_page(request):
 def main_page(request):
     if request.user.is_authenticated():
         customer = Customer.objects.get(user = request.user)
-        ls = customer.display_sharers()
+        ls = customer.display_sharers(action_type_id=1)
+        #return HttpResponse(ls)
 
         #get default start value for create numeric identifiers
         try:
@@ -65,10 +66,9 @@ def main_page(request):
             last = 0
 
         default_start = last + 1
-        
-        #error msg, such as invalidate redirect link, is in the form. 
-        form = check_session_form(request)
-        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form=form), context_instance=RequestContext(request))
+
+        form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
+        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form = form), context_instance=RequestContext(request))
 
     else:
         form = RegistrationForm()
@@ -130,6 +130,8 @@ def disable_or_enable_sharer_page(request, action):
 ##### PLUGIN PAGE #####
 @login_required
 def sharer_plugin_page(request):
+    # this is the config page.
+
     customer = Customer.objects.select_related().get(user=request.user)
     customer_sharer_ls = customer.sharer_set.all()
     client_key = customer.client_key
@@ -151,11 +153,17 @@ def edit_msg_page(request):
     return HttpResponseRedirect('/pluginpage/')
 
 def display_sharer_plugin_page(request, client_key, sharer_identifier):
+    # this is the actual promote page the customers link on their websites
+
     try:
-        customer = Customer.objects.get(client_key = client_key, sharer__customer._sharer_identifier = sharer_identifier)
+        customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = sharer_identifier)
     except Customer.DoesNotExist:
         return Http404
 
+    sharer_detail = customer.display_sharers(sharer_identifier = sharer_identifier)
+    message_title = customer.message_title
+    message_body = customer.message_body
+    return render_to_response('display_plugin_page.html', dict(sharer_detail = sharer_detail, message_title = message_title, message_body = message_body), context_instance = RequestContext(request))
 
 
 ##### ACTION #####

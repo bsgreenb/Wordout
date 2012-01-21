@@ -10,4 +10,39 @@
 
 {% block api_overview_subcontent %}
     <h1>getSharerInfo</h1>
+
+    <pre>
+        {
+            meta:{
+                status: "",
+                message: "",
+                timestamp: "",
+            },
+
+            response:[
+                {
+                    sharer_identifier: "",
+                    code: "",
+                    redirect_link: "",
+                    enabled: "",
+                    click_total: "",
+                    action_type_set:[
+                        {
+                            action_name: "",
+                            action_total: "",
+                        },
+                        {
+                            action_name: "",
+                            action_total: "",
+                        },
+                        {
+                            action_name: "",
+                            action_total: "",
+                        }
+                    ]
+                }
+            ]
+        }
+    </pre>
+
 {% endblock %}

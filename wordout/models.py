@@ -35,8 +35,8 @@ class Full_Link(models.Model):
         return '%s%s' % (self.host, self.path)
 
 class Customergroup(models.Model): # identify paid/unpaid users
-    max_users = models.IntegerField(max_length = 10)
-    max_actions = models.IntegerField(max_length = 2)
+    max_users = models.PositiveIntegerField(max_length = 10)
+    max_actions = models.PositiveIntegerField(max_length = 2)
     
     def __unicode__(self):
         return str(self.id)
@@ -60,9 +60,30 @@ class Customer(models.Model):
         return str(self.user)
  
     
-    def display_sharers(self, sharer_identifier = None):
+    def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
-
+        def sharers_by_action_count(action_type_id):
+            """Returns a QuerySet with Action_Count for Sharers on the specified action_type_id"""
+            return Sharer.objects.raw('''
+            SELECT wordout_sharer.id, wordout_sharer.enabled, wordout_sharer.created, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_full_link.path, worddout_host.host_name, COUNT(actions_of_type.id) AS action_count
+            FROM
+            wordout_customer
+            INNER JOIN wordout_sharer
+             ON (wordout_sharer.customer_id = wordout_customer.id)
+            INNER JOIN wordout_redirect_link
+             ON (wordout_full_link.id = wordout_sharer.redirect_link_id)
+            INNER wordout_host
+             ON (wordout_host.id = wordout_full_link.host_id)
+            LEFT JOIN wordout_click
+            ON (wordout_sharer.id = wordout_click.sharer_id)
+            LEFT JOIN
+            (SELECT wordout_action.id, wordout_action.click_id
+            FROM wordout_action
+            WHERE
+            wordout_action.action_type_id = %s) as actions_of_type
+            ON actions_of_type.click_id = wordout_click.id
+            GROUP BY wordout_sharer.id
+            ''', [action_type_id])
 
         # Create a dictionary of this Customer's actions
         action_type_ls = Action_Type.objects.filter(customer = self).order_by('-created')
@@ -86,6 +107,43 @@ class Customer(models.Model):
         results = {}
 
         for sharer in sharer_ls:
+        results = []
+        if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
+            try:
+                sharer_ls = Sharer.objects.get(customer=self,customer_sharer_identifier=customer_sharer_identifier)
+            except Sharer.DoesNotExist:
+                return [] # Most likely either a hacker, or they sent an incorrect sharer_identifier through the API
+        else: #We are to return a page of sharers sorted in the specified fashion.
+            if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
+                sharer_ls = sharers_by_action_count(action_type_id)
+            else:
+                sharer_ls = Sharer.objects.select_related()
+
+            sharer_ls.filter(customer=self) #we want to filter on the customer (WHERE customer = self)
+
+        sharer_ls_with_total_clicks = sharer_ls.annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer
+
+        #order by the specified field
+        if desc:
+            order_by = '-' + order_by
+        sharer_ls_with_total_clicks.order_by(order_by)
+
+        # Now it's time to slice
+        page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
+        start = results_per_page * page_number
+        end = results_per_page * (page_number + 1)
+        sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
+
+        #Next we want to get the total # of each of type of action for these sharers.  We force it to a list right array so we don't need to requery every time to match it to the sharers
+        sharer_action_counts = Action.objects.select_related().filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id').annotate(action_total=Count('id'))
+
+        #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
+
+        # First, create a dictionary of this Customer's actions for storing this stuff
+        action_type_ls = Action_Type.objects.filter(customer = self)
+        action_type_arr = {action_type.action_name: 0 for action_type in action_type_ls} # A dictionary for all the action_names, with counts as values initialized to 0.
+
+        for sharer in sharer_ls_with_total_clicks:
             # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
 
             sharer_dict = {
@@ -96,12 +154,6 @@ class Customer(models.Model):
                 'click_total': sharer.click_total,
                 'action_type_set': action_type_arr
             }
-
-            results[sharer.id] = sharer_dict
-
-        #Next we just need to loop through action_ls to add to thi
-        for action in action_ls:
-            results[action.click.sharer.id]['action_type_set'][action.action_name] += 1
 
         return results
 
@@ -184,7 +236,7 @@ class Customer(models.Model):
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_sharer_identifier = models.IntegerField(max_length = 10)
+    customer_sharer_identifier = models.PositiveIntegerField(max_length = 10)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)
@@ -192,7 +244,7 @@ class Sharer(models.Model):
     created = models.DateTimeField(auto_now_add = True)
 
     def __unicode__(self):
-        return self.code
+        return unicode(self.id)
 
 class Click(models.Model):
     sharer = models.ForeignKey(Sharer)
@@ -208,7 +260,7 @@ class Click(models.Model):
 
 class Action_Type(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_action_type_identifier = models.IntegerField(max_length=2)
+    customer_action_type_identifier = models.PositiveIntegerField(max_length=2)
     action_name = models.CharField(max_length=20)
     description = models.CharField(max_length=250, blank=True, null=True)
     enabled = models.BooleanField(default = True)
