@@ -92,7 +92,6 @@ class Customer(models.Model):
             sharers_by_action_count = Sharer.objects.raw(queryString, [action_type_id, self.id])
 
             sharer_ids = [sharer.id for sharer in sharers_by_action_count]
-            print sharer_ids
             return Sharer.objects.select_related().filter(id__in=sharer_ids).annotate(click_total = Count('click__id')) #Note: we select_related() so that we can access everything we need later
 
         results = []
