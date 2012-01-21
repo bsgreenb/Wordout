@@ -58,8 +58,8 @@ class Customer(models.Model):
 
     def __unicode__(self):
         return str(self.user)
- 
-    
+
+
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
         def sharers_by_action_count(action_type_id):
@@ -69,11 +69,11 @@ class Customer(models.Model):
             FROM
             wordout_customer
             INNER JOIN wordout_sharer
-             ON (wordout_sharer.customer_id = wordout_customer.id)
+            ON (wordout_sharer.customer_id = wordout_customer.id)
             INNER JOIN wordout_redirect_link
-             ON (wordout_full_link.id = wordout_sharer.redirect_link_id)
+            ON (wordout_full_link.id = wordout_sharer.redirect_link_id)
             INNER wordout_host
-             ON (wordout_host.id = wordout_full_link.host_id)
+            ON (wordout_host.id = wordout_full_link.host_id)
             LEFT JOIN wordout_click
             ON (wordout_sharer.id = wordout_click.sharer_id)
             LEFT JOIN
@@ -85,28 +85,6 @@ class Customer(models.Model):
             GROUP BY wordout_sharer.id
             ''', [action_type_id])
 
-        # Create a dictionary of this Customer's actions
-        action_type_ls = Action_Type.objects.filter(customer = self).order_by('-created')
-
-        # Next we get a list of their sharers..
-        sharer_ls = Sharer.objects.filter(customer = self)
-
-        if sharer_identifier:  #
-            sharer_ls = sharer_ls.filter(customer_sharer_identifier = sharer_identifier) # for api_get_sharer_by_identifier
-
-        #..and total clicks (TODO: you can replace the order_by and limit here with vars)
-        sharer_ls = sharer_ls.annotate(click_total = Count('click__id')).order_by('-created')[:10] # this returns sharer info and total clicks
-
-        # A list of all actions by this customer's sharers.  We force it to execute with list().  We also make it match the sharers limited by the previous query
-        action_ls = list(Action.objects.select_related().filter(click__sharer=sharer_ls))
-
-        # What will we do next: loop through sharer_ls to build an initial results dictionary, with sharer.id as key...
-
-        action_type_arr = {action_name: 0 for action_name in action_type_ls} # A dictionary for all the action_names, with counts as values initialized to 0.
-
-        results = {}
-
-        for sharer in sharer_ls:
         results = []
         if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
             try:
@@ -134,7 +112,7 @@ class Customer(models.Model):
         end = results_per_page * (page_number + 1)
         sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
-        #Next we want to get the total # of each of type of action for these sharers.  We force it to a list right array so we don't need to requery every time to match it to the sharers
+        #Next we want to get the total # of each of type of action for these sharers. We force it to a list right array so we don't need to requery every time to match it to the sharers
         sharer_action_counts = Action.objects.select_related().filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id').annotate(action_total=Count('id'))
 
         #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
@@ -154,6 +132,12 @@ class Customer(models.Model):
                 'click_total': sharer.click_total,
                 'action_type_set': action_type_arr
             }
+
+            for sharer_action_count in sharer_action_counts:
+                if sharer_action_count.sharer_id == sharer.id:
+                    sharer_dict['action_type_set'][sharer_action_count.action_name] = sharer_action_count.action_total
+
+            results.append(sharer_dict)
 
         return results
 
