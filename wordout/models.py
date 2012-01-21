@@ -59,7 +59,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-
+    #TODO: Proly makes sense to have seperate functions that use an abstracted core.  Too many parameters here..
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
         def sharers_by_action_count(action_type_id):
