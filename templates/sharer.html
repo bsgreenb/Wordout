@@ -6,14 +6,45 @@
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script>
 $(function() {
-	
-	load_data_to_modal('sharer');  //load data to detail modal
+
+    load_data_to_modal('sharer');  //load data to detail modal
+
+    function set_sharer_ls_from_checkbox(){ //used for edit redirect link, disable, enable
+        if ($('#sharer-ls').val() != 'ALL')
+        {
+            $('#sharer-ls').val('');
+
+            var sharer = '';
+            $('.checkbox:checked').each(function(){
+                sharer += $(this).val() + ',';
+            });
+            $('#sharer-ls').val(sharer);
+        }
+    }
+
+    function enable_or_disable_sharers(url){
+        $.post(url,{
+                    sharer_ls: $('#sharer-ls').val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                function(data){
+                    if (data['status'] == 'OK')
+                    {
+                        $('.checkbox:checked').each(function(){
+                            $(this).parent().parent().find('.enable').html(data['enable_text']);
+                        });
+                    }
+                }, "json");
+    }
+
+
 
 	$('table#actions').tablesorter({widthFixed: true});
 
 	$('#select-all').on('click', function(){
 		var $checkbox = $('.checkbox');
 		$checkbox.prop('checked', 'checked');
+        $('table#actions td').css({'background-color': '#FFFFCC'});
 		$('button#edit, button#disable, button#enable').removeAttr("disabled", "");
 		$(this).hide();
         $('#select-total-message').html('All X sharers on this page are selected. <a href="#" id="select-total-sharers">Select all XXX sharers</a>');
@@ -23,6 +54,7 @@ $(function() {
 	$('#unselect-all').on('click', function(){
 		var $checkbox = $('.checkbox');
 		$checkbox.prop('checked', '');
+        $('table#actions td').css({'background-color': ''});
 		$('button#edit, button#disable, button#enable').attr("disabled", "disabled");
 		$(this).hide();
 		$('#select-all').show();
@@ -41,6 +73,15 @@ $(function() {
     });
 
 	$('.checkbox').click(function(){
+        if ($(this).is(':checked'))
+        {
+            $(this).parent().parent().css('background-color', '#FFFFCC');
+        }
+        else
+        {
+            $(this).parent().parent().css('background-color', '');
+        }
+
 		if ($('.checkbox:checked').length == 0)
 		{
 			$('button#edit, button#disable, button#enable').attr("disabled", "disabled");
@@ -51,47 +92,48 @@ $(function() {
 		}
         $('#sharer-ls').val(''); //remove ALL value
         $('#select-total-message').hide();
-
 	});
 
-	$('#edit').click(function(){
-        if ($('#sharer-ls').val() != 'ALL')
-        {
-            $('#sharer-ls').val('');
 
-            var sharer = '';
-            $('.checkbox:checked').each(function(){
-                sharer += $(this).val() + ',';
-            });
-            $('#sharer-ls').val(sharer);
-        }
-        alert($('#sharer-ls').val());
+    $('#edit').click(function(){
+        $('#edit-link-error').hide().html('');
+        $('#redirect-link').val('');
+    });
+
+	$('#submit-edit-link').click(function(){
+
+        set_sharer_ls_from_checkbox();
+
+        var link = $('#redirect-link').val();
+
+        $.post('/changelink/',{
+                    sharer_ls: $('#sharer-ls').val(),
+                    redirect_link: link,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                function(data){
+                    if (data['status'] == 'OK')
+                    {
+                        $('.checkbox:checked').each(function(){
+                            $(this).parent().parent().find('.redirect_link').html(data['redirect_link']);
+                        });
+                        $('#exit-link-modal').click();
+                    }
+                    else
+                    {
+                        $('#edit-link-error').show().html(data['error']);
+                    }
+                }, "json");
 	});
 	
 	$('#disable').click(function(){
-        if ($('#sharer-ls').val() != 'ALL')
-        {
-            $('#sharer-ls').val('');
-
-            var sharer = '';
-            $('.checkbox:checked').each(function(){
-                sharer += $(this).val() + ',';
-            });
-            $('#sharer-ls').val(sharer);
-            //$('#disable-form').submit();
-        }
-        alert($('#sharer-ls').val());
+        set_sharer_ls_from_checkbox();
+        enable_or_disable_sharers('/disablesharer/');
 	});
 	
 	$('#enable').click(function(){
-		$('#enable-sharer-ls').val('');
-		
-		var sharer = '';
-		$('.checkbox:checked').each(function(){
-			sharer += $(this).val() + ',';
-		});
-		$('#enable-sharer-ls').val(sharer);
-		$('#enable-form').submit();
+        set_sharer_ls_from_checkbox();
+        enable_or_disable_sharers('/enablesharer/');
 	});
 
 });
@@ -150,7 +192,7 @@ span#pagination #next{
     </span>
 	
 </div>
-<table id="actions" class="zebra-striped">
+<table id="actions">
     <div class="alert-message warning" id="select-total-message" style="display:none"></div>
 	<thead>	
 		<tr>
@@ -162,6 +204,7 @@ span#pagination #next{
 					<th class="header green">{{action_type.action_name}}</th>
 				{% endfor %}
 			{% endif %}
+            <th class="header yellow">Enable</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -169,17 +212,11 @@ span#pagination #next{
 
 			<tr>
 				<td>
-                    {% if not sharer.enabled  %}
-                        <strike>
-                    {%  endif %}
-                        <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.sharer_identifier}}"/>{{ sharer.sharer_identifier }}
-                    {%  if not sharer.enabled  %}
-                        </strike>
-                    {%  endif %}
+                    <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.sharer_identifier}}"/>{{ sharer.sharer_identifier }}
                 </td>
 				<td>
 					<div><a href="http://wordout.me/{{sharer.code}}">wordout.me/{{ sharer.code }}</a></div>
-					<div>{{ sharer.redirect_link }}</div>
+					<div class="redirect_link">{{ sharer.redirect_link }}</div>
 				</td>
 				<td>{{ sharer.click_total }}
 					{% if sharer.click_total > 0 %}
@@ -189,6 +226,13 @@ span#pagination #next{
 				{% for action_type in sharer.action_type_set %}
 					<td>{{ action_type.action_total }}</td>
 				{% endfor %}
+                <td class="enable">
+                    {% if sharer.enabled %}
+                        enabled
+                    {% else %}
+                        disabled
+                    {% endif %}
+                </td>
 			</tr>
 		{% endfor %}
 	</tbody>
@@ -209,7 +253,6 @@ span#pagination #next{
 {% endif %}
 
 <!------------------------------- -->
-
 
 <div id="create-sharer-modal-from-dom" class="modal hide fade" style="display: block;">
 	<form method="POST" action="/createsharer/" id="create-sharer-form">
@@ -250,65 +293,70 @@ span#pagination #next{
 	</form>
 </div>
 
+
+<!-- this modal is to hold the ajax request for referrer by sharer -->
+
+<div id="detail-modal-from-dom" class="modal hide fade" style="display: block;">
+
+    <div class="modal-header">
+        <a class="close" href="#">×</a>
+        <h3>Clicks come from the following links</h3>
+    </div>
+    <div class="modal-body">
+        <table id="clickDetail" class="zebra-striped">
+            <thead>
+            <tr>
+                <th class="header">Referrer</th>
+                <th class="yellow header">Clicks</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!--ajax result goes here -->
+
+
+
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+
+    </div>
+</div>
+
 <!------------------------------- -->
 
-
 <div id="edit-link-modal-from-dom" class="modal hide fade" style="display: block;">
-	<form method="POST" action="/changelink/" id="edit-link-form">
-	    {% csrf_token %}
-	    <div class="modal-header">
-		    <a class="close" href="#">×</a>
-		    <h3>Edit links</h3>
-	    </div>
-	    
-        <div class="modal-body">
-			<fieldset>
-				<div class="clearfix">
-					<label>Redirect link:</label>
-					<div class="input">
-						<input type="text" name="redirect_link">
-					</div>
-				</div>
-				<input id="edit-link-sharer-ls" name="edit_link_sharer_ls" value="" type="hidden"/>
-					
-			</fieldset>
-	    </div>
 
-	    <div class="modal-footer">
-		    <input class="btn primary" href="#" value="Save" type="submit">
-	    </div>
+    <form>
+    <!--  <form method="POST" action="/changelink/" id="edit-link-form">-->
+        <div class="modal-header">
+            <a class="close" href="#" id="exit-link-modal">×</a>
+            <h3>Edit links</h3>
+        </div>
+
+
+        <div class="modal-body">
+
+            <fieldset>
+                <div class="clearfix">
+                    <div class="alert-message error" style="display: none" id="edit-link-error">
+                    </div>
+                    <label>Redirect link:</label>
+                    <div class="input">
+                        <input type="text" name="redirect_link" id="redirect-link">
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="modal-footer">
+            <input class="btn primary" href="#" value="Save" type="button" id="submit-edit-link">
+        </div>
 	</form>
 </div>
 
 
-<!-- this modal is to hold the ajax request -->
 
-<div id="detail-modal-from-dom" class="modal hide fade" style="display: block;">
-
-	<div class="modal-header">
-		<a class="close" href="#">×</a>
-		<h3>Clicks come from the following links</h3>
-	</div>
-	<div class="modal-body">
-		<table id="clickDetail" class="zebra-striped">
-			<thead>
-				<tr>
-					<th class="header">Referrer</th>
-					<th class="yellow header">Clicks</th>
-				</tr>
-			</thead>
-			<tbody>
-					<!--ajax result goes here -->
-					
-					
-					
-			</tbody>
-		</table>
-	</div>
-	<div class="modal-footer">
-		
-	</div>
-</div>
 
 
 <input type="hidden" id="sharer-ls" name="sharer_ls" value="" /> <!-- to hold the post value for sharer ls -->
