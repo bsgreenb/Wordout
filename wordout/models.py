@@ -67,6 +67,8 @@ class Customer(models.Model):
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
 
+            #TODO: This isn't getting the right click_total's, because the LEFT JOIN's introduce more sharers.
+
             #This big query returns the sharers, ordered by the provided action type, and LEFT JOINEd to the total number of clicks
             queryString = '''
             SELECT wordout_sharer.id, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_sharer.enabled,
@@ -100,6 +102,8 @@ class Customer(models.Model):
             ORDER BY action_count
             '''
 
+            print queryString
+
             #We have to do a workaround cus SQL-Lite is not cool about using parameters in ORDER BY clauses
             if desc:
                 queryString += 'DESC'
@@ -124,7 +128,7 @@ class Customer(models.Model):
                 #order by the specified field
                 if desc:
                     order_by = '-' + order_by
-                sharer_ls_with_total_clicks.order_by(order_by)
+                sharer_ls_with_total_clicks = sharer_ls_with_total_clicks.order_by(order_by)
 
             # Now it's time to slice (regardless of what they're ordering by)
             page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
@@ -134,7 +138,8 @@ class Customer(models.Model):
 
         #Next we want to get the total # of each of type of action for these sharers.
 
-        sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ls_with_total_clicks).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
+        sharer_ids = (sharer.id for sharer in sharer_ls_with_total_clicks) #Because the next line complains if we give it a queryset that has click_total (a field not defined in the model) in it.
+        sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ids).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
 
         #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
 
