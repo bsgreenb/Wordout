@@ -90,9 +90,9 @@ class Customer(models.Model):
                     (SELECT wordout_action.id, wordout_action.click_id
                     FROM wordout_action
                     WHERE
-                    wordout_action.action_type_id = 1) as actions_of_type
+                    wordout_action.action_type_id = %s) as actions_of_type
                      ON actions_of_type.click_id = wordout_click.id
-                WHERE wordout_customer.id = 1
+                WHERE wordout_customer.id = %s
                 GROUP BY wordout_sharer.id) as wordout_sharer_info
                 LEFT JOIN
                     (SELECT wordout_click.sharer_id, wordout_click.id
