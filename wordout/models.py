@@ -71,7 +71,7 @@ class Customer(models.Model):
 
             #This big query returns the sharers, ordered by the provided action type, and LEFT JOINEd to the total number of clicks
             queryString = '''
-            SELECT *
+            SELECT wordout_sharer_info.*, COUNT(click_totals.id) as click_total
             FROM
                 (SELECT wordout_sharer.id, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_sharer.enabled,
                 wordout_full_link.path,
@@ -97,9 +97,9 @@ class Customer(models.Model):
                 LEFT JOIN
                     (SELECT wordout_click.sharer_id, wordout_click.id
                     FROM
-                    wordout_click
-                    GROUP BY wordout_click.sharer_id) as click_totals
+                    wordout_click) as click_totals
                  ON click_totals.sharer_id = wordout_sharer_info.id
+            GROUP BY wordout_sharer_info.id
             ORDER BY action_count
             '''
 
@@ -109,7 +109,7 @@ class Customer(models.Model):
             else:
                 queryString += 'ASC'
 
-            return Sharer.objects.raw(queryString, [action_type_id, self.id])
+            return Sharer.objects.raw(queryString, (action_type_id, self.id))
 
         results = []
         if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
@@ -120,6 +120,8 @@ class Customer(models.Model):
         else: #We are to return a page of sharers sorted in the specified fashion.
             if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
                 sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks() #Note that this is a RawQuerySet
+                #TODO: fix that it's only getting one sharer back, and that it's returning the wrong number of total_clicks.  Need to debug the raw quey.
+                return list(sharer_ls_with_total_clicks) #DEBUG
             else:
                 #Note: we select_related() so that we can access everything we need later
                 sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
@@ -128,6 +130,7 @@ class Customer(models.Model):
                 if desc:
                     order_by = '-' + order_by
                 sharer_ls_with_total_clicks = sharer_ls_with_total_clicks.order_by(order_by)
+
 
             # Now it's time to slice (regardless of what they're ordering by)
             page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
