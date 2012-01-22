@@ -71,38 +71,37 @@ class Customer(models.Model):
 
             #This big query returns the sharers, ordered by the provided action type, and LEFT JOINEd to the total number of clicks
             queryString = '''
-            SELECT wordout_sharer.id, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_sharer.enabled,
-            wordout_full_link.path,
-            wordout_host.host_name,
-            COUNT(actions_of_type.id) AS action_count, COUNT(click_totals.id) as click_total
+            SELECT *
             FROM
-            wordout_customer
-            INNER JOIN wordout_sharer
-             ON wordout_sharer.customer_id = wordout_customer.id
-            LEFT JOIN wordout_click
-             ON wordout_sharer.id = wordout_click.sharer_id
-            LEFT JOIN wordout_full_link
-             ON wordout_full_link.id = wordout_sharer.redirect_link_id
-            LEFT JOIN wordout_host
-             ON wordout_host.id = wordout_full_link.host_id
-            LEFT JOIN
-            (SELECT wordout_action.id, wordout_action.click_id
-            FROM wordout_action
-            WHERE
-            wordout_action.action_type_id = %s) as actions_of_type
-             ON actions_of_type.click_id = wordout_click.id
-            LEFT JOIN
-            (SELECT wordout_click.sharer_id, wordout_click.id
-            FROM
-            wordout_click
-            GROUP BY wordout_click.sharer_id) as click_totals
-             ON click_totals.sharer_id = wordout_sharer.id
-            WHERE wordout_customer.id = %s
-            GROUP BY wordout_sharer.id
+                (SELECT wordout_sharer.id, wordout_sharer.customer_sharer_identifier, wordout_sharer.code, wordout_sharer.enabled,
+                wordout_full_link.path,
+                wordout_host.host_name, COUNT(actions_of_type.id) AS action_count
+                FROM
+                wordout_customer
+                INNER JOIN wordout_sharer
+                 ON wordout_sharer.customer_id = wordout_customer.id
+                LEFT JOIN wordout_click
+                 ON wordout_sharer.id = wordout_click.sharer_id
+                LEFT JOIN wordout_full_link
+                 ON wordout_full_link.id = wordout_sharer.redirect_link_id
+                LEFT JOIN wordout_host
+                 ON wordout_host.id = wordout_full_link.host_id
+                LEFT JOIN
+                    (SELECT wordout_action.id, wordout_action.click_id
+                    FROM wordout_action
+                    WHERE
+                    wordout_action.action_type_id = 1) as actions_of_type
+                     ON actions_of_type.click_id = wordout_click.id
+                WHERE wordout_customer.id = 1
+                GROUP BY wordout_sharer.id) as wordout_sharer_info
+                LEFT JOIN
+                    (SELECT wordout_click.sharer_id, wordout_click.id
+                    FROM
+                    wordout_click
+                    GROUP BY wordout_click.sharer_id) as click_totals
+                 ON click_totals.sharer_id = wordout_sharer_info.id
             ORDER BY action_count
             '''
-
-            print queryString
 
             #We have to do a workaround cus SQL-Lite is not cool about using parameters in ORDER BY clauses
             if desc:
