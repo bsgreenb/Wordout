@@ -26,8 +26,8 @@ urlpatterns = patterns('',
     (r'^createsharer/$', views.create_sharer_page),
     (r'^sharer/([0-9]+)/$', views.show_referrer_by_sharer),
     (r'^changelink/$', views.change_redirect_link_page),
-    (r'^disablesharer/$', views.disable_or_enable_sharer_page, {'action':'disable'}),
-    (r'^enablesharer/$', views.disable_or_enable_sharer_page, {'action':'enable'}),
+    (r'^disablesharer/$', views.disable_or_enable_sharer_page, {'action':'disabled'}),
+    (r'^enablesharer/$', views.disable_or_enable_sharer_page, {'action':'enabled'}),
 
     #sharer plugin page
     (r'^pluginpage/$', views.sharer_plugin_page),

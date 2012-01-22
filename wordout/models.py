@@ -201,10 +201,16 @@ class Customer(models.Model):
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
-        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(redirect_link = new_redirect_link)
+        sharers = Sharer.objects.filter(customer=self)
+        if sharer_ls != 'ALL':
+            sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)
+        sharers.update(redirect_link = new_redirect_link)
 
     def disable_or_enable_sharer(self, sharer_ls, boolean):
-        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(enabled = boolean)
+        sharers = Sharer.objects.filter(customer=self)
+        if sharer_ls != 'ALL':
+            sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)
+        sharers.update(enabled = boolean)
     
     def update_title_and_body(self, message_title, message_body):
         self.message_title=message_title

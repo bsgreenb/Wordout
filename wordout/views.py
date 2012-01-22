@@ -105,27 +105,65 @@ def create_sharer_page(request):
 
 @login_required
 def change_redirect_link_page(request):
-    if request.method == 'POST':
+    if request.is_ajax():
         form = ChangeLinkForm(user = request.user, data = request.POST)
         if form.is_valid():
-            sharer_ls = request.POST['edit_link_sharer_ls'][0:-1].split(',')
+            sharer_ls = request.POST['sharer_ls']
+            if sharer_ls != 'ALL':
+                sharer_ls = sharer_ls[:-1].split(',') # create a list
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
-            customer.change_redirect_link(redirect_link, sharer_ls)
+            try:
+                customer.change_redirect_link(redirect_link, sharer_ls)
+            except AttributeError: #invalid sharer ls
+                error = 'invalid sharer list'
+                return HttpResponse(simplejson.dumps({
+                    'status':'fail',
+                    'error':error
+                }))
+            results = {
+                'status':'OK',
+                'redirect_link':redirect_link
+            }
+            return HttpResponse(simplejson.dumps(results))
         else:
-            request.session['form'] = form
-    return HttpResponseRedirect('/')
+            error = 'invalid redirect link'
+    else:
+        error = 'invalid request'
+    return HttpResponse(simplejson.dumps({
+        'status':'fail',
+        'error':error
+    }))
 
 @login_required
 def disable_or_enable_sharer_page(request, action):
-    if request.method == 'POST':
-        sharer_ls = request.POST['sharer_ls'][:-1].split(',')
+    if request.is_ajax():
+        sharer_ls = request.POST['sharer_ls']
+        if sharer_ls != 'ALL':
+            sharer_ls = sharer_ls[:-1].split(',')
         customer = Customer.objects.get(user=request.user)
-        if action == 'disable':
-            customer.disable_or_enable_sharer(sharer_ls, False)
-        if action ==  'enable':
-            customer.disable_or_enable_sharer(sharer_ls, True)
-    return HttpResponseRedirect('/')
+        if action == 'disabled':
+            try:
+                customer.disable_or_enable_sharer(sharer_ls, False)
+            except AttributeError:
+                return HttpResponse(simplejson.dumps({
+                    'status':'fail'
+                }))
+        if action ==  'enabled':
+            try:
+                customer.disable_or_enable_sharer(sharer_ls, True)
+            except AttributeError:
+                return HttpResponse(simplejson.dumps({
+                    'status':'fail'
+                    }))
+        return HttpResponse(simplejson.dumps({
+            'status':'OK',
+            'enable_text': action
+        }))
+    return HttpResponse(simplejson.dumps({
+        'status':'fail'
+    }))
+
 
 ##### PLUGIN PAGE #####
 @login_required
