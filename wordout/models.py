@@ -120,8 +120,6 @@ class Customer(models.Model):
         else: #We are to return a page of sharers sorted in the specified fashion.
             if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
                 sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks() #Note that this is a RawQuerySet
-                #TODO: fix that it's only getting one sharer back, and that it's returning the wrong number of total_clicks.  Need to debug the raw quey.
-                return list(sharer_ls_with_total_clicks) #DEBUG
             else:
                 #Note: we select_related() so that we can access everything we need later
                 sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
