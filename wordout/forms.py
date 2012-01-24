@@ -6,6 +6,18 @@ from wordout.lib import force_url_format
 #todo
 # how i can validate the user agent.
 # customize each error messages and all ValidationError
+
+class DisplaySharerForm(forms.Form):
+    SORT_BY_CHOICES = (
+        ('customer_sharer_identifier', 'customer_sharer_identifier'),
+        ('action_count', 'action_count'),
+        ('redirect_link', 'redirect_link'),
+        ('enabled', 'enabled'),
+        ('click_total', 'click_total')
+    )
+    order_by = forms.CharField(choices=SORT_BY_CHOICES)
+    desc = forms.BooleanField(required=False)
+
 class CreateSharerForm(forms.Form):
     start = forms.IntegerField(error_messages={'required':'', 'invalid':''})
     end = forms.IntegerField(error_messages={'required':'', 'invalid':''})

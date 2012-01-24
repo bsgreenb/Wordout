@@ -62,7 +62,7 @@ class Customer(models.Model):
         return str(self.user)
 
     #TODO: We need to not assume that a user has sharers.  Make sure it can handle it that situation.
-    def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
+    def display_sharers(self, customer_sharer_identifier='', order_by='', desc='', action_type_id='', page_number='', results_per_page = ''):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
@@ -145,6 +145,7 @@ class Customer(models.Model):
 
         # First, create a dictionary of this Customer's actions for storing this stuff
         action_type_ls = list(Action_Type.objects.filter(customer = self)) #force it to be alist so we don't query it each time through
+
         for sharer in sharer_ls_with_total_clicks:
             # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
 
