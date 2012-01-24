@@ -8,15 +8,29 @@ from wordout.lib import force_url_format
 # customize each error messages and all ValidationError
 
 class DisplaySharerForm(forms.Form):
-    SORT_BY_CHOICES = (
+    ORDER_BY_CHOICES = (
         ('customer_sharer_identifier', 'customer_sharer_identifier'),
         ('action_count', 'action_count'),
         ('redirect_link', 'redirect_link'),
         ('enabled', 'enabled'),
         ('click_total', 'click_total')
     )
-    order_by = forms.CharField(choices=SORT_BY_CHOICES)
+    order_by = forms.CharField(choices=ORDER_BY_CHOICES, required=False)
     desc = forms.BooleanField(required=False)
+    action_type_id = forms.IntegerField(required=False)
+    page_number = forms.IntegerField(required=False)
+    customer_sharer_identifier = forms.IntegerField(required=False)
+
+    def clean_order_by(self):
+        if 'order_by' not in self.cleaned_data:
+            self.cleaned_data['order_by'] = 'customer_sharer_identifier'
+            return self.cleaned_data['order_by']
+
+    def clean_desc(self):
+        if 'desc' not in self.cleaned_data:
+            self.cleaned_data['desc'] = True
+            return self.cleaned_data['desc']
+        
 
 class CreateSharerForm(forms.Form):
     start = forms.IntegerField(error_messages={'required':'', 'invalid':''})
