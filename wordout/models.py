@@ -61,7 +61,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    g
+
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
         def sharers_by_action_count_with_total_clicks():
@@ -111,10 +111,7 @@ class Customer(models.Model):
 
         results = []
         if customer_sharer_identifier: # they specified a specific sharer rather than asking to sort by some criteria
-            try:
-                sharer_ls_with_total_clicks = Sharer.objects.get(customer=self,customer_sharer_identifier=customer_sharer_identifier).annotate(click_total = Count('click__id'))
-            except Sharer.DoesNotExist:
-                return [] # Most likely either a hacker, or they sent an incorrect sharer_identifier through the API
+            sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self,customer_sharer_identifier=customer_sharer_identifier).annotate(click_total = Count('click__id'))
         else: #We are to return a page of sharers sorted in the specified fashion.
             if order_by == 'action_count': #we have to make a special query for when they want to sort by the count of a specific action
                 sharer_ls_with_total_clicks = sharers_by_action_count_with_total_clicks() #Note that this is a RawQuerySet
@@ -134,38 +131,40 @@ class Customer(models.Model):
             end = results_per_page * (page_number + 1)
             sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
-        #Next we want to get the total # of each of type of action for these sharers.
+        if not sharer_ls_with_total_clicks: #This saves us having to query further if there aren't any sharers or a sharer matching the provided sharer identifier.
+            return []
+        else:
+            #Next we want to get the total # of each of type of action for these sharers.
+            sharer_ids = (sharer.id for sharer in sharer_ls_with_total_clicks) #Because the next line complains if we give it a queryset that has click_total (a field not defined in the model) in it.
+            sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ids).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
 
-        sharer_ids = (sharer.id for sharer in sharer_ls_with_total_clicks) #Because the next line complains if we give it a queryset that has click_total (a field not defined in the model) in it.
-        sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ids).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
+            #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
 
-        #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
+            # First, create a dictionary of this Customer's actions for storing this stuff
+            action_type_ls = list(Action_Type.objects.filter(customer = self)) #force it to be alist so we don't query it each time through
+            for sharer in sharer_ls_with_total_clicks:
+                # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
 
-        # First, create a dictionary of this Customer's actions for storing this stuff
-        action_type_ls = list(Action_Type.objects.filter(customer = self)) #force it to be alist so we don't query it each time through
-        for sharer in sharer_ls_with_total_clicks:
-            # build sharer dictionary instead of return query set. issues: 1. DateTime can't be json dumped. 2. queryset gives redirect_link_id instead of actual redirect link.
+                if order_by == 'action_count':
+                    redirect_link = sharer.host_name + sharer.path #Because it was raw, not select_related()
+                else:
+                    redirect_link = sharer.redirect_link.host.host_name + sharer.redirect_link.path #select_related gives you objects which you follow rather than direct fields
 
-            if order_by == 'action_count':
-                redirect_link = sharer.host_name + sharer.path #Because it was raw, not select_related()
-            else:
-                redirect_link = sharer.redirect_link.host.host_name + sharer.redirect_link.path #select_related gives you objects which you follow rather than direct fields
+                sharer_dict = {
+                    'sharer_identifier': sharer.customer_sharer_identifier,
+                    'code': sharer.code,
+                    'redirect_link': redirect_link,
+                    'enabled': sharer.enabled,
+                    'click_total': sharer.click_total,
+                    'action_type_set': {action_type.action_name: 0 for action_type in action_type_ls} #we have to pass it a dictionary literal each time cus python is ornery about this
+                }
 
-            sharer_dict = {
-                'sharer_identifier': sharer.customer_sharer_identifier,
-                'code': sharer.code,
-                'redirect_link': redirect_link,
-                'enabled': sharer.enabled,
-                'click_total': sharer.click_total,
-                'action_type_set': {action_type.action_name: 0 for action_type in action_type_ls} #we have to pass it a dictionary literal each time cus python is ornery about this
-            }
+                for sharer_action_count in sharer_action_counts:
+                    if sharer_action_count['click__sharer_id'] == sharer.id:
+                        sharer_dict['action_type_set'][sharer_action_count['action_type__action_name']] = sharer_action_count['action_total']
 
-            for sharer_action_count in sharer_action_counts:
-                if sharer_action_count['click__sharer_id'] == sharer.id:
-                    sharer_dict['action_type_set'][sharer_action_count['action_type__action_name']] = sharer_action_count['action_total']
-
-            results.append(sharer_dict)
-        return results
+                results.append(sharer_dict)
+            return results
 
     def display_referrer_by_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
