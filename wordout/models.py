@@ -130,9 +130,7 @@ class Customer(models.Model):
             end = results_per_page * (page_number + 1)
             sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
-        if not sharer_ls_with_total_clicks: #This saves us having to query further if there aren't any sharers or a sharer matching the provided sharer identifier.
-            return []
-        else:
+        if sharer_ls_with_total_clicks: #This saves us having to query further if there aren't any sharers or a sharer matching the provided sharer identifier.
             #Next we want to get the total # of each of type of action for these sharers.
             sharer_ids = (sharer.id for sharer in sharer_ls_with_total_clicks) #Because the next line complains if we give it a queryset that has click_total (a field not defined in the model) in it.
             sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ids).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
