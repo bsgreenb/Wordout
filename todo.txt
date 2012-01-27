@@ -1,3 +1,16 @@
+#TODO
+- why force url format is not working for change_redirect_link's redirect_link
+- planout the sorting
+    - order_by
+    - desc
+    - action_type_id
+    - page_number
+
+    1. those can be all links on the th
+    2. question: how do i get order_by
+        - suppose click_totals. /?order_by=click_total&desc=false
+
+
 #i have SOUTH_TESTS_MIGRATE = False on settings.py. remove it if i want to use south
 REDESIGN ALL THE PAGES
 - sharer page. this describes what is the plugin page and how to implement it.

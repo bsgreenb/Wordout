@@ -61,8 +61,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-
-    def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
+    def display_sharers(self, customer_sharer_identifier, order_by, desc, action_type_id, page_number, results_per_page):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
@@ -164,6 +163,7 @@ class Customer(models.Model):
                         sharer_dict['action_type_set'][sharer_action_count['action_type__action_name']] = sharer_action_count['action_total']
 
                 results.append(sharer_dict)
+
             return results
 
     def display_referrer_by_sharer(self, customer_sharer_identifier):
@@ -198,10 +198,16 @@ class Customer(models.Model):
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
-        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(redirect_link = new_redirect_link)
+        sharers = Sharer.objects.filter(customer=self)
+        if sharer_ls != 'ALL':
+            sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)
+        sharers.update(redirect_link = new_redirect_link)
 
     def disable_or_enable_sharer(self, sharer_ls, boolean):
-        Sharer.objects.filter(customer=self, customer_sharer_identifier__in = sharer_ls).update(enabled = boolean)
+        sharers = Sharer.objects.filter(customer=self)
+        if sharer_ls != 'ALL':
+            sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)
+        sharers.update(enabled = boolean)
     
     def update_title_and_body(self, message_title, message_body):
         self.message_title=message_title
