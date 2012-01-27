@@ -61,13 +61,11 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    #TODO: We need to not assume that a user has sharers.  Make sure it can handle it that situation.
+    g
     def display_sharers(self, customer_sharer_identifier = None, order_by='created', desc=True, action_type_id=None, page_number=1, results_per_page = 30):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
-
-            #TODO: This isn't getting the right click_total's, because the LEFT JOIN's introduce more sharers.
 
             #This big query returns the sharers, ordered by the provided action type, and LEFT JOINEd to the total number of clicks
             queryString = '''
