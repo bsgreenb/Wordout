@@ -8,15 +8,59 @@ from wordout.lib import force_url_format
 # customize each error messages and all ValidationError
 
 class DisplaySharerForm(forms.Form):
-    SORT_BY_CHOICES = (
+    ORDER_BY_CHOICES = (
         ('customer_sharer_identifier', 'customer_sharer_identifier'),
         ('action_count', 'action_count'),
         ('redirect_link', 'redirect_link'),
         ('enabled', 'enabled'),
         ('click_total', 'click_total')
     )
-    order_by = forms.ChoiceField(choices=SORT_BY_CHOICES)
-    desc = forms.BooleanField(required=False)
+
+    DESC_CHOICES = (  # use this to replace forms.BoolenField.
+        ('true', 'true'),
+        ('false', 'false')
+    )
+
+    order_by = forms.ChoiceField(choices=ORDER_BY_CHOICES, required=False)
+    desc = forms.ChoiceField(choices=DESC_CHOICES, required=False)
+    action_type_id = forms.IntegerField(required=False)
+    page_number = forms.IntegerField(required=False)
+    customer_sharer_identifier = forms.IntegerField(required=False)
+
+    def clean_order_by(self):
+        if 'order_by' in self.cleaned_data and self.cleaned_data['order_by'] == '':
+            return 'customer_sharer_identifier'
+        elif 'order_by' in self.cleaned_data:
+            return self.cleaned_data['order_by']
+        raise forms.ValidationError('order by is invalid')
+
+    def clean_desc(self):
+        if 'desc' in self.cleaned_data and self.cleaned_data['desc'] == '':
+            return 'false'
+        elif 'desc' in self.cleaned_data:
+            return self.cleaned_data['desc']
+        raise forms.ValidationError('desc is invalid')
+
+    def clean_action_type_id(self):
+        if 'action_type_id' in self.cleaned_data and self.cleaned_data['action_type_id'] == None:
+            return None
+        elif 'action_type_id' in self.cleaned_data:
+            return self.cleaned_data['action_type_id']
+        raise forms.ValidationError('action type id is invalid')
+
+    def clean_page_number(self):
+        if 'page_number' in self.cleaned_data and self.cleaned_data['page_number'] == None:
+            return '1'
+        elif 'page_number' in self.cleaned_data:
+            return self.cleaned_data['page_number']
+        raise forms.ValidationError('page number is invalid')
+
+    def clean_customer_sharer_identifier(self):
+        if 'customer_sharer_identifier' in self.cleaned_data and self.cleaned_data['customer_sharer_identifier'] == None:
+            return None
+        elif 'customer_sharer_identifier' in self.cleaned_data:
+            return self.cleaned_data['customer_sharer_identifier']
+        raise forms.ValidationError('customer sharer identifier is invalid')
 
 class CreateSharerForm(forms.Form):
     start = forms.IntegerField(error_messages={'required':'', 'invalid':''})

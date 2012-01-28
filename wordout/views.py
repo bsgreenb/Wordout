@@ -53,77 +53,78 @@ def register_page(request):
 
 ##### SHARER #####
 
-ORDER_BY_CHOICES = (
-    'customer_sharer_identifier',
-    'action_count',
-    'redirect_link',
-    'enabled',
-    'click_total'
-)
-
-RESULTS_PER_PAGE = 30
+RESULTS_PER_PAGE = 20
 
 def main_page(request):
-    pass
-#    if request.user.is_authenticated():
-#        get_data = request.GET
-#        order_by = 'customer_sharer_identifier'
-#        if not get_data.get('order_by', '') and get_data['order_by'] in ORDER_BY_CHOICES:
-#            order_by = get_data['order_by']
-#
-#        desc = True
-#        if not get_data.get('desc', '') and get_data['desc'] == 'false':
-#            desc = False
-#
-#        action_type_id = None
-#        if not get_data.get('action_type_id', '') and isinstance(get_data['action_type_id'], int):
-#            action_type_id = get_data['action_type_id']
-#
-#        page_number = 1
-#        if not get_data.get('page_number', '') and isinstance(get_data['page_number'], int):
-#            page_number = get_data['page_number']
-#
-#        customer_sharer_identifier = None
-#        if not get_data.get('customer_sharer_identifier', '') and isinstance(get_data['customer_sharer_identifier']):
-#            customer_sharer_identifier = get_data['customer_sharer_identifier']
-#
-#        customer = Customer.objects.get(user = request.user)
-#        ls = customer.display_sharers(
-#            customer_sharer_identifier = customer_sharer_identifier,
-#            order_by = order_by,
-#            desc = desc,
-#            action_type_id = action_type_id,
-#            page_number = page_number,
-#            results_per_page = RESULTS_PER_PAGE
-#        )
-#
-#        # next is to have a list of dicts that I can loop through to give the sorting url and header
-#        sort_links = [
-#            {'order_by':'customer_sharer_identifier','display_name':'Sharer_ID'},
-#            {'order_by':'redirect_link', 'display_name':'link'},
-#            {'order_by':'enabled', 'display_name':'Enable'},
-#            {'order_by':'click_total', 'display_name':'Clicks'}
-#        ]
-#
-#
-#
-#        #get default start value for create numeric identifiers
-#        try:
-#            last = Sharer.objects.filter(customer = customer).order_by('-created')[0]
-#            last = last.customer_sharer_identifier
-#        except IndexError:
-#            last = 0
-#
-#        default_start = last + 1
-#
-#        form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
-#        return render_to_response('sharer.html', dict(ls=ls, default_start = default_start, form = form), context_instance=RequestContext(request))
-#
-#    else:
-#        form = RegistrationForm()
-#    return render_to_response(
-#                'main_page.html', dict(form=form),
-#                context_instance=RequestContext(request))
+    if request.user.is_authenticated():
+        form = DisplaySharerForm(request.GET)  # validation is in the form
+        if form.is_valid():
+            order_by = form.cleaned_data['order_by']
+            desc = form.cleaned_data['desc']
+            action_type_id = form.cleaned_data['action_type_id']
+            page_number = form.cleaned_data['page_number']
+            customer_sharer_identifier = forms.cleaned_data['customer_sharer_identifier']
+
+            customer = Customer.objects.get(user = request.user)
+            ls = customer.display_sharers(
+                customer_sharer_identifier = customer_sharer_identifier,
+                order_by = order_by,
+                desc = desc,
+                action_type_id = action_type_id,
+                page_number = page_number,
+                results_per_page = RESULTS_PER_PAGE
+            )
+
+            # next is to have a list of dicts that I can loop through to give the sorting url and header
+            sort_links = [
+                {'order_by':'customer_sharer_identifier','display_name':'Sharer_ID'},
+                {'order_by':'redirect_link', 'display_name':'link'},
+                {'order_by':'enabled', 'display_name':'Enable'},
+                {'order_by':'click_total', 'display_name':'Clicks'}
+            ]
+
+        for action_type in ls[0]['action_type_set']: # complete the sort links
+            sort_links.append({
+                'order_by':'action_count',
+                'display_name':action_type['action_name'],
+                'action_type_id': action_type['action_type_id'],
+            })
+
+        # NOW, I set urls
+        for item in sort_links:
+            url = '/?order_by=%s&desc=%s'
+
+            toggle_desc = 'true'
+            if desc == 'true':  # switch desc, asc
+                toggle_desc = 'false'
+
+            if item['order_by'] == order_by: # test whether I need switch desc, asc
+                url = url % (order_by, toggle_desc)
+            else:
+                url = url % (item['order_by'], 'true')
+
+            if item['action_type_id']:
+                url = url + '&action_type_id=' + item['action_type_id']
+
+            item['sort_url'] = url
+
+        #get default start value for create numeric identifiers
+        try:
+            last = Sharer.objects.filter(customer = customer).order_by('-created')[0]
+            last = last.customer_sharer_identifier
+        except IndexError:
+            last = 0
+
+        default_start = last + 1
+
+        form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
+        return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, default_start = default_start, form = form), context_instance=RequestContext(request))
+
+    else:
+        form = RegistrationForm()
+    return render_to_response(
+                'main_page.html', dict(form=form),
+                context_instance=RequestContext(request))
 
 @login_required
 def show_referrer_by_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
