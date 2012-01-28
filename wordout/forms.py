@@ -15,7 +15,7 @@ class DisplaySharerForm(forms.Form):
         ('enabled', 'enabled'),
         ('click_total', 'click_total')
     )
-    order_by = forms.CharField(choices=SORT_BY_CHOICES)
+    order_by = forms.ChoiceField(choices=SORT_BY_CHOICES)
     desc = forms.BooleanField(required=False)
 
 class CreateSharerForm(forms.Form):
