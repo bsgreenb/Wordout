@@ -192,14 +192,14 @@ def disable_or_enable_sharer_page(request, action):
         if sharer_ls != 'ALL':
             sharer_ls = sharer_ls[:-1].split(',')
         customer = Customer.objects.get(user=request.user)
-        if action == 'disabled':
+        if action == 'disable':
             try:
                 customer.disable_or_enable_sharer(sharer_ls, False)
             except AttributeError:
                 return HttpResponse(simplejson.dumps({
                     'status':'fail'
                 }))
-        if action ==  'enabled':
+        if action ==  'enable':
             try:
                 customer.disable_or_enable_sharer(sharer_ls, True)
             except AttributeError:
