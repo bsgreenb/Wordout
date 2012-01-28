@@ -153,7 +153,7 @@ class Customer(models.Model):
                     'redirect_link': redirect_link,
                     'enabled': sharer.enabled,
                     'click_total': sharer.click_total,
-                    'action_type_set': [{action_type_id: action_type.id, action_type.action_name: action_type.action_name, action_total: 0} for action_type in action_type_ls] #we have to pass it a dictionary literal each time cus python is ornery about this
+                    'action_type_set': [{'action_type_id': action_type.id, 'action_name': action_type.action_name, 'action_total': 0} for action_type in action_type_ls] #we have to pass it a dictionary literal each time cus python is ornery about this
                 }
 
                 for sharer_action_count in sharer_action_counts:
