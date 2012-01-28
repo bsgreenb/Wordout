@@ -61,7 +61,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    def display_sharers(self, customer_sharer_identifier, order_by, desc, action_type_id, page_number, results_per_page):
+    def display_sharers(self, customer_sharer_identifier = None, order_by = 'created', desc = True, action_type_id = None, page_number = 1, results_per_page = 30):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
@@ -130,12 +130,10 @@ class Customer(models.Model):
             end = results_per_page * (page_number + 1)
             sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
 
-        if not sharer_ls_with_total_clicks: #This saves us having to query further if there aren't any sharers or a sharer matching the provided sharer identifier.
-            return []
-        else:
+        if sharer_ls_with_total_clicks: #This saves us having to query further if there aren't any sharers or a sharer matching the provided sharer identifier.
             #Next we want to get the total # of each of type of action for these sharers.
             sharer_ids = (sharer.id for sharer in sharer_ls_with_total_clicks) #Because the next line complains if we give it a queryset that has click_total (a field not defined in the model) in it.
-            sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ids).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_total=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
+            sharer_action_counts = Action.objects.filter(click__sharer__in=sharer_ids).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_count=Count('id')) #NOTE: These actions are only for the slice of sharers that have been picked from previously based on ORDER_BY and Pagination via slicing.
 
             #With our sharers+total_clicks, and the number of actions of each type for each sharer, it's time to build our result dictionary
 
@@ -155,12 +153,14 @@ class Customer(models.Model):
                     'redirect_link': redirect_link,
                     'enabled': sharer.enabled,
                     'click_total': sharer.click_total,
-                    'action_type_set': {action_type.action_name: 0 for action_type in action_type_ls} #we have to pass it a dictionary literal each time cus python is ornery about this
+                    'action_type_set': [{'action_type_id': action_type.id, 'action_name': action_type.action_name, 'action_count': 0} for action_type in action_type_ls] #we have to pass it a dictionary literal each time cus python is ornery about this
                 }
 
                 for sharer_action_count in sharer_action_counts:
-                    if sharer_action_count['click__sharer_id'] == sharer.id:
-                        sharer_dict['action_type_set'][sharer_action_count['action_type__action_name']] = sharer_action_count['action_total']
+                    if sharer_action_count['click__sharer_id'] == sharer.id: #We've matched the sharer's action count row to their total_click and other info row.
+                        for action_type in sharer_dict['action_type_set']:
+                            if action_type['action_type_id'] == sharer_action_count['action_type_id']:
+                                action_type['action_count'] = sharer_action_count['action_count']
 
                 results.append(sharer_dict)
 
