@@ -1,3 +1,9 @@
+action_type_list
+sharers_list
+
+
+
+
 #TODO
 - why force url format is not working for change_redirect_link's redirect_link
 - planout the sorting

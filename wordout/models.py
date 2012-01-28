@@ -153,12 +153,14 @@ class Customer(models.Model):
                     'redirect_link': redirect_link,
                     'enabled': sharer.enabled,
                     'click_total': sharer.click_total,
-                    'action_type_set': {action_type.action_name: 0 for action_type in action_type_ls} #we have to pass it a dictionary literal each time cus python is ornery about this
+                    'action_type_set': [{action_type_id=action_type.id, action_name=action_type.action_name, action_total= 0} for action_type in action_type_ls] #we have to pass it a dictionary literal each time cus python is ornery about this
                 }
 
                 for sharer_action_count in sharer_action_counts:
-                    if sharer_action_count['click__sharer_id'] == sharer.id:
-                        sharer_dict['action_type_set'][sharer_action_count['action_type__action_name']] = sharer_action_count['action_total']
+                    if sharer_action_count['click__sharer_id'] == sharer.id: #We've matched the sharer's action count row to their total_click and other info row.
+                        for action_type in sharer_dict['action_type_set']:
+                            if action_type['action_type_id'] == sharer_action_count['action_type_id']:
+                                action_type['action_total'] = sharer_action_count['action_total']
 
                 results.append(sharer_dict)
 
