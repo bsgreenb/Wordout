@@ -4,7 +4,6 @@ import re
 from django.contrib.auth.models import User
 from wordout.lib import force_url_format
 
-# how i can validate the user agent.
 # customize each error messages and all ValidationError
 
 class DisplaySharerForm(forms.Form):

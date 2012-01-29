@@ -26,10 +26,10 @@ def register_page(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = User.objects.create_user(
-                    username=form.cleaned_data['username'],
-                    password=form.cleaned_data['password1'],
-                    email=form.cleaned_data['email']
-                     )
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1'],
+                email=form.cleaned_data['email']
+            )
             #this is not the best practice. I forced extra query here.  change on version 2
             #I need create/check both client_id and api_key
             while True:
