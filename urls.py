@@ -62,8 +62,8 @@ urlpatterns = patterns('',
     (r'^api/getSharerInfoById/(?P<api_key>\w{30})/$', api_views.api_get_sharer_by_identifier),
     (r'^api/getActionTypes/(?P<api_key>\w{30})/$', api_views.api_get_action_type_page),
 
-    (r'^referrer/$', views.referrer_page),
-    (r'^referrer/([0-9]+)/$', views.path_page),
+    #(r'^referrer/$', views.referrer_page),
+    #(r'^referrer/([0-9]+)/$', views.path_page),
     (r'^([0-9a-z]{6})/$', views.direct_page)
 )
 
