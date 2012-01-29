@@ -15,13 +15,12 @@ class DisplaySharerForm(forms.Form):
         ('click_total', 'click_total')
     )
 
-    DESC_CHOICES = (  # use this to replace forms.BoolenField.
-        ('true', 'true'),
-        ('false', 'false')
+    DIRECTION = (
+        ('desc','desc'),
+        ('asc', 'asc')
     )
-
     order_by = forms.ChoiceField(choices=ORDER_BY_CHOICES, required=False)
-    desc = forms.ChoiceField(choices=DESC_CHOICES, required=False)
+    direction = forms.ChoiceField(choices=DIRECTION, required=False)
     action_type_id = forms.IntegerField(required=False)
     page_number = forms.IntegerField(required=False)
     customer_sharer_identifier = forms.IntegerField(required=False)
@@ -33,12 +32,12 @@ class DisplaySharerForm(forms.Form):
             return self.cleaned_data['order_by']
         raise forms.ValidationError('order by is invalid')
 
-    def clean_desc(self):
-        if 'desc' in self.cleaned_data and self.cleaned_data['desc'] == '':
-            return 'false'
-        elif 'desc' in self.cleaned_data:
-            return self.cleaned_data['desc']
-        raise forms.ValidationError('desc is invalid')
+    def clean_direction(self):
+        if 'direction' in self.cleaned_data and self.cleaned_data['direction'] == '':
+            return 'desc'
+        elif 'direction' in self.cleaned_data:
+            return self.cleaned_data['direction']
+        raise forms.ValidationError('direction is invalid')
 
     def clean_action_type_id(self):
         if 'action_type_id' in self.cleaned_data and self.cleaned_data['action_type_id'] == None:

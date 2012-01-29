@@ -1,8 +1,6 @@
 {% extends 'backbone/base.html' %}
 
 {% block js %}
-<script src="/static/js/plugin/jquery.tablesorter.js"></script>
-<script src="/static/js/plugin/jquery.tablesorter.pager.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script>
 $(function() {
@@ -37,10 +35,6 @@ $(function() {
                 }, "json");
     }
 
-
-
-	$('table#actions').tablesorter({widthFixed: true});
-
 	$('#select-all').on('click', function(){
 		var $checkbox = $('.checkbox');
 		$checkbox.prop('checked', 'checked');
@@ -70,6 +64,10 @@ $(function() {
         $('#sharer-ls').val('');
         $('#select-total-message').html('All X sharers on this page are selected. <a href="#" id="select-total-sharers">Select all XXX sharers</a>');
         $('#unselect-all').click();
+    });
+
+    $('table#actions th').click(function(){
+        window.location.href = $(this).children('a').attr('href');
     });
 
 	$('.checkbox').click(function(){
@@ -136,6 +134,13 @@ $(function() {
         enable_or_disable_sharers('/enablesharer/');
 	});
 
+    $('a#previous').click(function(e){
+        if ($(this).attr('disabled') == 'disabled')
+        {
+            e.preventDefault();
+        }
+    });
+
 });
 </script>
 {% endblock %}
@@ -164,9 +169,8 @@ span#pagination{
 }
 
 span#pagination #next{
-    margin-left: 0;
+    margin-left: 5px;
 }
-
 {% endblock %}
 
 {% block content %}
@@ -181,26 +185,25 @@ span#pagination #next{
 	<button class="btn" id="enable" disabled="disabled">Enable</button>
 	<button class="btn" id="disable" disabled="disabled">Disable</button>
 
-    <span id="pagination">
-        X of XXXX
-        <button class="btn prev"><</button>
-        <button class="btn next" id="next">></button>
-    </span>
+    {% if start_id > 1 %}
+        <span id="pagination">
+
+            {{display_start}}-{{display_end}} of {{start_id}}
+
+            <a id="previous" href="{{previous_page_url}}" class="btn"{% if passed_page_number == 1 %} disabled="disabled" {% endif %}"><</a>
+
+            <a id="next" href="{{next_page_url}}" class="btn">></a>
+        </span>
+    {% endif %}
 	
 </div>
-<table id="actions">
+<table id="actions" class="zebra-striped">
     <div class="alert-message warning" id="select-total-message" style="display:none"></div>
-	<thead>	
+	<thead>
 		<tr>
-			<th class="header">Sharer ID</th>
-			<th class="blue header">Link</th>
-			<th class="yellow header headerSortDown">Clicks</th>
-			{% if ls.0.action_type_set %}
-				{% for action_type in ls.0.action_type_set %}
-					<th class="header green">{{action_type.action_name}}</th>
-				{% endfor %}
-			{% endif %}
-            <th class="header yellow">Enable</th>
+            {% for header in sort_links %}
+                <th {% if header.header_arrow %} class="header {{header.header_arrow}}" {% endif %}><a href="{{header.sort_url}}">{{header.display_name}}</a></th>
+            {% endfor %}
 		</tr>
 	</thead>
 	<tbody>
@@ -220,7 +223,7 @@ span#pagination #next{
 					{% endif %}		
 				</td>
 				{% for action_type in sharer.action_type_set %}
-					<td>{{ action_type.action_total }}</td>
+					<td>{{ action_type.action_count }}</td>
 				{% endfor %}
                 <td class="enable">
                     {% if sharer.enabled %}
@@ -263,7 +266,7 @@ span#pagination #next{
 				<div class="clearfix">
 					<label>Start sharer id:</label>
 					<div class="input">
-						<input type="text" value="{{default_start}}" name="start" readonly="readonly">
+						<input type="text" value="{{start_id}}" name="start" readonly="readonly">
 					</div>
 				</div>
 			
@@ -352,20 +355,5 @@ span#pagination #next{
 </div>
 
 
-
-
-
 <input type="hidden" id="sharer-ls" name="sharer_ls" value="" /> <!-- to hold the post value for sharer ls -->
-        
-<!--
-<form id="disable-form" action="/disablesharer/" method="POST" style="display:hidden">
-    {% csrf_token %}
-    <input type="hidden" id="disable-sharer-ls" name="sharer_ls" value="" />
-</form>
-
-<form id="enable-form" action="/enablesharer/" method="POST" style="display:hidden">
-    {% csrf_token %}
-    <input type="hidden" id="enable-sharer-ls" name="sharer_ls" value="" />
-</form>
--->
 {% endblock %}

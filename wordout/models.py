@@ -61,7 +61,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    def display_sharers(self, customer_sharer_identifier = None, order_by = 'created', desc = True, action_type_id = None, page_number = 1, results_per_page = 30):
+    def display_sharers(self, customer_sharer_identifier = None, order_by = 'created', direction = 'desc', action_type_id = None, page_number = 1, results_per_page = 30):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
@@ -101,9 +101,9 @@ class Customer(models.Model):
             '''
 
             #We have to do a workaround cus SQL-Lite is not cool about using parameters in ORDER BY clauses
-            if desc:
+            if direction == 'desc':
                 queryString += 'DESC'
-            else:
+            elif direction == 'asc':
                 queryString += 'ASC'
 
             return Sharer.objects.raw(queryString, (action_type_id, self.id))
@@ -119,13 +119,13 @@ class Customer(models.Model):
                 sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
 
                 #order by the specified field
-                if desc:
+                if direction == 'desc':
                     order_by = '-' + order_by
                 sharer_ls_with_total_clicks = sharer_ls_with_total_clicks.order_by(order_by)
 
 
             # Now it's time to slice (regardless of what they're ordering by)
-            page_number -= 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
+            page_number = int(page_number) - 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
             start = results_per_page * page_number
             end = results_per_page * (page_number + 1)
             sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]
@@ -151,9 +151,9 @@ class Customer(models.Model):
                     'sharer_identifier': sharer.customer_sharer_identifier,
                     'code': sharer.code,
                     'redirect_link': redirect_link,
-                    'enabled': sharer.enabled,
                     'click_total': sharer.click_total,
-                    'action_type_set': [{'action_type_id': action_type.id, 'action_name': action_type.action_name, 'action_count': 0} for action_type in action_type_ls] #we have to pass it a dictionary literal each time cus python is ornery about this
+                    'action_type_set': [{'action_type_id': action_type.id, 'action_name': action_type.action_name, 'action_count': 0} for action_type in action_type_ls], #we have to pass it a dictionary literal each time cus python is ornery about this
+                    'enabled': sharer.enabled,
                 }
 
                 for sharer_action_count in sharer_action_counts:
