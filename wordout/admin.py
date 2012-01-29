@@ -10,10 +10,10 @@ class SharerAdmin(admin.ModelAdmin):
 class ClickAdmin(admin.ModelAdmin):
     list_display = ('sharer', 'redirect_link', 'referrer','IP', 'created')
 
-class CustomergroupAdmin(admin.ModelAdmin):
+class Customer_GroupAdmin(admin.ModelAdmin):
     list_display = ('id', 'max_users', 'max_actions')
 
-class ActionTypeAdmin(admin.ModelAdmin):
+class Action_TypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'customer', 'customer_action_type_identifier', 'action_name', 'description')
 
 class ActionAdmin(admin.ModelAdmin):
@@ -27,6 +27,6 @@ admin.site.register(User_Agent)
 admin.site.register(Full_Link, Full_LinkAdmin)
 admin.site.register(Sharer, SharerAdmin)
 admin.site.register(Click, ClickAdmin)
-admin.site.register(Customergroup, CustomergroupAdmin)
-admin.site.register(Action_Type, ActionTypeAdmin)
+admin.site.register(Customer_Group, Customer_GroupAdmin)
+admin.site.register(Action_Type, Action_TypeAdmin)
 admin.site.register(Action, ActionAdmin)

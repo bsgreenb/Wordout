@@ -98,7 +98,7 @@ class CreateSharerForm(forms.Form):
             #limit the number of identifiers. current is 1000
             total = Sharer.objects.filter(customer = self._user).count()
             num_created = end - start + 1
-            max_users = Customer.objects.get(user = self._user).customergroup.max_users
+            max_users = Customer.objects.get(user = self._user).customer_group.max_users
             if (total + num_created) > max_users:
                 raise forms.ValidationError('The amount of sharer is limited to %s' % max_users)
 
@@ -127,6 +127,7 @@ class RegistrationForm(forms.Form):
     email = forms.EmailField(label=u'Email', error_messages={'required':'', 'invalid':''})
     password1 = forms.CharField(label=u'Password', widget=forms.PasswordInput(), error_messages={'required':'', 'invalid':''})
     password2 = forms.CharField(label=u'Confirm Password', widget=forms.PasswordInput(), error_messages={'required':'', 'invalid':''})
+
     def clean_password2(self):
         if 'password1' in self.cleaned_data:
             password1 = self.cleaned_data['password1']
@@ -139,12 +140,12 @@ class RegistrationForm(forms.Form):
     def clean_username(self):
         username = self.cleaned_data['username']
         if not re.search(r'^\w+$', username):
-            raise forms.ValidationError('Username can only contain alphanumeric characters and the underscore.')
+            raise forms.ValidationError('Usernames can only contain letters, numbers, and underscores.')
         try:
             User.objects.get(username=username)
         except User.DoesNotExist:
             return username
-        raise forms.ValidationError('Username is already taken')
+        raise forms.ValidationError('An account with this username is already registered.')
 
     def clean_email(self):
         email = self.cleaned_data['email']
@@ -152,7 +153,7 @@ class RegistrationForm(forms.Form):
             User.objects.get(email=email)
         except User.DoesNotExist:
             return email
-        raise forms.ValidationError('Email is already taken')
+        raise forms.ValidationError('Email address is already in use for an existing account.')
 
 
 class ActionTypeForm(forms.Form):
@@ -167,7 +168,7 @@ class ActionTypeForm(forms.Form):
     def clean_action_id(self):
         if 'customer_action_type_identifier' in self.cleaned_data:
             customer_action_type_identifier = self.cleaned_data['customer_action_type_identifier']
-            max_actions = self._user.customergroup.max_actions
+            max_actions = self._user.customer_group.max_actions
             if customer_action_type_identifier >= max_actions:
                 raise forms.ValidationError('The max number of  actions is %s' % max_actions)
             return customer_action_type_identifier
