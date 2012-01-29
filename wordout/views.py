@@ -60,16 +60,16 @@ def main_page(request):
         form = DisplaySharerForm(request.GET)  # validation is in the form
         if form.is_valid():
             order_by = form.cleaned_data['order_by']
-            desc = form.cleaned_data['desc']
+            direction = form.cleaned_data['direction']
             action_type_id = form.cleaned_data['action_type_id']
             page_number = form.cleaned_data['page_number']
-            customer_sharer_identifier = forms.cleaned_data['customer_sharer_identifier']
+            customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier']
 
             customer = Customer.objects.get(user = request.user)
             ls = customer.display_sharers(
                 customer_sharer_identifier = customer_sharer_identifier,
                 order_by = order_by,
-                desc = desc,
+                direction = direction,
                 action_type_id = action_type_id,
                 page_number = page_number,
                 results_per_page = RESULTS_PER_PAGE
@@ -77,48 +77,87 @@ def main_page(request):
 
             # next is to have a list of dicts that I can loop through to give the sorting url and header
             sort_links = [
-                {'order_by':'customer_sharer_identifier','display_name':'Sharer_ID'},
+                {'order_by':'customer_sharer_identifier','display_name':'sharer_id'},
                 {'order_by':'redirect_link', 'display_name':'link'},
-                {'order_by':'enabled', 'display_name':'Enable'},
-                {'order_by':'click_total', 'display_name':'Clicks'}
+                {'order_by':'click_total', 'display_name':'visits'}
             ]
 
-        for action_type in ls[0]['action_type_set']: # complete the sort links
-            sort_links.append({
-                'order_by':'action_count',
-                'display_name':action_type['action_name'],
-                'action_type_id': action_type['action_type_id'],
-            })
+            for action_type in ls[0]['action_type_set']: # complete the sort links
+                sort_links.append({
+                    'order_by':'action_count',
+                    'display_name':action_type['action_name'],
+                    'action_type_id': action_type['action_type_id'],
+                })
 
-        # NOW, I set urls
-        for item in sort_links:
-            url = '/?order_by=%s&desc=%s'
+            sort_links.append({'order_by':'enabled', 'display_name':'enable'}) #this guy goes the last
+            # NOW, I set urls
+            next_page_url = ''
+            previous_page_url = ''
 
-            toggle_desc = 'true'
-            if desc == 'true':  # switch desc, asc
-                toggle_desc = 'false'
+            for item in sort_links:
+                page_number = int(page_number)
+                base_url = '/?order_by=' + item['order_by']
 
-            if item['order_by'] == order_by: # test whether I need switch desc, asc
-                url = url % (order_by, toggle_desc)
-            else:
-                url = url % (item['order_by'], 'true')
+                toggle_direction = 'desc'
+                if direction == 'desc':  # switch desc, asc
+                    toggle_direction = 'asc'
 
-            if item['action_type_id']:
-                url = url + '&action_type_id=' + item['action_type_id']
+                if item['order_by'] == order_by and (item['order_by'] != 'action_count' or item['action_type_id'] == action_type_id):
+                    url = base_url + '&direction=' + toggle_direction
+                    if direction == 'desc':
+                        item['header_arrow'] = 'headerSortUp'
+                    else:
+                        item['header_arrow'] = 'headerSortDown'
 
-            item['sort_url'] = url
+                    # previous_page_url and next_page_url. built based on base_url, direction and page_number
 
-        #get default start value for create numeric identifiers
-        try:
-            last = Sharer.objects.filter(customer = customer).order_by('-created')[0]
-            last = last.customer_sharer_identifier
-        except IndexError:
-            last = 0
+                    base_page_url = base_url + '&direction=' + direction + '&page_number='
 
-        default_start = last + 1
+                    next_page_number = page_number + 1
+                    next_page_url = base_page_url + str(next_page_number)
 
-        form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
-        return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, default_start = default_start, form = form), context_instance=RequestContext(request))
+                    previous_page_number = page_number - 1
+                    previous_page_url = base_page_url + str(previous_page_number)
+
+                    if item['order_by'] == 'action_count' and item['action_type_id'] == action_type_id:
+                        next_page_url = next_page_url + '&action_type_id=' + str(item['action_type_id'])
+                        previous_page_url = previous_page_url + '&action_type_id=' + str(item['action_type_id'])
+
+                else:
+                    url = base_url + '&direction=desc'
+
+                url = url + '&page_number=1'
+
+                try:
+                    url = url + '&action_type_id=' + str(item['action_type_id'])
+                except KeyError:
+                    pass
+
+                item['sort_url'] = url
+
+                # i need sent page number
+
+            #get default start value to create numeric identifiers on the pop out form
+            try:
+                start_id = Sharer.objects.filter(customer = customer).order_by('-created')[0].customer_sharer_identifier + 1
+            except IndexError:
+                start_id = 1
+
+            display_end = int(page_number) * RESULTS_PER_PAGE
+            display_start = (int(page_number) - 1) * RESULTS_PER_PAGE + 1
+
+            form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
+            # EXPLAIN RETURN VARS:
+            # sort_links are used to display table headers plus the sort urls
+            # ls is the sharer contents
+            # default_start is used for pop out form to create sharers
+            # previous_page_url and next_page_url are used for previous page and next page
+            # passed_page_number is used to disable previous page if it is equal to 0
+            # display_start and display_end are used to fill x - x of xxxx
+            #return HttpResponse(sort_links)
+            return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, start_id = start_id, previous_page_url = previous_page_url, next_page_url = next_page_url, passed_page_number=page_number, display_start = display_start, display_end=display_end, form = form), context_instance=RequestContext(request))
+        else:
+            return Http404
 
     else:
         form = RegistrationForm()
