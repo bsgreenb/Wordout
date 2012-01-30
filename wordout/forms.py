@@ -153,7 +153,7 @@ class RegistrationForm(forms.Form):
             User.objects.get(email=email)
         except User.DoesNotExist:
             return email
-        raise forms.ValidationError('Email address is already in use for an existing account.')
+        raise forms.ValidationError('That email address is already in use for an existing account.')
 
 
 class ActionTypeForm(forms.Form):
