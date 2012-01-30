@@ -56,7 +56,7 @@ class Customer(models.Model):
     api_key = models.CharField(max_length = 30, unique=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
-    customer_group = models.ForeignKey(Customer_Group)
+    customer_group = models.ForeignKey(Customer_Group,default=1)
 
     def __unicode__(self):
         return str(self.user)
