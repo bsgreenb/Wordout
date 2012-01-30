@@ -35,7 +35,7 @@ urlpatterns = patterns('',
 
 
     #display sharer page (the actual promote page plus this sharer's analysis)
-    (r'^share/(?P<client_key>\w{9})/(?P<sharer_identifier>[0-9]+)/$', views.display_sharer_plugin_page),
+    (r'^share/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>[0-9]+)/$', views.display_sharer_plugin_page),
 
     #action page
     (r'^actiontype/$', views.action_type_page),

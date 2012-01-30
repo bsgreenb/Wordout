@@ -53,7 +53,6 @@ def register_page(request):
 
 ##### SHARER #####
 
-RESULTS_PER_PAGE = 20
 
 def main_page(request):
     if request.user.is_authenticated():
@@ -71,8 +70,7 @@ def main_page(request):
                 order_by = order_by,
                 direction = direction,
                 action_type_id = action_type_id,
-                page_number = page_number,
-                results_per_page = RESULTS_PER_PAGE
+                page_number = page_number
             )
 
             # next is to have a list of dicts that I can loop through to give the sorting url and header
@@ -279,18 +277,18 @@ def edit_msg_page(request):
 
     return HttpResponseRedirect('/pluginpage/')
 
-def display_sharer_plugin_page(request, client_key, sharer_identifier):
+def display_sharer_plugin_page(request, client_key, customer_sharer_identifier):
     # this is the actual promote page the customers link on their websites
 
     try:
-        customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = sharer_identifier)
+        customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = customer_sharer_identifier)
     except Customer.DoesNotExist:
         return Http404
 
-    sharer_detail = customer.display_sharers(sharer_identifier = sharer_identifier)
+    ls = customer.display_sharers(customer_sharer_identifier = customer_sharer_identifier)
     message_title = customer.message_title
     message_body = customer.message_body
-    return render_to_response('display_plugin_page.html', dict(sharer_detail = sharer_detail, message_title = message_title, message_body = message_body), context_instance = RequestContext(request))
+    return render_to_response('display_plugin_page.html', dict(ls = ls, message_title = message_title, message_body = message_body), context_instance = RequestContext(request))
 
 
 ##### ACTION #####
@@ -362,7 +360,6 @@ def path_page(request, host_id):
     return HttpResponse(simplejson.dumps(results), 'application/javascript')
 
 def share_page(request, client_key, sharer_identifier):
-    #need completely construct this page.
     try:
         customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = sharer_identifier)
     except Customer.DoesNotExist:

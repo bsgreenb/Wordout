@@ -23,8 +23,7 @@ def get_customer_by_api_key(api_key):
 ##### APIDOC #####
 @login_required
 def apidoc_overview_page(request):
-    customer = Customer.objects.get(user=request.user)
-    api_key = customer.api_key
+    api_key = Customer.objects.get(user=request.user).api_key
     return render_to_response('apidoc/apidoc_overview.html', dict(api_key=api_key), context_instance=RequestContext(request))
 
 def apidoc_do_action_page(request):
@@ -253,7 +252,9 @@ def api_get_all_sharers_page(request, api_key):
     if result:
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
-    ls = customer.display_sharers()
+    total_number_of_sharers = customer.sharer_set.count() # this is sent as results_per_page.
+
+    ls = customer.display_sharers(results_per_page=total_number_of_sharers)
     status = 'OK'
     message = 'query succeed.'
     result = get_api_metaset(status, message)
@@ -286,7 +287,7 @@ def api_get_sharer_by_identifier(request, api_key):
             result = get_api_metaset(status, message)
             HttpResponse(simplejson.dumps(result), 'application/javascript')
 
-        ls = customer.display_sharers(sharer_identifier = data['customer_sharer_identifier'])
+        ls = customer.display_sharers(customer_sharer_identifier = data['customer_sharer_identifier'])
         status = 'OK'
         message = 'query succeed.'
         result = get_api_metaset(status, message)
