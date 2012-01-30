@@ -41,13 +41,13 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('wordout', ['Full_Link'])
 
-        # Adding model 'Customergroup'
-        db.create_table('wordout_customergroup', (
+        # Adding model 'Customer_Group'
+        db.create_table('wordout_customer_group', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('max_users', self.gf('django.db.models.fields.IntegerField')(max_length=10)),
-            ('max_actions', self.gf('django.db.models.fields.IntegerField')(max_length=2)),
+            ('max_users', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=10)),
+            ('max_actions', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=2)),
         ))
-        db.send_create_signal('wordout', ['Customergroup'])
+        db.send_create_signal('wordout', ['Customer_Group'])
 
         # Adding model 'Customer'
         db.create_table('wordout_customer', (
@@ -57,7 +57,7 @@ class Migration(SchemaMigration):
             ('api_key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=30)),
             ('message_title', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
             ('message_body', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('customergroup', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Customergroup'])),
+            ('customer_group', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['wordout.Customer_Group'])),
         ))
         db.send_create_signal('wordout', ['Customer'])
 
@@ -65,7 +65,7 @@ class Migration(SchemaMigration):
         db.create_table('wordout_sharer', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Customer'])),
-            ('customer_sharer_identifier', self.gf('django.db.models.fields.IntegerField')(max_length=10)),
+            ('customer_sharer_identifier', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=10)),
             ('code', self.gf('django.db.models.fields.CharField')(unique=True, max_length=8, db_index=True)),
             ('redirect_link', self.gf('django.db.models.fields.related.ForeignKey')(related_name='sharer_redirect_link', to=orm['wordout.Full_Link'])),
             ('enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
@@ -90,7 +90,7 @@ class Migration(SchemaMigration):
         db.create_table('wordout_action_type', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Customer'])),
-            ('customer_action_type_identifier', self.gf('django.db.models.fields.IntegerField')(max_length=2)),
+            ('customer_action_type_identifier', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=2)),
             ('action_name', self.gf('django.db.models.fields.CharField')(max_length=20)),
             ('description', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
             ('enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
@@ -103,7 +103,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('click', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Click'])),
             ('action_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wordout.Action_Type'])),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
+            ('extra_data', self.gf('django.db.models.fields.CharField')(max_length=250, null=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
         db.send_create_signal('wordout', ['Action'])
@@ -123,8 +123,8 @@ class Migration(SchemaMigration):
         # Deleting model 'Full_Link'
         db.delete_table('wordout_full_link')
 
-        # Deleting model 'Customergroup'
-        db.delete_table('wordout_customergroup')
+        # Deleting model 'Customer_Group'
+        db.delete_table('wordout_customer_group')
 
         # Deleting model 'Customer'
         db.delete_table('wordout_customer')
@@ -184,7 +184,7 @@ class Migration(SchemaMigration):
             'action_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Action_Type']"}),
             'click': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Click']"}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
+            'extra_data': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'wordout.action_type': {
@@ -192,7 +192,7 @@ class Migration(SchemaMigration):
             'action_name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'customer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Customer']"}),
-            'customer_action_type_identifier': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
+            'customer_action_type_identifier': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '2'}),
             'description': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
@@ -211,17 +211,17 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Customer'},
             'api_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'}),
             'client_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '9'}),
-            'customergroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Customergroup']"}),
+            'customer_group': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': "orm['wordout.Customer_Group']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'message_body': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'message_title': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
         },
-        'wordout.customergroup': {
-            'Meta': {'object_name': 'Customergroup'},
+        'wordout.customer_group': {
+            'Meta': {'object_name': 'Customer_Group'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'max_actions': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
-            'max_users': ('django.db.models.fields.IntegerField', [], {'max_length': '10'})
+            'max_actions': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '2'}),
+            'max_users': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '10'})
         },
         'wordout.full_link': {
             'Meta': {'object_name': 'Full_Link'},
@@ -247,7 +247,7 @@ class Migration(SchemaMigration):
             'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '8', 'db_index': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'customer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wordout.Customer']"}),
-            'customer_sharer_identifier': ('django.db.models.fields.IntegerField', [], {'max_length': '10'}),
+            'customer_sharer_identifier': ('django.db.models.fields.PositiveIntegerField', [], {'max_length': '10'}),
             'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
