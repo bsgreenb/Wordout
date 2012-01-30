@@ -26,7 +26,7 @@ def force_url_format(url):
     url_format = re.compile(r'^(https?\://[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3})((/\S*)?)$')
     return url_format.search(url)
 
-def check_session_form(request):
+def get_previous_form(request): # Because of modal dialogues, sometimes we want to pass the form from modals to the main page that called them for displaying their error msgs
     if request.session.get('form', ''):
         form = request.session['form']
         del request.session['form']

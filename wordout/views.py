@@ -11,7 +11,7 @@ from django.utils import simplejson
 from wordout.forms import *
 from wordout.models import *
 from wordout.lib import get_ip, code_generator
-from wordout.lib import check_session_form  #I store form error in session['form'] this function is to return the form that includes error
+from wordout.lib import get_previous_form  #I store form error in session['form'] this function is to return the form that includes error
 
 
 ##### SYSTEM RELATED #####
@@ -57,11 +57,15 @@ def register_page(request):
 
 ##### SHARER #####
 
-
+#TODO: Look at how he uses templates
+#TODO: Probably make customer_sharer_identifier + customer_id unique_together (read docs on that first tho)
 def main_page(request):
+
     if request.user.is_authenticated():
         form = DisplaySharerForm(request.GET)  # validation is in the form
         if form.is_valid():
+
+            RESULTS_PER_PAGE = 20
             order_by = form.cleaned_data['order_by']
             direction = form.cleaned_data['direction']
             action_type_id = form.cleaned_data['action_type_id']
@@ -74,98 +78,97 @@ def main_page(request):
                 order_by = order_by,
                 direction = direction,
                 action_type_id = action_type_id,
-                page_number = page_number
+                page_number = page_number,
+                results_per_page = RESULTS_PER_PAGE
             )
 
-            # next is to have a list of dicts that I can loop through to give the sorting url and header
-            sort_links = [
-                {'order_by':'customer_sharer_identifier','display_name':'sharer_id'},
-                {'order_by':'redirect_link', 'display_name':'link'},
-                {'order_by':'click_total', 'display_name':'visits'}
-            ]
 
-            for action_type in ls[0]['action_type_set']: # complete the sort links
-                sort_links.append({
-                    'order_by':'action_count',
-                    'display_name':action_type['action_name'],
-                    'action_type_id': action_type['action_type_id'],
-                })
+            if not ls:
+                total_sharer_count = 0 #This is where they're going to begin
+                return render_to_response('sharer.html', dict(total_sharer_count = total_sharer_count), context_instance=RequestContext(request))
+            else:
+                total_sharer_count = customer.sharer_set.order_by('-customer_sharer_identifier')[0]   # sort by customer_sharer_identifier is the same as sort by created
+                # next is to have a list of dicts that I can loop through to give the sorting url and header
 
-            sort_links.append({'order_by':'enabled', 'display_name':'enable'}) #this guy goes the last
-            # NOW, I set urls
-            next_page_url = ''
-            previous_page_url = ''
+                sort_links = [
+                        {'order_by':'customer_sharer_identifier','display_name':'sharer_id'},
+                        {'order_by':'redirect_link', 'display_name':'link'},
+                        {'order_by':'click_total', 'display_name':'visits'}
+                ]
 
-            for item in sort_links:
-                page_number = int(page_number)
-                base_url = '/?order_by=' + item['order_by']
+                #This completes the header row, by inspecting the first result
+                for action_type in ls[0]['action_type_set']:
+                    sort_links.append({
+                        'order_by':'action_count',
+                        'display_name':action_type['action_name'],
+                        'action_type_id': action_type['action_type_id'],
+                        })
 
-                toggle_direction = 'desc'
-                if direction == 'desc':  # switch desc, asc
-                    toggle_direction = 'asc'
+                sort_links.append({'order_by':'enabled', 'display_name':'enabled'}) #Add the reset of the header row
 
-                if item['order_by'] == order_by and (item['order_by'] != 'action_count' or item['action_type_id'] == action_type_id):
-                    url = base_url + '&direction=' + toggle_direction
-                    if direction == 'desc':
-                        item['header_arrow'] = 'headerSortUp'
+                # Django complains when these aren't set in advance
+                next_page_url = None
+                previous_page_url = None
+                display_end = None
+                display_start = None
+
+                for sort_link in sort_links:
+                    url = '/?order_by=' + sort_link['order_by']
+
+                    if sort_link['order_by'] == 'action_count':
+                        url +='&action_type_id=' + str(sort_link['action_type_id'])
+
+                    #Something is always being sorted on, so this if will always be run at least once.  That's why we can assume that our pagination stuff is done there.
+                    if sort_link['order_by'] == order_by and (sort_link['order_by'] != 'action_count' or sort_link['action_type_id'] == action_type_id): #If this is the one currently being sorted on...
+
+                        #Toggle the direction and show the right header
+                        if direction == 'DESC':
+                            url += '&direction=ASC'
+                            sort_link['header_arrow'] = 'headerSortUp'
+                        else:
+                            url += '&direction=DESC'
+                            sort_link['header_arrow'] = 'headerSortDown'
+
+                        #After we set the url stuff specifically for this (selected) one, we need to set the pagination URLs based on it...
+                        base_page_url = url + '&direction=' + direction + '&page_number='
+
+                        if (page_number * RESULTS_PER_PAGE) >= total_sharer_count: #it's the last page
+                            next_page_url = None
+                        else:
+                            next_page_url = base_page_url + str(page_number + 1)
+
+                        if page_number > 1:
+                            previous_page_url = base_page_url + str(page_number - 1)
+                        else: #It's the first page
+                            previous_page_url = None
+
+                        display_end = min(int(page_number) * RESULTS_PER_PAGE, total_sharer_count) #we use min() to insure that it doesn't assume the final page is a full one.
+                        display_start = (int(page_number) - 1) * RESULTS_PER_PAGE + 1
+                        #TODO: Stop doing the pagination checks in the template. Update templates to check for none
                     else:
-                        item['header_arrow'] = 'headerSortDown'
+                        url += '&direction=DESC'
 
-                    # previous_page_url and next_page_url. built based on base_url, direction and page_number
+                    url += '&page_number=1' #Sort links will always reset the pg number to 1.  We don't do this earlier so we don't mess up the pagination code above.
 
-                    base_page_url = base_url + '&direction=' + direction + '&page_number='
+                    sort_link['sort_url'] = url
 
-                    next_page_number = page_number + 1
-                    next_page_url = base_page_url + str(next_page_number)
+                form = get_previous_form(request) # this gets the form from the session var created by the modal dialogue, then discards the session so refresh doesn't cause an issue.
 
-                    previous_page_number = page_number - 1
-                    previous_page_url = base_page_url + str(previous_page_number)
+                # EXPLAIN RETURN VARS:
+                # sort_links are used to display table headers plus the sort urls
+                # ls is the sharer contents
+                # default_start is used for pop out form to create sharers
+                # previous_page_url and next_page_url are used for previous page and next page
+                # passed_page_number is used to disable previous page if it is equal to 0
+                # display_start and display_end are used to fill x - x of xxxx
+                #return HttpResponse(sort_links)
 
-                    if item['order_by'] == 'action_count' and item['action_type_id'] == action_type_id:
-                        next_page_url = next_page_url + '&action_type_id=' + str(item['action_type_id'])
-                        previous_page_url = previous_page_url + '&action_type_id=' + str(item['action_type_id'])
-
-                else:
-                    url = base_url + '&direction=desc'
-
-                url = url + '&page_number=1'
-
-                try:
-                    url = url + '&action_type_id=' + str(item['action_type_id'])
-                except KeyError:
-                    pass
-
-                item['sort_url'] = url
-
-                # i need sent page number
-
-            #get default start value to create numeric identifiers on the pop out form
-            try:
-                start_id = Sharer.objects.filter(customer = customer).order_by('-created')[0].customer_sharer_identifier + 1
-            except IndexError:
-                start_id = 1
-
-            display_end = int(page_number) * RESULTS_PER_PAGE
-            display_start = (int(page_number) - 1) * RESULTS_PER_PAGE + 1
-
-            form = check_session_form(request) # this is used to display form errors. the function will take the form and remove it from the session.
-            # EXPLAIN RETURN VARS:
-            # sort_links are used to display table headers plus the sort urls
-            # ls is the sharer contents
-            # default_start is used for pop out form to create sharers
-            # previous_page_url and next_page_url are used for previous page and next page
-            # passed_page_number is used to disable previous page if it is equal to 0
-            # display_start and display_end are used to fill x - x of xxxx
-            #return HttpResponse(sort_links)
-            return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, start_id = start_id, previous_page_url = previous_page_url, next_page_url = next_page_url, passed_page_number=page_number, display_start = display_start, display_end=display_end, form = form), context_instance=RequestContext(request))
+                return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, total_sharer_count = total_sharer_count, previous_page_url = previous_page_url, next_page_url = next_page_url, display_start = display_start, display_end=display_end, form = form), context_instance=RequestContext(request))
         else:
-            return Http404
-
+            return HttpResponseRedirect('/') #Redirect to the main page w/o invalid parameters
     else:
         form = RegistrationForm()
-    return render_to_response(
-                'main_page.html', dict(form=form),
-                context_instance=RequestContext(request))
+        return render_to_response('landing_page.html', dict(form=form), context_instance=RequestContext(request))
 
 @login_required
 def show_referrer_by_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
@@ -266,7 +269,7 @@ def sharer_plugin_page(request):
     client_key = customer.client_key
     message_title = customer.message_title
     message_body = customer.message_body
-    form = check_session_form(request)
+    form = get_previous_form(request)
     return render_to_response('plugin_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
 
 @login_required
@@ -308,7 +311,7 @@ def action_type_page(request):
     else:
         new_action_type_identifier = customer.action_type_set.aggregate(last_customer_action_type_identifier=Max('customer_action_type_identifier'))['last_customer_action_type_identifier'] + 1
 
-    form = check_session_form(request)
+    form = get_previous_form(request)
     return render_to_response('action_type_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, new_action_type_identifier = new_action_type_identifier, form=form), context_instance=RequestContext(request))
 
 @login_required

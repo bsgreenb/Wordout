@@ -181,7 +181,7 @@ class Customer(models.Model):
                 data.append(holder)
         return data
 
-
+    #TODO: We need to handle the situation where customer sharer identifier is already there..
     def create_sharer(self, start, end, redirect_link):
         redirect_link, created = get_or_create_link(redirect_link)
 
