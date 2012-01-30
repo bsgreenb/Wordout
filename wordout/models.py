@@ -36,7 +36,7 @@ class Full_Link(models.Model):
     def __unicode__(self):
         return '%s%s' % (self.host, self.path)
 
-class Customergroup(models.Model): # identify paid/unpaid users
+class Customer_Group(models.Model): # identify paid/unpaid users
     max_users = models.PositiveIntegerField(max_length = 10)
     max_actions = models.PositiveIntegerField(max_length = 2)
     
@@ -56,7 +56,7 @@ class Customer(models.Model):
     api_key = models.CharField(max_length = 30, unique=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
-    customergroup = models.ForeignKey(Customergroup)
+    customer_group = models.ForeignKey(Customer_Group)
 
     def __unicode__(self):
         return str(self.user)

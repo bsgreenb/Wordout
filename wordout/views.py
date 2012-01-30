@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login as auth_login, logout
+from django.contrib.auth import authenticate, login as auth_login, logout  #We want to avoid overriding our own login function
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
@@ -26,29 +26,33 @@ def register_page(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = User.objects.create_user(
-                    username=form.cleaned_data['username'],
-                    password=form.cleaned_data['password1'],
-                    email=form.cleaned_data['email']
-                     )
-            #this is not the best practice. I forced extra query here.  change on version 2
-            #I need create/check both client_id and api_key
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1'],
+                email=form.cleaned_data['email']
+            )
+
+            # We make sure that the code hasn't been taken
             while True:
                 client_key = code_generator(9)
                 api_key = code_generator(30)
                 try:
                     Customer.objects.get(client_key = client_key)
+                    Customer.objects.get(api_key = api_key)
                 except Customer.DoesNotExist:
-                    try:
-                        Customer.objects.get(api_key = api_key)
-                    except Customer.DoesNotExist:
-                        break
-            free_group = Customergroup.objects.get(id=1)
-            Customer.objects.create(user=user, client_key = client_key, api_key = api_key, customergroup=free_group )
+                    break
+
+            FREE_GROUP = 1 #ID of the Free Users group.  This is what everyone will be during private beta.
+            Customer.objects.create(user=user, client_key = client_key, api_key = api_key, customer_group=FREE_GROUP)
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
+
+            #Since everything worked, log them in and send them to the main page.
             auth_login(request, new_user)
             return HttpResponseRedirect('/')
+
+        #TODO: We currently don't show errors in the template, we just return register.html again.
     else:
         form = RegistrationForm()
+
     return render_to_response('registration/register.html', dict(form = form), context_instance=RequestContext(request))
 
 ##### SHARER #####
