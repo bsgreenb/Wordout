@@ -61,7 +61,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    def display_sharers(self, customer_sharer_identifier = None, order_by = 'created', direction = 'desc', action_type_id = None, page_number = 1, results_per_page = 30):
+    def display_sharers(self, customer_sharer_identifier = None, order_by = 'customer_sharer_identifier', direction = 'desc', action_type_id = None, page_number = 1, results_per_page = 20):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
@@ -169,8 +169,8 @@ class Customer(models.Model):
     def display_referrer_by_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
         sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
-        ls = Full_Link.objects.filter(click__sharer=sharer).annotate(clicks=Count('click__id')).order_by('clicks')
-        #haven't gotten the offical way to serialization models. need replace the code below in the future
+        ls = Full_Link.objects.select_related().filter(click__sharer=sharer).annotate(clicks=Count('click__id')).order_by('clicks')
+        #haven't gotten the official way to serialization models. need replace the code below in the future
         data = []
         if ls:
             for i in ls:
@@ -179,8 +179,6 @@ class Customer(models.Model):
                     'clicks':i.clicks
                 }
                 data.append(holder)
-
-           #data = [{'referrer': i.host.host_name + i.path, 'clicks': i.clicks} for i in ls]
         return data
 
 
@@ -246,7 +244,7 @@ class Customer(models.Model):
 
     ##### api call #####
     def api_add_action(self, click, action_type, extra_data):
-        action = Action.objects.create(click=click, action_type=action_type, extra_data=extra_data)
+        Action.objects.create(click=click, action_type=action_type, extra_data=extra_data)
 
 
 class Sharer(models.Model):

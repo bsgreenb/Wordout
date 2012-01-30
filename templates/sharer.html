@@ -220,7 +220,7 @@ span#pagination #next{
 				</td>
 				<td>{{ sharer.click_total }}
 					{% if sharer.click_total > 0 %}
-						<span class="label notice" id="{{sharer.customer_sharer_identifier}}">detail</span>
+						<span class="label notice" id="{{sharer.sharer_identifier}}">detail</span>
 					{% endif %}		
 				</td>
 				{% for action_type in sharer.action_type_set %}
