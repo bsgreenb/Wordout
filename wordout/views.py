@@ -87,7 +87,7 @@ def main_page(request):
                 total_sharer_count = 0 #This is where they're going to begin
                 return render_to_response('sharer.html', dict(total_sharer_count = total_sharer_count), context_instance=RequestContext(request))
             else:
-                total_sharer_count = customer.sharer_set.order_by('-customer_sharer_identifier')[0]   # sort by customer_sharer_identifier is the same as sort by created
+                total_sharer_count = customer.sharer_set.count()   # sort by customer_sharer_identifier is the same as sort by created
                 # next is to have a list of dicts that I can loop through to give the sorting url and header
 
                 sort_links = [
@@ -162,9 +162,9 @@ def main_page(request):
                 # passed_page_number is used to disable previous page if it is equal to 0
                 # display_start and display_end are used to fill x - x of xxxx
                 #return HttpResponse(sort_links)
-
                 return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, total_sharer_count = total_sharer_count, previous_page_url = previous_page_url, next_page_url = next_page_url, display_start = display_start, display_end=display_end, form = form), context_instance=RequestContext(request))
         else:
+            request.session['form'] = form
             return HttpResponseRedirect('/') #Redirect to the main page w/o invalid parameters
     else:
         form = RegistrationForm()
@@ -192,7 +192,7 @@ def create_sharer_page(request):
             end = form.cleaned_data['end']
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
-            data = customer.create_sharer(start, end, redirect_link)
+            customer.create_sharer(start, end, redirect_link)
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/')
