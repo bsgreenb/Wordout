@@ -186,16 +186,19 @@ span#pagination #next{
 	<button class="btn" id="enable" disabled="disabled">Enable</button>
 	<button class="btn" id="disable" disabled="disabled">Disable</button>
 
-    {% if start_id > 1 %}
-        <span id="pagination">
+    <span id="pagination">
 
-            {{display_start}}-{{display_end}} of {{start_id}}
+        {{display_start}}-{{display_end}} of {{total_sharer_count}}
 
-            <a id="previous" href="{{previous_page_url}}" class="btn"{% if passed_page_number == 1 %} disabled="disabled" {% endif %}"><</a>
+        {% if previous_page_url %}
+            <a id="previous" href="{{previous_page_url}}" class="btn""><</a>
+        {% endif %}
 
+        {% if next_page_url %}
             <a id="next" href="{{next_page_url}}" class="btn">></a>
-        </span>
-    {% endif %}
+        {% endif %}
+
+    </span>
 	
 </div>
 <table id="actions" class="zebra-striped">
@@ -238,61 +241,6 @@ span#pagination #next{
 	</tbody>
 </table>
 
-{% else %}
-<div class="hero-unit">
-	<h1>Hello, world!</h1>
-	<p>
-		Vestibulum id ligula porta felis euismod semper. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
-	</p>
-
-	<p>
-		<button class="btn primary large" data-keyboard="true" data-backdrop="true" data-controls-modal="create-sharer-modal-from-dom">CREATE SHARERS</button>
-	</p>
-</div>
-
-{% endif %}
-
-<!------------------------------- -->
-
-<div id="create-sharer-modal-from-dom" class="modal hide fade" style="display: block;">
-	<form method="POST" action="/createsharer/" id="create-sharer-form">
-		{% csrf_token %}
-	    <div class="modal-header">
-		    <a class="close" href="#">×</a>
-		    <h3>Create Sharers</h3>
-	    </div>
-	
-	    <div class="modal-body">
-			<fieldset>
-				<div class="clearfix">
-					<label>Start sharer id:</label>
-					<div class="input">
-						<input type="text" value="{{start_id}}" name="start" readonly="readonly">
-					</div>
-				</div>
-			
-				<div class="clearfix">
-					<label>End sharer id: </label>
-					<div class="input">
-						<input type="text" name="end">
-					</div>
-				</div>
-				
-				<div class="clearfix">
-					<label>Redirect link: </label>
-					<div class="input">
-						<input type="text" name="redirect_link">
-					</div>
-				</div>
-			</fieldset>
-	    </div>
-
-	    <div class="modal-footer">
-		    <input class="btn primary" href="#" value="Save" type="submit">
-	    </div>
-	</form>
-</div>
-
 
 <!-- this modal is to hold the ajax request for referrer by sharer -->
 
@@ -328,7 +276,7 @@ span#pagination #next{
 <div id="edit-link-modal-from-dom" class="modal hide fade" style="display: block;">
 
     <form>
-    <!--  <form method="POST" action="/changelink/" id="edit-link-form">-->
+        <!--  <form method="POST" action="/changelink/" id="edit-link-form">-->
         <div class="modal-header">
             <a class="close" href="#" id="exit-link-modal">×</a>
             <h3>Edit links</h3>
@@ -352,9 +300,65 @@ span#pagination #next{
         <div class="modal-footer">
             <input class="btn primary" href="#" value="Save" type="button" id="submit-edit-link">
         </div>
-	</form>
+    </form>
 </div>
 
 
 <input type="hidden" id="sharer-ls" name="sharer_ls" value="" /> <!-- to hold the post value for sharer ls -->
+
+
+{% else %}
+<div class="hero-unit">
+	<h1>Hello, world!</h1>
+	<p>
+		Vestibulum id ligula porta felis euismod semper. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+	</p>
+
+	<p>
+		<button class="btn primary large" data-keyboard="true" data-backdrop="true" data-controls-modal="create-sharer-modal-from-dom">CREATE SHARERS</button>
+	</p>
+</div>
+
+{% endif %}
+
+<!------------------------------- -->
+
+<div id="create-sharer-modal-from-dom" class="modal hide fade" style="display: block;">
+	<form method="POST" action="/createsharer/" id="create-sharer-form">
+		{% csrf_token %}
+	    <div class="modal-header">
+		    <a class="close" href="#">×</a>
+		    <h3>Create Sharers</h3>
+	    </div>
+	
+	    <div class="modal-body">
+			<fieldset>
+				<div class="clearfix">
+					<label>Start sharer id:</label>
+					<div class="input">
+						<input type="text" value="{{total_acount_sharer|add:"1"}}" name="start" readonly="readonly">
+					</div>
+				</div>
+			
+				<div class="clearfix">
+					<label>End sharer id: </label>
+					<div class="input">
+						<input type="text" name="end">
+					</div>
+				</div>
+				
+				<div class="clearfix">
+					<label>Redirect link: </label>
+					<div class="input">
+						<input type="text" name="redirect_link">
+					</div>
+				</div>
+			</fieldset>
+	    </div>
+
+	    <div class="modal-footer">
+		    <input class="btn primary" href="#" value="Save" type="submit">
+	    </div>
+	</form>
+</div>
 {% endblock %}

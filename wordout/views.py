@@ -69,7 +69,7 @@ def main_page(request):
             order_by = form.cleaned_data['order_by']
             direction = form.cleaned_data['direction']
             action_type_id = form.cleaned_data['action_type_id']
-            page_number = form.cleaned_data['page_number']
+            page_number = int(form.cleaned_data['page_number'])
             customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier']
 
             customer = Customer.objects.get(user = request.user)
@@ -142,8 +142,8 @@ def main_page(request):
                         else: #It's the first page
                             previous_page_url = None
 
-                        display_end = min(int(page_number) * RESULTS_PER_PAGE, total_sharer_count) #we use min() to insure that it doesn't assume the final page is a full one.
-                        display_start = (int(page_number) - 1) * RESULTS_PER_PAGE + 1
+                        display_end = min(page_number * RESULTS_PER_PAGE, total_sharer_count) #we use min() to insure that it doesn't assume the final page is a full one.
+                        display_start = (page_number - 1) * RESULTS_PER_PAGE + 1
                         #TODO: Stop doing the pagination checks in the template. Update templates to check for none
                     else:
                         url += '&direction=DESC'

@@ -61,7 +61,7 @@ class Customer(models.Model):
     def __unicode__(self):
         return str(self.user)
 
-    def display_sharers(self, customer_sharer_identifier = None, order_by = 'customer_sharer_identifier', direction = 'desc', action_type_id = None, page_number = 1, results_per_page = 20):
+    def display_sharers(self, customer_sharer_identifier = None, order_by = 'customer_sharer_identifier', direction = 'DESC', action_type_id = None, page_number = 1, results_per_page = 20):
 
         def sharers_by_action_count_with_total_clicks():
             """Gives a queryset sharers, ordered by a given action type (action_type_id), with the total number of clicks"""
@@ -101,10 +101,7 @@ class Customer(models.Model):
             '''
 
             #We have to do a workaround cus SQL-Lite is not cool about using parameters in ORDER BY clauses
-            if direction == 'desc':
-                queryString += 'DESC'
-            elif direction == 'asc':
-                queryString += 'ASC'
+            queryString += direction
 
             return Sharer.objects.raw(queryString, (action_type_id, self.id))
 
@@ -119,13 +116,13 @@ class Customer(models.Model):
                 sharer_ls_with_total_clicks = Sharer.objects.select_related().filter(customer=self).annotate(click_total = Count('click__id')) #get the total number of clicks for every sharer of this customer
 
                 #order by the specified field
-                if direction == 'desc':
+                if direction == 'DESC':
                     order_by = '-' + order_by
                 sharer_ls_with_total_clicks = sharer_ls_with_total_clicks.order_by(order_by)
 
 
             # Now it's time to slice (regardless of what they're ordering by)
-            page_number = int(page_number) - 1 #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
+            page_number -= page_number #Because SQL's limit's are 0 based, but the page_number's API users provide are 1-based
             start = results_per_page * page_number
             end = results_per_page * (page_number + 1)
             sharer_ls_with_total_clicks = sharer_ls_with_total_clicks[start:end]

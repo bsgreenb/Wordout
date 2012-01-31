@@ -72,7 +72,7 @@ class DisplaySharerForm(forms.Form):
 
     def clean_direction(self):
         if 'direction' in self.cleaned_data and self.cleaned_data['direction'] == '':
-            return 'desc'
+            return 'DESC'
         elif 'direction' in self.cleaned_data:
             return self.cleaned_data['direction']
         raise forms.ValidationError('direction is invalid')
