@@ -110,7 +110,55 @@ class Test_Update_Title_And_Body(TestCase):
 class Test_Create_ActionType(TestCase):
     fixtures = ['test_data.json']
 
-    # requirement 1.
+    # requirement 1. action_name is inserted
+    # requirement 2. description is inserted
+    # requirement 3. the number of action type is added by one
+
+    def setUp(self):
+        self.customer = Customer.objects.get(pk=1)
+        self.action_name = 'test'
+        self.description = 'test out'
+        self.count = Action_Type.objects.filter(customer=self.customer).count()
+        self.next_action_type = Action_Type.objects.filter(customer=self.customer).order_by('-created')[0].customer_action_type_identifier + 1
+
+    def test_create_action_type(self):
+        self.customer.create_actiontype(self.next_action_type, self.action_name, self.description)
+        current_action_types = Action_Type.objects.filter(customer=self.customer)
+
+        self.assertEqual(self.count+1, current_action_types.count())
+
+        last_action = current_action_types.order_by('-created')[0]
+        self.assertEqual(self.action_name, last_action.action_name)
+        self.assertEqual(self.description, last_action.description)
+
+class Test_Edit_ActionType(TestCase):
+    fixtures = ['test_data.json']
+
+    # requirement 1. action_name is saved
+    # requirement 2. description is saved.
+
+    def setUp(self):
+        self.customer = Customer.objects.get(pk=1)
+        self.new_action_name = 'fk'
+        self.new_description = 'fkfk'
+        self.edited_actiontype = Action_Type.objects.filter(customer=self.customer).order_by('-created')[0]
+
+    def test_edit_action_type(self):
+        self.edited_actiontype.action_name = self.new_action_name
+        self.edited_actiontype.description = self.new_description
+        self.edited_actiontype.save()
+
+        after_edited_actiontype = Action_Type.objects.filter(customer=self.customer).order_by('-created')[0]
+        self.assertEqual(after_edited_actiontype.action_name, self.new_action_name)
+        self.assertEqual(after_edited_actiontype.description, self.new_description)
+
+
+class Test_Disable_Or_Enable_Action(TestCase):
+    fixtures = ['test_data.json']
+
+    # requirement 1. [[1], [1,2], [1,2,3]] / disable and enable. the code should work for all six cases
+    pass
+
 
 
 
