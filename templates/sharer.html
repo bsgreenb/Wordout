@@ -218,7 +218,7 @@ span#pagination #next{
                     <input class="checkbox" type="checkbox" name="sharer_id" value="{{sharer.sharer_identifier}}"/>{{ sharer.sharer_identifier }}
                 </td>
 				<td>
-					<div><a href="http://wordout.me/{{sharer.code}}">wordout.me/{{ sharer.code }}</a></div>
+					<div><a href="http://{{request.get_host}}/{{sharer.code}}" target="_blank">{{request.get_host}}/{{ sharer.code }}</a></div>
 					<div class="redirect_link">{{ sharer.redirect_link }}</div>
 				</td>
 				<td>{{ sharer.click_total }}
@@ -309,9 +309,9 @@ span#pagination #next{
 
 {% else %}
 <div class="hero-unit">
-	<h1>Hello, world!</h1>
+	<h1>Get Started</h1>
 	<p>
-		Vestibulum id ligula porta felis euismod semper. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+		It's time to get started with creating a referral program.  Click the "<B>Create Sharers</B>" button to
 	</p>
 
 	<p>
