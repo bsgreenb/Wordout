@@ -70,11 +70,9 @@ def main_page(request):
             direction = form.cleaned_data['direction']
             action_type_id = form.cleaned_data['action_type_id']
             page_number = int(form.cleaned_data['page_number'])
-            customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier']
 
             customer = Customer.objects.get(user = request.user)
             ls = customer.display_sharers(
-                customer_sharer_identifier = customer_sharer_identifier,
                 order_by = order_by,
                 direction = direction,
                 action_type_id = action_type_id,
