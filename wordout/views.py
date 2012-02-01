@@ -62,6 +62,11 @@ def register_page(request):
 def main_page(request):
 
     if request.user.is_authenticated():
+        customer = Customer.objects.select_related().get(user = request.user)
+
+        if customer.sharer_set.count() == 0 and customer.redirect_link == None: # no sharer and referral program is not set up yet.
+            return HttpResponseRedirect('/pluginpage')
+
         form = DisplaySharerForm(request.GET)  # validation is in the form
         if form.is_valid():
 
@@ -72,7 +77,6 @@ def main_page(request):
             page_number = int(form.cleaned_data['page_number'])
             customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier']
 
-            customer = Customer.objects.get(user = request.user)
             ls = customer.display_sharers(
                 customer_sharer_identifier = customer_sharer_identifier,
                 order_by = order_by,
@@ -271,20 +275,21 @@ def sharer_plugin_page(request):
     # this is the config page.
 
     customer = Customer.objects.select_related().get(user=request.user)
-    customer_sharer_ls = customer.sharer_set.all()
+    redirect_link = customer.redirect_link #
     client_key = customer.client_key
     message_title = customer.message_title
     message_body = customer.message_body
     form = get_previous_form(request)
-    return render_to_response('plugin_page.html', dict(customer_sharer_ls=customer_sharer_ls, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
+    return render_to_response('plugin_page.html', dict(redirect_link = redirect_link, client_key=client_key, message_title=message_title, message_body=message_body, form=form), context_instance=RequestContext(request))
 
 @login_required
-def edit_msg_page(request):
+def set_program_page(request):
     if request.method == 'POST':
         customer = Customer.objects.get(user=request.user)
-        form = MessageForm(request.POST)
+        form = SetProgramForm(request.POST)
         if form.is_valid():
-            customer.update_title_and_body(form.cleaned_data['message_title'], form.cleaned_data['message_body'])
+            redirect_link, created = get_or_create_link(form.cleaned_data['redirect_link'])
+            customer.update_program(redirect_link, form.cleaned_data['message_title'], form.cleaned_data['message_body'])
         else:
             request.session['form'] = form
 
@@ -292,16 +297,27 @@ def edit_msg_page(request):
 
 def display_sharer_plugin_page(request, client_key, customer_sharer_identifier):
     # this is the actual promote page the customers link on their websites
-
     try:
-        customer = Customer.objects.get(client_key = client_key, sharer__customer_sharer_identifier = customer_sharer_identifier)
+        customer = Customer.objects.select_related().get(client_key = client_key)
     except Customer.DoesNotExist:
         return Http404
 
-    ls = customer.display_sharers(customer_sharer_identifier = customer_sharer_identifier)
+    ls = '' # if ls is empty, in templates, I will display example stuff.
+    if customer_sharer_identifier != 'example':
+        try: # get or create the sharer
+            sharer = customer.sharer_set.select_related().get(customer_sharer_identifier=customer_sharer_identifier)
+        except: #TODO not sure what catch error should be here. DoesNotExist is not working.
+            sharer = customer.create_sharer(customer_sharer_identifier = customer_sharer_identifier, redirect_link = customer.redirect_link)
+
+        ls = customer.display_sharers(customer_sharer_identifier = customer_sharer_identifier)
+
     message_title = customer.message_title
     message_body = customer.message_body
-    return render_to_response('display_plugin_page.html', dict(ls = ls, message_title = message_title, message_body = message_body), context_instance = RequestContext(request))
+
+    action_types = customer.action_type_set.all()# display action types of this customer for example cases
+
+    # I check whether the ls is empty to decide to show example page. if example page, I use action_types to display the client's action types
+    return render_to_response('display_plugin_page.html', dict(ls = ls, message_title = message_title, message_body = message_body, action_types=action_types), context_instance = RequestContext(request))
 
 
 ##### ACTION #####

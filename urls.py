@@ -31,11 +31,12 @@ urlpatterns = patterns('',
 
     #sharer plugin page
     (r'^pluginpage/$', views.sharer_plugin_page),
-    (r'^editmsg/$', views.edit_msg_page),
+    (r'^setprogram/$', views.set_program_page),
 
 
-    #display sharer page (the actual promote page plus this sharer's analysis)
-    (r'^share/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>[0-9]+)/$', views.display_sharer_plugin_page),
+    #display sharer page (the actual promote page plus this sharer's analysis).
+    (r'^client/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>example)/$', views.display_sharer_plugin_page), # show example page
+    (r'^client/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>\w+)/$', views.display_sharer_plugin_page), # run the function get_or_create_sharers and display the actual stats
 
     #action page
     (r'^actiontype/$', views.action_type_page),
