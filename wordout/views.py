@@ -230,22 +230,28 @@ def change_redirect_link_page(request):
     }))
 
 @login_required
-def disable_or_enable_sharer_page(request, action):
+def disable_or_enable_page(request, action, function):  # this is used on four pages: enable/disable sharers and enable/disable actions
     if request.is_ajax():
-        sharer_ls = request.POST['sharer_ls']
-        if sharer_ls != 'ALL':
-            sharer_ls = sharer_ls[:-1].split(',')
+        ls = request.POST['ls']
+        if ls != 'ALL':
+            ls = ls[:-1].split(',')
         customer = Customer.objects.get(user=request.user)
         if action == 'disable':
             try:
-                customer.disable_or_enable_sharer(sharer_ls, False)
+                if function == 'disable_or_enable_sharer':
+                    customer.disable_or_enable_sharer(ls, False)
+                elif function == 'disable_or_enable_action':
+                    customer.disable_or_enable_action(ls, False)
             except AttributeError:
                 return HttpResponse(simplejson.dumps({
                     'status':'fail'
                 }))
         if action ==  'enable':
             try:
-                customer.disable_or_enable_sharer(sharer_ls, True)
+                if function == 'disable_or_enable_sharer':
+                    customer.disable_or_enable_sharer(ls, True)
+                elif function == 'disable_or_enable_action':
+                    customer.disable_or_enable_action(ls, True)
             except AttributeError:
                 return HttpResponse(simplejson.dumps({
                     'status':'fail'
@@ -317,10 +323,11 @@ def action_type_page(request):
 @login_required
 def create_action_type_page(request):
     if request.method == 'POST':
-        customer = Customer.objects.get(user=request.user)
+        customer = Customer.objects.select_related().get(user=request.user)
+        next_customer_action_type_identifier = customer.action_type_set.count() + 1
         form  = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.create_actiontype(form.cleaned_data['customer_action_type_identifier'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.create_actiontype(next_customer_action_type_identifier, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/actiontype')
@@ -336,16 +343,20 @@ def edit_action_type_page(request):
             request.session['form'] = form
     return HttpResponseRedirect('/actiontype')
 
+'''
 @login_required
 def disable_or_enable_action_page(request, action):
-    if request.method == 'POST':
-        action_type_ls = request.POST['action_type_ls'][:-1].split(',')
+    if request.is_ajax():
+        action_type_ls = request.POST['ls'][:-1].split(',')
         customer = Customer.objects.get(user=request.user)
         if action == 'disable':
-            customer.disable_or_enable_action(action_type_ls, False)
+            try:
+                customer.disable_or_enable_action(action_type_ls, False)
+            except
         if action == 'enable':
             customer.disable_or_enable_action(action_type_ls, True)
     return HttpResponseRedirect('/actiontype')
+'''
 
 @login_required
 def referrer_page(request):

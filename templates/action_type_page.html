@@ -3,6 +3,7 @@
 {% block js %}
 <script src="/static/js/plugin/jquery.tablesorter.js"></script>
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
+<script src="/static/js/get_ls_and_toggle.js"></script>
 <script>
 $(function() {
 	$("table#actions").tablesorter({widthFixed: true})
@@ -29,25 +30,13 @@ $(function() {
 	});
 	
 	$('#disable').click(function(){
-		$('#disable-action-type-ls').val('');
-		
-		var actions = '';
-		$('.checkbox:checked').each(function(){
-			actions += $(this).val() + ',';
-		});
-		$('#disable-action-type-ls').val(actions);
-		$('#disable-form').submit();
+        set_ls_from_checkbox('action-type-ls'); //from get_ls_and_toggle.js
+		enable_or_disable('/disableaction/', 'action-type-ls', '{{csrf_token}}')
 	});
 	
 	$('#enable').click(function(){
-		$('#enable-action-type-ls').val('');
-		
-		var actions = '';
-		$('.checkbox:checked').each(function(){
-			actions += $(this).val() + ',';
-		});
-		$('#enable-action-type-ls').val(actions);
-		$('#enable-form').submit();
+        set_ls_from_checkbox('action-type-ls'); //from get_ls_and_toggle.js
+        enable_or_disable('/enableaction/', 'action-type-ls', '{{csrf_token}}')
 	});
 	
 })
@@ -117,8 +106,12 @@ div#action #enable, div#action #disable{
 				<td>
 					{{ l.description }}
 				</td>
-				<td>
-					{{ l.enabled }}
+				<td class="enable">
+                    {% if l.enabled %}
+                        enable
+                    {% else %}
+                        disable
+                    {% endif %}
 				</td>
 			</tr>
 		{% endfor %}
@@ -141,13 +134,6 @@ div#action #enable, div#action #disable{
 	
 		<div class="modal-body">
 			<fieldset>
-				<div class="clearfix">
-					<label>Action ID: </label>
-					<div class="input">
-						<input type="text" value="{{new_action_type_identifier}}" name="customer_action_type_identifier" readonly="readonly"/>
-					</div>
-				</div>
-				
 				<div class="clearfix">
 					<label>Action Name: </label>
 					<div class="input">
@@ -203,14 +189,6 @@ div#action #enable, div#action #disable{
 	</form>
 </div>
 
-<form id="disable-form" action="/disableaction/" method="POST" style="display:hidden">
-    {% csrf_token %}
-    <input type="hidden" id="disable-action-type-ls" name="action_type_ls" value="" />
-</form>
-
-<form id="enable-form" action="/enableaction/" method="POST" style="display:hidden">
-    {% csrf_token %}
-    <input type="hidden" id="enable-action-type-ls" name="action_type_ls" value="" />
-</form>
+<input type="hidden" id="action-type-ls" name="action_type_ls" value="" />
 
 {% endblock %}
