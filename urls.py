@@ -26,8 +26,8 @@ urlpatterns = patterns('',
     (r'^createsharer/$', views.create_sharer_page),
     (r'^sharer/([0-9]+)/$', views.show_referrer_by_sharer),
     (r'^changelink/$', views.change_redirect_link_page),
-    (r'^disablesharer/$', views.disable_or_enable_sharer_page, {'action':'disable'}),
-    (r'^enablesharer/$', views.disable_or_enable_sharer_page, {'action':'enable'}),
+    (r'^disablesharer/$', views.disable_or_enable_page, {'action':'disable', 'function':'disable_or_enable_sharer'}),
+    (r'^enablesharer/$', views.disable_or_enable_page, {'action':'enable','function':'disable_or_enable_sharer'}),
 
     #sharer plugin page
     (r'^pluginpage/$', views.sharer_plugin_page),
@@ -41,9 +41,8 @@ urlpatterns = patterns('',
     (r'^actiontype/$', views.action_type_page),
     (r'^createactiontype/$', views.create_action_type_page),
     (r'^editactiontype/$', views.edit_action_type_page),
-    (r'^disableaction/$', views.disable_or_enable_action_page, {'action':'disable'}),
-    (r'^enableaction/$', views.disable_or_enable_action_page, {'action':'enable'}),
-
+    (r'^disableaction/$', views.disable_or_enable_page, {'action':'disable', 'function':'disable_or_enable_action'}),
+    (r'^enableaction/$', views.disable_or_enable_page, {'action':'enable', 'function':'disable_or_enable_action'}),
 
     #api doc page
     (r'^apidoc/overview/$', api_views.apidoc_overview_page),

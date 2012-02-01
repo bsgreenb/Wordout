@@ -87,7 +87,7 @@ def main_page(request):
                 total_sharer_count = 0 #This is where they're going to begin
                 return render_to_response('sharer.html', dict(total_sharer_count = total_sharer_count), context_instance=RequestContext(request))
             else:
-                total_sharer_count = customer.sharer_set.order_by('-customer_sharer_identifier')[0]   # sort by customer_sharer_identifier is the same as sort by created
+                total_sharer_count = customer.sharer_set.count()   # sort by customer_sharer_identifier is the same as sort by created
                 # next is to have a list of dicts that I can loop through to give the sorting url and header
 
                 sort_links = [
@@ -162,9 +162,9 @@ def main_page(request):
                 # passed_page_number is used to disable previous page if it is equal to 0
                 # display_start and display_end are used to fill x - x of xxxx
                 #return HttpResponse(sort_links)
-
                 return render_to_response('sharer.html', dict(ls=ls, sort_links=sort_links, total_sharer_count = total_sharer_count, previous_page_url = previous_page_url, next_page_url = next_page_url, display_start = display_start, display_end=display_end, form = form), context_instance=RequestContext(request))
         else:
+            request.session['form'] = form
             return HttpResponseRedirect('/') #Redirect to the main page w/o invalid parameters
     else:
         form = RegistrationForm()
@@ -192,7 +192,7 @@ def create_sharer_page(request):
             end = form.cleaned_data['end']
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
-            data = customer.create_sharer(start, end, redirect_link)
+            customer.create_sharer(start, end, redirect_link)
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/')
@@ -230,22 +230,28 @@ def change_redirect_link_page(request):
     }))
 
 @login_required
-def disable_or_enable_sharer_page(request, action):
+def disable_or_enable_page(request, action, function):  # this is used on four pages: enable/disable sharers and enable/disable actions
     if request.is_ajax():
-        sharer_ls = request.POST['sharer_ls']
-        if sharer_ls != 'ALL':
-            sharer_ls = sharer_ls[:-1].split(',')
+        ls = request.POST['ls']
+        if ls != 'ALL':
+            ls = ls[:-1].split(',')
         customer = Customer.objects.get(user=request.user)
         if action == 'disable':
             try:
-                customer.disable_or_enable_sharer(sharer_ls, False)
+                if function == 'disable_or_enable_sharer':
+                    customer.disable_or_enable_sharer(ls, False)
+                elif function == 'disable_or_enable_action':
+                    customer.disable_or_enable_action(ls, False)
             except AttributeError:
                 return HttpResponse(simplejson.dumps({
                     'status':'fail'
                 }))
         if action ==  'enable':
             try:
-                customer.disable_or_enable_sharer(sharer_ls, True)
+                if function == 'disable_or_enable_sharer':
+                    customer.disable_or_enable_sharer(ls, True)
+                elif function == 'disable_or_enable_action':
+                    customer.disable_or_enable_action(ls, True)
             except AttributeError:
                 return HttpResponse(simplejson.dumps({
                     'status':'fail'
@@ -317,10 +323,11 @@ def action_type_page(request):
 @login_required
 def create_action_type_page(request):
     if request.method == 'POST':
-        customer = Customer.objects.get(user=request.user)
+        customer = Customer.objects.select_related().get(user=request.user)
+        next_customer_action_type_identifier = customer.action_type_set.count() + 1
         form  = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.create_actiontype(form.cleaned_data['customer_action_type_identifier'], form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.create_actiontype(next_customer_action_type_identifier, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/actiontype')
@@ -336,16 +343,20 @@ def edit_action_type_page(request):
             request.session['form'] = form
     return HttpResponseRedirect('/actiontype')
 
+'''
 @login_required
 def disable_or_enable_action_page(request, action):
-    if request.method == 'POST':
-        action_type_ls = request.POST['action_type_ls'][:-1].split(',')
+    if request.is_ajax():
+        action_type_ls = request.POST['ls'][:-1].split(',')
         customer = Customer.objects.get(user=request.user)
         if action == 'disable':
-            customer.disable_or_enable_action(action_type_ls, False)
+            try:
+                customer.disable_or_enable_action(action_type_ls, False)
+            except
         if action == 'enable':
             customer.disable_or_enable_action(action_type_ls, True)
     return HttpResponseRedirect('/actiontype')
+'''
 
 @login_required
 def referrer_page(request):

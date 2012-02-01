@@ -3,38 +3,11 @@
 {% block js %}
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script src="/static/js/detail.js"></script>
+<script src="/static/js/get_ls_and_toggle.js"></script>
 <script>
 $(function() {
 
     load_data_to_modal('sharer');  //load data to detail modal
-
-    function set_sharer_ls_from_checkbox(){ //used for edit redirect link, disable, enable
-        if ($('#sharer-ls').val() != 'ALL')
-        {
-            $('#sharer-ls').val('');
-
-            var sharer = '';
-            $('.checkbox:checked').each(function(){
-                sharer += $(this).val() + ',';
-            });
-            $('#sharer-ls').val(sharer);
-        }
-    }
-
-    function enable_or_disable_sharers(url){
-        $.post(url,{
-                    sharer_ls: $('#sharer-ls').val(),
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                function(data){
-                    if (data['status'] == 'OK')
-                    {
-                        $('.checkbox:checked').each(function(){
-                            $(this).parent().parent().find('.enable').html(data['enable_text']);
-                        });
-                    }
-                }, "json");
-    }
 
 	$('#select-all').on('click', function(){
 		var $checkbox = $('.checkbox');
@@ -101,7 +74,7 @@ $(function() {
 
 	$('#submit-edit-link').click(function(){
 
-        set_sharer_ls_from_checkbox();
+        set_ls_from_checkbox('sharer-ls'); //from get_ls_and_toggle.js
 
         var link = $('#redirect-link').val();
 
@@ -126,13 +99,13 @@ $(function() {
 	});
 	
 	$('#disable').click(function(){
-        set_sharer_ls_from_checkbox();
-        enable_or_disable_sharers('/disablesharer/');
+        set_ls_from_checkbox('sharer-ls'); //from get_ls_and_toggle.js
+        enable_or_disable('/disablesharer/', 'sharer-ls', '{{csrf_token}}');
 	});
 	
 	$('#enable').click(function(){
-        set_sharer_ls_from_checkbox();
-        enable_or_disable_sharers('/enablesharer/');
+        set_ls_from_checkbox('sharer-ls'); //from get_ls_and_toggle.js
+        enable_or_disable('/enablesharer/', 'sharer-ls', '{{csrf_token}}');
 	});
 
     $('a#previous').click(function(e){
@@ -231,9 +204,9 @@ span#pagination #next{
 				{% endfor %}
                 <td class="enable">
                     {% if sharer.enabled %}
-                        enabled
+                        enable
                     {% else %}
-                        disabled
+                        disable
                     {% endif %}
                 </td>
 			</tr>

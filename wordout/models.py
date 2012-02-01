@@ -54,6 +54,7 @@ class Customer(models.Model):
     user = models.OneToOneField(User)
     client_key = models.CharField(max_length = 9, unique=True)
     api_key = models.CharField(max_length = 30, unique=True)
+    redirect_link = models.ForeignKey(Full_Link, related_name='customer_default_redirect_link', null=True, blank=True)
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
     customer_group = models.ForeignKey(Customer_Group,default=1)
@@ -179,17 +180,20 @@ class Customer(models.Model):
         return data
 
     #TODO: We need to handle the situation where customer sharer identifier is already there..
+
     def create_sharer(self, start, end, redirect_link):
+        EXCLUE_CODE_LIST = ('sharer', 'apidoc')
         redirect_link, created = get_or_create_link(redirect_link)
 
         for i in range(start, end+1):
             while True:
                 code = code_generator()
-                try:
-                    Sharer.objects.get(code = code)
-                except Sharer.DoesNotExist:
-                    Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
-                    break
+                if code not in EXCLUE_CODE_LIST:
+                    try:
+                        Sharer.objects.get(code = code)
+                    except Sharer.DoesNotExist:
+                        Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
+                        break
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)

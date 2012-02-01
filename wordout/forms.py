@@ -160,7 +160,6 @@ class ChangeLinkForm(forms.Form):
         raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
 
 class ActionTypeForm(forms.Form):
-    customer_action_type_identifier = forms.IntegerField(error_messages={'required':'', 'invalid':''})
     action_name = forms.CharField(max_length=20, error_messages={'required':'', 'invalid':''})
     action_description = forms.CharField(max_length=250, required=False, error_messages={'invalid':''})
     
@@ -168,13 +167,10 @@ class ActionTypeForm(forms.Form):
         super(ActionTypeForm, self).__init__(*args, **kwargs)
         self._user = user
 
-    def clean_action_id(self):
-        if 'customer_action_type_identifier' in self.cleaned_data:
-            customer_action_type_identifier = self.cleaned_data['customer_action_type_identifier']
-            max_actions = self._user.customer_group.max_actions
-            if customer_action_type_identifier >= max_actions:
-                raise forms.ValidationError('The max number of  actions is %s' % max_actions)
-            return customer_action_type_identifier
+    def clean_action_name(self): # BAD NAME to call function. But I do want to check the max actions on this form and give form errors.
+        if self._user.action_type_set.count() >= self._user.customer_group.max_actions: # current number of actions is equal or more than max actions
+            raise forms.ValidationError('The max number of  actions is %s' % max_actions)
+        return self.cleaned_data['action_name']
 
 class MessageForm(forms.Form):
     message_title = forms.CharField(max_length=200, required=False, error_messages={'invalid':''})
