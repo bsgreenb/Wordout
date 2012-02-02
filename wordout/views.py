@@ -57,7 +57,8 @@ def register_page(request):
 
 ##### SHARER #####
 
-#TODO: Look at how he uses templates
+#TODO: Understand this related_name stuff Rui is doing and make sure he's doing it right
+#TODO: Bug-fixo
 #TODO: Probably make customer_sharer_identifier + customer_id unique_together (read docs on that first tho)
 def main_page(request):
 
