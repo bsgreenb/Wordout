@@ -184,19 +184,15 @@ class Customer(models.Model):
 
     #TODO: We need to handle the situation where customer sharer identifier is already there..
 
-    def create_sharer(self, start, end, redirect_link):
+    def create_sharer(self, customer_sharer_identifier, redirect_link):
         EXCLUE_CODE_LIST = ('sharer', 'apidoc')
-        redirect_link, created = get_or_create_link(redirect_link)
-
-        for i in range(start, end+1):
-            while True:
-                code = code_generator()
-                if code not in EXCLUE_CODE_LIST:
-                    try:
-                        Sharer.objects.get(code = code)
-                    except Sharer.DoesNotExist:
-                        Sharer.objects.create(customer = self, customer_sharer_identifier = i, code = code, redirect_link = redirect_link)
-                        break
+        while True:
+            code = code_generator()
+            if code not in EXCLUE_CODE_LIST:
+                try:
+                    Sharer.objects.get(code = code)
+                except Sharer.DoesNotExist:
+                    return Sharer.objects.create(customer = self, customer_sharer_identifier = customer_sharer_identifier, code = code, redirect_link = redirect_link)
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
@@ -211,7 +207,8 @@ class Customer(models.Model):
             sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)
         sharers.update(enabled = boolean)
     
-    def update_title_and_body(self, message_title, message_body):
+    def update_program(self, redirect_link, message_title, message_body):
+        self.redirect_link=redirect_link
         self.message_title=message_title
         self.message_body=message_body
         self.save()
@@ -253,7 +250,7 @@ class Customer(models.Model):
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_sharer_identifier = models.PositiveIntegerField(max_length = 10)
+    customer_sharer_identifier = models.CharField(max_length = 2000)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)

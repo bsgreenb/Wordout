@@ -172,9 +172,18 @@ class ActionTypeForm(forms.Form):
             raise forms.ValidationError('The max number of  actions is %s' % max_actions)
         return self.cleaned_data['action_name']
 
-class MessageForm(forms.Form):
+class SetProgramForm(forms.Form):
+    redirect_link = forms.URLField(error_messages={'required':'', 'invalid':''})
     message_title = forms.CharField(max_length=200, required=False, error_messages={'invalid':''})
     message_body = forms.CharField(required=False, error_messages={'invalid':''})
+
+    def clean_redirect_link(self):
+        if 'redirect_link' in self.cleaned_data:
+            redirect_link = self.cleaned_data['redirect_link']
+            if force_url_format(redirect_link):
+            #regular expression testing out the format
+                return redirect_link
+        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
 
 class ValidateReferrer(forms.Form):
     referrer = forms.URLField(error_messages={'required':'', 'invalid':''})
@@ -188,25 +197,14 @@ class ValidateIP(forms.Form):
 class DoActionForm(forms.Form):
     click_id = forms.IntegerField(min_value=1)
     action_type_identifier = forms.IntegerField(min_value=1, max_value=99)
-    extra_data = forms.CharField(max_length=250, required=False)
+    extra_data = forms.CharField(max_length=500, required=False)
 
 class AddSharerForm(forms.Form):
-    redirect_link = forms.URLField()
-    
-    def clean_redirect_link(self):
-        if 'redirect_link' in self.cleaned_data:
-            redirect_link = self.cleaned_data['redirect_link']
-            if force_url_format(redirect_link):
-                #regular expression testing out the format
-               return redirect_link
-        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
+    customer_sharer_identifier = forms.CharField(max_length=2000)
 
 class ToggleSharerForm(forms.Form):
-    customer_sharer_identifier = forms.IntegerField(min_value=1)
+    customer_sharer_identifier = forms.CharField(max_length=2000)
     enabled = forms.BooleanField(required=False)
 
-class GetSharerByIdForm(forms.Form):
-    #check if the sharer id is an integer
-    customer_sharer_identifier = forms.IntegerField(min_value=1)
 
     

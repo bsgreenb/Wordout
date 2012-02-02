@@ -103,7 +103,7 @@ class Test_Update_Title_And_Body(TestCase):
         self.title = 'Hello. This is the title'
 
     def test_title_and_body_save(self):
-        self.customer.update_title_and_body(self.title, self.body)
+        self.customer.update_program(self.title, self.body)
         self.assertEqual(self.body, self.customer.message_body)
         self.assertEqual(self.title, self.customer.message_title)
 

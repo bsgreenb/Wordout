@@ -31,11 +31,12 @@ urlpatterns = patterns('',
 
     #sharer plugin page
     (r'^pluginpage/$', views.sharer_plugin_page),
-    (r'^editmsg/$', views.edit_msg_page),
+    (r'^setprogram/$', views.set_program_page),
 
 
-    #display sharer page (the actual promote page plus this sharer's analysis)
-    (r'^share/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>[0-9]+)/$', views.display_sharer_plugin_page),
+    #display sharer page (the actual promote page plus this sharer's analysis).
+    (r'^client/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>example)/$', views.display_sharer_plugin_page), # show example page
+    (r'^client/(?P<client_key>\w{9})/(?P<customer_sharer_identifier>\w+)/$', views.display_sharer_plugin_page), # run the function get_or_create_sharers and display the actual stats
 
     #action page
     (r'^actiontype/$', views.action_type_page),
@@ -47,18 +48,16 @@ urlpatterns = patterns('',
     #api doc page
     (r'^apidoc/overview/$', api_views.apidoc_overview_page),
     (r'^apidoc/doAction/$', api_views.apidoc_do_action_page),
+    (r'^apidoc/getSharer/$', api_views.apidoc_get_sharer_page),
     (r'^apidoc/getAllSharers/$', api_views.apidoc_get_all_sharers_page),
-    (r'^apidoc/getSharerInfo/$', api_views.apidoc_get_sharer_info_page),
-    (r'^apidoc/addSharer/$', api_views.apidoc_add_sharer),
     (r'^apidoc/toggleSharer/$', api_views.apidoc_toggle_sharer),
     (r'^apidoc/getActionType/$', api_views.apidoc_get_action_type),
     
     #apicall I think this could go into a subdomain. decide later
     (r'^api/doAction/(?P<api_key>\w{30})/$', api_views.api_do_action_page),
-    (r'^api/addSharer/(?P<api_key>\w{30})/$', api_views.api_add_sharer_page),
-    (r'^api/toggleSharer/(?P<api_key>\w{30})/$', api_views.api_toggle_sharer_page),
+    (r'^api/getSharer/(?P<api_key>\w{30})/$', api_views.api_get_sharer_page),
     (r'^api/getAllSharers/(?P<api_key>\w{30})/$', api_views.api_get_all_sharers_page),
-    (r'^api/getSharerInfoById/(?P<api_key>\w{30})/$', api_views.api_get_sharer_by_identifier),
+    (r'^api/toggleSharer/(?P<api_key>\w{30})/$', api_views.api_toggle_sharer_page),
     (r'^api/getActionTypes/(?P<api_key>\w{30})/$', api_views.api_get_action_type_page),
 
     #(r'^referrer/$', views.referrer_page),
