@@ -255,7 +255,7 @@ class Sharer(models.Model):
     created = models.DateTimeField(auto_now_add = True)
 
     class Meta:
-        unique_together = (customer, customer_sharer_identifier) #Ensure that a given customer never repeats a customer_sharer_identifier.  Note: If we let them add multiple sites this might change in the future.
+        unique_together = ('customer', 'customer_sharer_identifier') #Ensure that a given customer never repeats a customer_sharer_identifier.  Note: If we let them add multiple sites this might change in the future.
 
     def __unicode__(self):
         return unicode(self.id)
