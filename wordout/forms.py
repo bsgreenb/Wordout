@@ -154,10 +154,10 @@ class DoActionForm(forms.Form):
     extra_data = forms.CharField(max_length=500, required=False)
 
 class AddSharerForm(forms.Form):
-    customer_sharer_identifier = forms.CharField(max_length=2000)
+    customer_sharer_identifier = forms.CharField(max_length=50)
 
 class ToggleSharerForm(forms.Form):
-    customer_sharer_identifier = forms.CharField(max_length=2000)
+    customer_sharer_identifier = forms.CharField(max_length=50)
     enabled = forms.BooleanField(required=False)
 
 
