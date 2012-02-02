@@ -39,15 +39,11 @@ def apidoc_get_all_sharers_page(request):
 
 
 def apidoc_toggle_sharer(request):
-
-
     return render_to_response('apidoc/apidoc_togglesharer.html', dict(), context_instance = RequestContext(request))
 
 
 
 def apidoc_get_action_type(request):
-
-
     return render_to_response('apidoc/apidoc_getactiontype.html', dict(), context_instance = RequestContext(request))
 
 
@@ -187,6 +183,8 @@ def api_toggle_sharer_page(request, api_key):
         customer, result = get_customer_by_api_key(api_key)
         if result:
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+
         customer_sharer_identifier = data['customer_sharer_identifier']
         enabled = data['enabled']
 
@@ -196,6 +194,7 @@ def api_toggle_sharer_page(request, api_key):
             message = 'invalid sharer identifier.'
             result = get_api_metaset('failed', message)
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
         sharer.enabled=enabled
         sharer.save()
         status = 'OK'
@@ -206,8 +205,10 @@ def api_toggle_sharer_page(request, api_key):
                 'enabled': enabled
                 }
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
-    result = get_api_metaset('failed', 'invalid data sent.')
-    return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+    else:
+        result = get_api_metaset('failed', 'invalid data sent.')
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
         
 def api_get_action_type_page(request, api_key):
     customer, result = get_customer_by_api_key(api_key)
@@ -240,36 +241,3 @@ def api_get_all_sharers_page(request, api_key):
     result = get_api_metaset(status, message)
     result['response'] = ls
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-def api_get_sharer_by_identifier(request, api_key):
-    #i repeat myself with api_toggle_sharer_page.
-    customer, result = get_customer_by_api_key(api_key)
-    if result:
-        return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-    status = 'failed'
-    sharer_identifier = request.GET.get('sharer_identifier', '')
-    if not sharer_identifier:
-        message = 'sharer identifier is required.'
-        result = get_api_metaset(status, message)
-        return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-    form = GetSharerByIdForm({
-        'customer_sharer_identifier':sharer_identifier
-    })
-
-    if form.is_valid():
-        data = form.cleaned_data
-        try:
-            Sharer.objects.get(customer = customer, customer_sharer_identifier = data['customer_sharer_identifier'])
-        except Sharer.DoesNotExist:
-            message = 'invalid sharer identifier.'
-            result = get_api_metaset(status, message)
-            HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-        ls = customer.display_sharers(customer_sharer_identifier = data['customer_sharer_identifier'])
-        status = 'OK'
-        message = 'query succeed.'
-        result = get_api_metaset(status, message)
-        result['response'] = ls
-        return HttpResponse(simplejson.dumps(result), 'application/javascript')

@@ -203,11 +203,8 @@ class AddSharerForm(forms.Form):
     customer_sharer_identifier = forms.CharField(max_length=2000)
 
 class ToggleSharerForm(forms.Form):
-    customer_sharer_identifier = forms.IntegerField(min_value=1)
+    customer_sharer_identifier = forms.CharField(max_length=2000)
     enabled = forms.BooleanField(required=False)
 
-class GetSharerByIdForm(forms.Form):
-    #check if the sharer id is an integer
-    customer_sharer_identifier = forms.IntegerField(min_value=1)
 
     
