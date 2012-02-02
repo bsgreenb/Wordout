@@ -197,18 +197,10 @@ class ValidateIP(forms.Form):
 class DoActionForm(forms.Form):
     click_id = forms.IntegerField(min_value=1)
     action_type_identifier = forms.IntegerField(min_value=1, max_value=99)
-    extra_data = forms.CharField(max_length=250, required=False)
+    extra_data = forms.CharField(max_length=500, required=False)
 
 class AddSharerForm(forms.Form):
-    redirect_link = forms.URLField()
-    
-    def clean_redirect_link(self):
-        if 'redirect_link' in self.cleaned_data:
-            redirect_link = self.cleaned_data['redirect_link']
-            if force_url_format(redirect_link):
-                #regular expression testing out the format
-               return redirect_link
-        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
+    customer_sharer_identifier = forms.CharField(max_length=2000)
 
 class ToggleSharerForm(forms.Form):
     customer_sharer_identifier = forms.IntegerField(min_value=1)

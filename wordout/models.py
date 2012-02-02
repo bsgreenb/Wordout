@@ -247,7 +247,7 @@ class Customer(models.Model):
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_sharer_identifier = models.PositiveIntegerField(max_length = 10)
+    customer_sharer_identifier = models.CharField(max_length = 2000)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)

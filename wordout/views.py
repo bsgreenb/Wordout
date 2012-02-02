@@ -304,10 +304,18 @@ def display_sharer_plugin_page(request, client_key, customer_sharer_identifier):
 
     ls = '' # if ls is empty, in templates, I will display example stuff.
     if customer_sharer_identifier != 'example':
-        try: # get or create the sharer
-            sharer = customer.sharer_set.select_related().get(customer_sharer_identifier=customer_sharer_identifier)
-        except: #TODO not sure what catch error should be here. DoesNotExist is not working.
-            sharer = customer.create_sharer(customer_sharer_identifier = customer_sharer_identifier, redirect_link = customer.redirect_link)
+
+        form = AddSharerForm({
+            'customer_sharer_identifier':customer_sharer_identifier
+        })
+
+        if form.is_valid():
+            try:
+                sharer = customer.sharer_set.select_related().get(customer_sharer_identifier=form.cleaned_data['customer_sharer_identifier'])
+            except: #TODO not sure what catch error should be here. DoesNotExist is not working.
+                sharer = customer.create_sharer(customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier'], redirect_link = customer.redirect_link)
+        else:  # not a valid sharer identifier
+           return HttpResponse('customer sharer identifier needs to be integer or characters.')
 
         ls = customer.display_sharers(customer_sharer_identifier = customer_sharer_identifier)
 
