@@ -181,7 +181,7 @@ class Customer(models.Model):
 
     #TODO: We need to handle the situation where customer sharer identifier is already there..
 
-    def create_sharer(self, customer_sharer_identifier, redirect_link):
+    def create_sharer(self, customer_sharer_identifier):
         EXCLUE_CODE_LIST = ('sharer', 'apidoc')
         while True:
             code = code_generator()
@@ -189,7 +189,8 @@ class Customer(models.Model):
                 try:
                     Sharer.objects.get(code = code)
                 except Sharer.DoesNotExist:
-                    return Sharer.objects.create(customer = self, customer_sharer_identifier = customer_sharer_identifier, code = code, redirect_link = redirect_link)
+                    #return Sharer.objects.create(customer = self, customer_sharer_identifier = customer_sharer_identifier, code = code, redirect_link = self.redirect_link)
+                    return Sharer.objects.create(customer = self, customer_sharer_identifier = customer_sharer_identifier, code = code, redirect_link = self.redirect_link)
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
         new_redirect_link, created = get_or_create_link(new_redirect_link)
@@ -247,7 +248,7 @@ class Customer(models.Model):
 
 class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
-    customer_sharer_identifier = models.CharField(max_length = 2000)
+    customer_sharer_identifier = models.CharField(max_length = 50)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
     redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
     enabled = models.BooleanField(default = True)
