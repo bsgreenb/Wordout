@@ -122,7 +122,6 @@ def main_page(request):
 
                     #Something is always being sorted on, so this if will always be run at least once.  That's why we can assume that our pagination stuff is done there.
                     if sort_link['order_by'] == order_by and (sort_link['order_by'] != 'action_count' or sort_link['action_type_id'] == action_type_id): #If this is the one currently being sorted on...
-
                         #Toggle the direction and show the right header
                         if direction == 'DESC':
                             url += '&direction=ASC'
@@ -146,7 +145,6 @@ def main_page(request):
 
                         display_end = min(page_number * RESULTS_PER_PAGE, total_sharer_count) #we use min() to insure that it doesn't assume the final page is a full one.
                         display_start = (page_number - 1) * RESULTS_PER_PAGE + 1
-                        #TODO: Stop doing the pagination checks in the template. Update templates to check for none
                     else:
                         url += '&direction=DESC'
 
@@ -175,7 +173,7 @@ def main_page(request):
 @login_required
 def show_referrer_by_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
     customer = Customer.objects.get(user = request.user)
-    data = customer.display_referrer_by_sharer(customer_sharer_identifier)
+    data = customer.display_referrers_for_sharer(customer_sharer_identifier)
     results = {}
     if data:
         results['success'] = True

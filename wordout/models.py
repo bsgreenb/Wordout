@@ -9,29 +9,25 @@ from lib import code_generator, force_url_format
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
 class HOST(models.Model):
     host_name = models.URLField()
-    created = models.DateTimeField(auto_now_add = True)
 
     def __unicode__(self):
         return self.host_name
 
 class IP(models.Model):
     address = models.IPAddressField()
-    created = models.DateTimeField(auto_now_add = True)
 
     def __unicode__(self):
         return self.address
 
 class User_Agent(models.Model):
     agent = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add = True)
     
     def __unicode__(self):
         return self.agent
 
 class Full_Link(models.Model):
     host = models.ForeignKey(HOST)
-    path = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add = True)
+    path = models.CharField(max_length=200, default='/') #We want to ensure there's always a path
     
     def __unicode__(self):
         return '%s%s' % (self.host, self.path)
@@ -164,22 +160,26 @@ class Customer(models.Model):
 
             return results
 
-    def display_referrer_by_sharer(self, customer_sharer_identifier):
+    def display_referrers_for_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
-        sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
-        ls = Full_Link.objects.select_related().filter(click__sharer=sharer).annotate(clicks=Count('click__id')).order_by('clicks')
+        #TODO: Proly test this out
+        #TODO: Go through Rui's new commits
+        try:
+            sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
+        except DoesNotExist:
+            return []
+        #Now we get the clicks, grouped by the referrers
+        referrers = Click.objects.select_related().filter(sharer=sharer).annotate(click_total=Count('referrer')).order_by('click_total') #We select related so we can get the referrer link
         #haven't gotten the official way to serialization models. need replace the code below in the future
         data = []
-        if ls:
-            for i in ls:
-                holder = {
-                    'referrer':i.host.host_name + i.path,
-                    'clicks':i.clicks
-                }
-                data.append(holder)
+        if referrers:
+            for referrer in referrers:
+                if referrer.host.host_name and referrer.path:
+                    referrer_url = referrer.host.host_name + referrer.path
+                else:
+                    referrer_url = None
+                data.append({'referrer': referrer_url, 'clicks': referrer.click_total})
         return data
-
-    #TODO: We need to handle the situation where customer sharer identifier is already there..
 
     def create_sharer(self, customer_sharer_identifier, redirect_link):
         EXCLUE_CODE_LIST = ('sharer', 'apidoc')
@@ -249,7 +249,7 @@ class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
     customer_sharer_identifier = models.CharField(max_length = 2000)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
-    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
+    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link') #QSTN: (Hmm, first need to figure out our rules on changes/defaults). {This is the link that is used on the "Sharer Page", "Deal JS", and .  It is also used by *default* on the API, but can be overridden there.}
     enabled = models.BooleanField(default = True)
     modified = models.DateTimeField(auto_now = True)
     created = models.DateTimeField(auto_now_add = True)
