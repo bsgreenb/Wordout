@@ -20,50 +20,30 @@ def get_customer_by_api_key(api_key):
         result = get_api_metaset('failed', 'invalid api key')
     return (customer, result)
 
-##### APIDOC #####
+##### APIDOC #####  this is just the instruction.
 @login_required
 def apidoc_overview_page(request):
     api_key = Customer.objects.get(user=request.user).api_key
     return render_to_response('apidoc/apidoc_overview.html', dict(api_key=api_key), context_instance=RequestContext(request))
 
 def apidoc_do_action_page(request):
-
-
     return render_to_response('apidoc/apidoc_doaction.html', dict(), context_instance = RequestContext(request))
 
 
-
-def apidoc_get_all_sharers_page(request):
-
-
-    return render_to_response('apidoc/apidoc_getallsharer.html', dict(), context_instance = RequestContext(request))
-
-
-
-def apidoc_get_sharer_info_page(request):
-
-
+def apidoc_get_sharer_page(request):
     return render_to_response('apidoc/apidoc_getsharerinfo.html', dict(), context_instance = RequestContext(request))
 
 
-
-def apidoc_add_sharer(request):
-
-
-    return render_to_response('apidoc/apidoc_addsharer.html', dict(), context_instance = RequestContext(request))
-
+def apidoc_get_all_sharers_page(request):
+    return render_to_response('apidoc/apidoc_getallsharer.html', dict(), context_instance = RequestContext(request))
 
 
 def apidoc_toggle_sharer(request):
-
-
     return render_to_response('apidoc/apidoc_togglesharer.html', dict(), context_instance = RequestContext(request))
 
 
 
 def apidoc_get_action_type(request):
-
-
     return render_to_response('apidoc/apidoc_getactiontype.html', dict(), context_instance = RequestContext(request))
 
 
@@ -72,7 +52,7 @@ def apidoc_get_action_type(request):
 def api_do_action_page(request, api_key):
     #all data valid?
     #api matches a user?
-    #click sent maches a click?
+    #click sent is a real click?
     #click belongs to the user?
     status = 'failed'
     wocid = request.GET.get('wocid', '')
@@ -81,10 +61,10 @@ def api_do_action_page(request, api_key):
         result = get_api_metaset(status, message) #return httpresponse of a json with fail message
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
-    action_type_identifier = request.GET.get('action_type_identifier', '')
+    action_type_identifier = request.GET.get('action_type_identifier', '') # sent 1, 2, 3
     if not action_type_identifier:
         message = 'missing action type identifier.'       
-        result = get_api_metaset(status, message) #return httpresponse of a json with fail message
+        result = get_api_metaset(status, message)
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
     extra_data = request.GET.get('extra_data', '')
@@ -97,7 +77,7 @@ def api_do_action_page(request, api_key):
     if form.is_valid():
         data = form.cleaned_data
         customer, result = get_customer_by_api_key(api_key) 
-        if result:
+        if result:  # result is true means the user doesn't exist
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
         
         try: #is the click_id valid
@@ -120,13 +100,13 @@ def api_do_action_page(request, api_key):
 
         if click.sharer.customer != customer:
             #does the click id belong to this customer
-            message = 'invalid wordout click id for this api_key'
-            result = get_api_metaset(status, message) #return httpresponse of a json with fail message
+            message = 'invalid wordout click id for this customer'
+            result = get_api_metaset(status, message)
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
         else:
             try:
                 action = customer.api_add_action(click = click, action_type = action_type, extra_data = data['extra_data'])
-            except:
+            except: #TODO give right catch here.
                 messasge = 'service is not available.'
                 result = get_api_metaset(status, message) #return httpresponse of a json with fail message
                 return HttpResponse(simplejson.dumps(result), 'application/javascript')
@@ -143,44 +123,40 @@ def api_do_action_page(request, api_key):
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
 
-def api_add_sharer_page(request, api_key):
+def api_get_sharer_page(request, api_key):
     status = 'failed'
-    redirect_link = request.GET.get('redirect_link', '')
-    if not redirect_link:
-        message = 'redirect link is required'
+    sharer_identifier = request.GET.get('sharer_identifier', '')
+    if not sharer_identifier:
+        message = 'sharer identifier is required'
         result = get_api_metaset(status, message)
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
     form = AddSharerForm({
-        'redirect_link':redirect_link
+        'customer_sharer_identifier': sharer_identifier
         })
-    
+
     if form.is_valid():
-        data = form.cleaned_data
         customer, result = get_customer_by_api_key(api_key)
         if result:
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-        next_customer_sharer_identifier = Sharer.objects.filter(customer=customer).aggregate(current_identifier=Max('customer_sharer_identifier'))['current_identifier'] + 1
         
-        try: 
-            customer.create_sharer(start = next_customer_sharer_identifier, end = next_customer_sharer_identifier, redirect_link = data['redirect_link'])
-        except:
-            message = 'the service is not avaible.'
-            result = get_api_metaset(status, message)
-            return HttpResponse(simplejson.dumps(result), 'application/javascript')
+        try:
+            sharer = customer.sharer_set.select_related().get(customer_sharer_identifier=form.cleaned_data['customer_sharer_identifier']) # sharer is already inserted. get the sharer info
+            status = 'OK'
+            message = 'get the sharer info'
+        except: #TODO not sure what catch error should be here. DoesNotExist is not working.
+            sharer = customer.create_sharer(customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier'], redirect_link = customer.redirect_link)
+            status = 'OK'
+            message = 'The new sharer is added'
 
-        status = 'OK'
-        message = 'The new sharer is added'
         result = get_api_metaset(status, message)
-        result['response'] = {
-                'new_sharer_identifier':next_customer_sharer_identifier, 
-                'code': code,
-                'redirect_link': redirect_link.host.host_name + redirect_link.path
-                }
+        data = customer.display_sharers(customer_sharer_identifier = sharer.customer_sharer_identifier)  # get the sharer's info.
+        result['response'] = data
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
-    result = get_api_metaset(status, 'invalid redirect link sent. You need match the format: http(s)://subdomain.example.com/(path)')
-    return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+    else:
+        result = get_api_metaset(status, 'the sharer identifier is not valid. it has to be integers or characters')
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
 
 def api_toggle_sharer_page(request, api_key):
     #call it enable instead of enabled.
@@ -207,6 +183,8 @@ def api_toggle_sharer_page(request, api_key):
         customer, result = get_customer_by_api_key(api_key)
         if result:
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+
         customer_sharer_identifier = data['customer_sharer_identifier']
         enabled = data['enabled']
 
@@ -216,6 +194,7 @@ def api_toggle_sharer_page(request, api_key):
             message = 'invalid sharer identifier.'
             result = get_api_metaset('failed', message)
             return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
         sharer.enabled=enabled
         sharer.save()
         status = 'OK'
@@ -226,8 +205,10 @@ def api_toggle_sharer_page(request, api_key):
                 'enabled': enabled
                 }
         return HttpResponse(simplejson.dumps(result), 'application/javascript')
-    result = get_api_metaset('failed', 'invalid data sent.')
-    return HttpResponse(simplejson.dumps(result), 'application/javascript')
+
+    else:
+        result = get_api_metaset('failed', 'invalid data sent.')
+        return HttpResponse(simplejson.dumps(result), 'application/javascript')
         
 def api_get_action_type_page(request, api_key):
     customer, result = get_customer_by_api_key(api_key)
@@ -260,36 +241,3 @@ def api_get_all_sharers_page(request, api_key):
     result = get_api_metaset(status, message)
     result['response'] = ls
     return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-def api_get_sharer_by_identifier(request, api_key):
-    #i repeat myself with api_toggle_sharer_page.
-    customer, result = get_customer_by_api_key(api_key)
-    if result:
-        return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-    status = 'failed'
-    sharer_identifier = request.GET.get('sharer_identifier', '')
-    if not sharer_identifier:
-        message = 'sharer identifier is required.'
-        result = get_api_metaset(status, message)
-        return HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-    form = GetSharerByIdForm({
-        'customer_sharer_identifier':sharer_identifier
-    })
-
-    if form.is_valid():
-        data = form.cleaned_data
-        try:
-            Sharer.objects.get(customer = customer, customer_sharer_identifier = data['customer_sharer_identifier'])
-        except Sharer.DoesNotExist:
-            message = 'invalid sharer identifier.'
-            result = get_api_metaset(status, message)
-            HttpResponse(simplejson.dumps(result), 'application/javascript')
-
-        ls = customer.display_sharers(customer_sharer_identifier = data['customer_sharer_identifier'])
-        status = 'OK'
-        message = 'query succeed.'
-        result = get_api_metaset(status, message)
-        result['response'] = ls
-        return HttpResponse(simplejson.dumps(result), 'application/javascript')

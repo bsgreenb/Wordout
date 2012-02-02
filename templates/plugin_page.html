@@ -5,7 +5,7 @@
 $(function() {
 	$('#change').click(function(){
 		$('#change, #preview').hide();
-		$('#message-title, #message-body').removeAttr('disabled', '');
+		$('#redirect-link, #message-title, #message-body').removeAttr('disabled', '');
 		$('#save-change').show();
 	})
 })
@@ -14,11 +14,11 @@ $(function() {
 
 {% block content %}
 
-{% if not customer_sharer_ls %}
+{% if not redirect_link %}
     <div class="alert-message block-message warning">
     	<a class="close" href="#">×</a>
     	<p>
-    		<strong>Holy guacamole! This is a warning!</strong> Best check yo self, you’re not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+    	    THE FIRST STEP IS TO SET UP THE REFERRAL PROGRAM WITH PROPER REDIRECT LINK, MESSAGE TITLE AND MESSAGE BODY.
     	</p>
     </div>
 {% endif %}
@@ -30,16 +30,25 @@ $(function() {
 {% include 'backbone/form_errors.html' %}
 <div>
     <h2>Step 1: Customize your sharer page.</h2>
-    <form class="form-stacked" action="/editmsg/" method="POST">
+    <form class="form-stacked" action="/setprogram/" method="POST">
         {% csrf_token %}
         <fieldset>
             <legend></legend>
+
+            <div class="clearfix">
+                <label>Redirect Link</label>
+                <div class="input">
+                    <input class="xlarge" type="text" size="30" name="redirect_link" value="{% if redirect_link %} {{redirect_link}} {% endif %}" disabled="disabled" id="redirect-link">
+                </div>
+            </div>
+
             <div class="clearfix">
                 <label>Sharer page title</label>
                 <div class="input">
                     <input class="xlarge" type="text" size="30" name="message_title" value="{{message_title}}" disabled="disabled" id="message-title">
                 </div>
             </div>
+
             <div class="clearfix">
                 <label>Sharer page message</label>
                 <div class="input">
@@ -47,9 +56,10 @@ $(function() {
                 </div>
             </div>
             <div>
+
                 <a class="btn primary" id="change" href="#">Change</a>
                 <button class="btn primary" type="submit" id="save-change" style="display:none">Save changes</button>
-                <a class="btn primary" href="http://127.0.0.1:8000/share/123456789/1" id="preview" target="_blank">Preview</a>
+                <a class="btn primary" href="http://127.0.0.1:8000/client/123456789/example" id="preview" target="_blank">Preview</a>
             </div>
         </fieldset>
     </form>
@@ -61,7 +71,7 @@ $(function() {
         <p>
             <h5>Replace [sharer id] with your user id. Use this HTML Link in a Webpage</h5>
             <div>
-                &lt;a href=&quot;http://wordout.me/share/{{ client_key }}/[sharer id]&quot;&gt;Reward Program&lt;/a&gt;
+                &lt;a href=&quot;http://wordout.me/client/{{ client_key }}/[sharer id]&quot;&gt;Reward Program&lt;/a&gt;
             </div>
         </p>
     </div>
