@@ -1,5 +1,13 @@
 {% extends 'backbone/base.html' %}
 
+{% block css %}
+    div.help-block{
+        margin-top: 5px;
+    }
+
+{% endblock %}
+
+
 {% block js %}
 <script>
 $(function() {
@@ -39,6 +47,7 @@ $(function() {
                 <label>Redirect Link</label>
                 <div class="input">
                     <input class="xlarge" type="text" size="30" name="redirect_link" value="{% if redirect_link %} {{redirect_link}} {% endif %}" disabled="disabled" id="redirect-link">
+                    <div class="help-block">The URL need match the format: http(s)://subdomain.example.com</div>
                 </div>
             </div>
 

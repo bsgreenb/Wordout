@@ -338,21 +338,6 @@ def edit_action_type_page(request):
             request.session['form'] = form
     return HttpResponseRedirect('/actiontype')
 
-'''
-@login_required
-def disable_or_enable_action_page(request, action):
-    if request.is_ajax():
-        action_type_ls = request.POST['ls'][:-1].split(',')
-        customer = Customer.objects.get(user=request.user)
-        if action == 'disable':
-            try:
-                customer.disable_or_enable_action(action_type_ls, False)
-            except
-        if action == 'enable':
-            customer.disable_or_enable_action(action_type_ls, True)
-    return HttpResponseRedirect('/actiontype')
-'''
-
 @login_required
 def referrer_page(request):
     customer = Customer.objects.get(user=request.user)
