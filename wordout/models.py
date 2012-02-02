@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 #from django.db import connection #for debugging
 
-from lib import code_generator, force_url_format
+from lib import code_generator, valid_wordout_url
 
 #extend the user object. This is not the best way because I have to query the database once everytime. change it in version two
 class HOST(models.Model):
@@ -40,11 +40,14 @@ class Customer_Group(models.Model): # identify paid/unpaid users
         return str(self.id)
 
 def get_or_create_link(url):
-    result = force_url_format(url) #regular expression forcing http(s)://subdomain.example.extension
-    netloc, path = result.group(1), result.group(2)
-    netloc, created = HOST.objects.get_or_create(host_name = netloc)
-    link, created = Full_Link.objects.get_or_create(host = netloc, path = path)
-    return (link, created)
+    """
+    Takes a complete URL and either gets the Full Link from the database, either by fetching or creating the necessary rows then fetching.
+    """
+    result = valid_wordout_url(url) #regular expression forcing http(s)://subdomain.example.extension
+    host_name, path = result.group(1), result.group(2)
+    host, created = HOST.objects.get_or_create(host_name = netloc)
+    link, created = Full_Link.objects.get_or_create(host = host, path = path)
+    return link
 
 class Customer(models.Model):
     user = models.OneToOneField(User)
@@ -194,7 +197,10 @@ class Customer(models.Model):
                     return Sharer.objects.create(customer = self, customer_sharer_identifier = customer_sharer_identifier, code = code, redirect_link = self.redirect_link)
    
     def change_redirect_link(self, new_redirect_link, sharer_ls):
-        new_redirect_link, created = get_or_create_link(new_redirect_link)
+        """
+        Changes redirect links to new_redirect_link for the sharers specified in sharer_ls.  This can be ALL of them if 'ALL' is sent for that.
+        """
+        new_redirect_link = get_or_create_link(new_redirect_link)
         sharers = Sharer.objects.filter(customer=self)
         if sharer_ls != 'ALL':
             sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)

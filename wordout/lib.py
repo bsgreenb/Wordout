@@ -22,7 +22,10 @@ def get_ip(request):
 def code_generator(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for i in range(size))
 
-def force_url_format(url):
+def valid_wordout_url(url):
+    """
+    matches url on the complete wordout HTTP rules (basically, you must specify http:// or https://) as well as the subdomain e.g. 'www'.  Can be used for both validation and for capturing specific parts like the host or the path.
+    """
     url_format = re.compile(r'^(https?\://[a-zA-Z0-9\-\.]+\.[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3})((/\S*)?)$')
     return url_format.search(url)
 

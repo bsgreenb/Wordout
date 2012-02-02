@@ -182,27 +182,29 @@ def show_referrers_for_sharer(request, customer_sharer_identifier): #show where 
 
 @login_required
 def change_redirect_link_page(request):
-    if request.is_ajax():
+    if request.is_ajax(): #per https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpRequest.is_ajax jQuery sends the header to make this True
         form = ChangeLinkForm(user = request.user, data = request.POST)
         if form.is_valid():
             sharer_ls = request.POST['sharer_ls']
+            #They send 'ALL' to indicate they want to change redirect_links for all sharers, rather than just a subset of them.
             if sharer_ls != 'ALL':
+                #QSTN: Why do you chop one off the edge?
+                #QSTN: Where is the form shown pre-ajax submit?
+                #QSTN: Why no input-level validation of sharer_ls?
                 sharer_ls = sharer_ls[:-1].split(',') # create a list
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
             try:
                 customer.change_redirect_link(redirect_link, sharer_ls)
+
+                #QSTN: Why you need to pass back redirect_link?
+                results = {
+                    'status':'OK',
+                    'redirect_link':redirect_link
+                }
+                return HttpResponse(simplejson.dumps(results))
             except AttributeError: #invalid sharer ls
                 error = 'invalid sharer list'
-                return HttpResponse(simplejson.dumps({
-                    'status':'fail',
-                    'error':error
-                }))
-            results = {
-                'status':'OK',
-                'redirect_link':redirect_link
-            }
-            return HttpResponse(simplejson.dumps(results))
         else:
             error = 'invalid redirect link'
     else:
@@ -267,7 +269,7 @@ def set_program_page(request):
         customer = Customer.objects.get(user=request.user)
         form = SetProgramForm(request.POST)
         if form.is_valid():
-            redirect_link, created = get_or_create_link(form.cleaned_data['redirect_link'])
+            redirect_link= get_or_create_link(form.cleaned_data['redirect_link'])
             customer.update_program(redirect_link, form.cleaned_data['message_title'], form.cleaned_data['message_body'])
         else:
             request.session['form'] = form
@@ -403,7 +405,7 @@ def direct_page(request, code):
     if request.META.get('HTTP_REFERER', ''):
         referrer_form = ValidateReferrer({'referrer':request.META['HTTP_Referrer']})
         if referrer_form.is_valid():
-            referrer, created = get_or_create_link(referrer_form.cleaned_data['referrer'])
+            referrer = get_or_create_link(referrer_form.cleaned_data['referrer'])
         else:
             referrer = None
     else:

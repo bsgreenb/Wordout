@@ -2,7 +2,7 @@ from wordout.models import *
 from django import forms
 import re
 from django.contrib.auth.models import User
-from wordout.lib import force_url_format
+from wordout.lib import valid_wordout_url
 
 # customize each error messages and all ValidationError
 
@@ -101,23 +101,19 @@ class DisplaySharerForm(forms.Form):
 class ChangeLinkForm(forms.Form):
     redirect_link = forms.URLField(error_messages={'required':'', 'invalid':''})
 
-    def __init__(self, user=None, *args, **kwargs):
-        super(ChangeLinkForm, self).__init__(*args, **kwargs)
-        self._user = user
-
     def clean_redirect_link(self):
         if 'redirect_link' in self.cleaned_data:
             redirect_link = self.cleaned_data['redirect_link']
-            if force_url_format(redirect_link):
+            if valid_wordout_url(redirect_link):
                 #regular expression testing out the format
                return redirect_link
-        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
+        raise forms.ValidationError('The URL needs to match the format: "http(s)://subdomain.example.com(path)" (parentheses mean optional)".')
 
 class ActionTypeForm(forms.Form):
     action_name = forms.CharField(max_length=20, error_messages={'required':'', 'invalid':''})
     action_description = forms.CharField(max_length=250, required=False, error_messages={'invalid':''})
     
-    def __init__(self, user=None, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs): #Because forms.Form.__init__ isn't a normal init that just stores variables, we have to super it to pass user.
         super(ActionTypeForm, self).__init__(*args, **kwargs)
         self._user = user
 
@@ -134,7 +130,7 @@ class SetProgramForm(forms.Form):
     def clean_redirect_link(self):
         if 'redirect_link' in self.cleaned_data:
             redirect_link = self.cleaned_data['redirect_link']
-            if force_url_format(redirect_link):
+            if valid_wordout_url(redirect_link):
             #regular expression testing out the format
                 return redirect_link
         raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
