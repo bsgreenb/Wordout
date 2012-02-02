@@ -182,7 +182,7 @@ class Customer(models.Model):
         return data
 
 
-    def create_sharer(self, customer_sharer_identifier):s
+    def create_sharer(self, customer_sharer_identifier):
         EXCLUDE_CODE_LIST = ('sharer', 'apidoc')
         while True:
             code = code_generator()
