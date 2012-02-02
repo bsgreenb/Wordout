@@ -182,6 +182,9 @@ def show_referrers_for_sharer(request, customer_sharer_identifier): #show where 
 
 @login_required
 def change_redirect_link_page(request):
+    """
+    This is a processor for the ajax request sent from the modal form in sharer.html
+    """
     if request.is_ajax(): #per https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpRequest.is_ajax jQuery sends the header to make this True
         form = ChangeLinkForm(user = request.user, data = request.POST)
         if form.is_valid():
@@ -189,15 +192,16 @@ def change_redirect_link_page(request):
             #They send 'ALL' to indicate they want to change redirect_links for all sharers, rather than just a subset of them.
             if sharer_ls != 'ALL':
                 #QSTN: Why do you chop one off the edge?
-                #QSTN: Where is the form shown pre-ajax submit?
-                #QSTN: Why no input-level validation of sharer_ls?
+                    #TODO: Fix up the JS that sends here so it doesn't need to chop off the end.  Check out get_ls_and_toggle.js
+                    #TODO: Look at all of Rui's js while I'm at it.
+
                 sharer_ls = sharer_ls[:-1].split(',') # create a list
             redirect_link = form.cleaned_data['redirect_link']
             customer = Customer.objects.get(user=request.user)
             try:
                 customer.change_redirect_link(redirect_link, sharer_ls)
 
-                #QSTN: Why you need to pass back redirect_link?
+                #We pass back the redirect_link so the dashboard display can be updated with it.
                 results = {
                     'status':'OK',
                     'redirect_link':redirect_link
