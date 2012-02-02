@@ -182,10 +182,10 @@ class Customer(models.Model):
     #TODO: We need to handle the situation where customer sharer identifier is already there..
 
     def create_sharer(self, customer_sharer_identifier):
-        EXCLUE_CODE_LIST = ('sharer', 'apidoc')
+        EXCLUDE_CODE_LIST = ('sharer', 'apidoc')
         while True:
             code = code_generator()
-            if code not in EXCLUE_CODE_LIST:
+            if code not in EXCLUDE_CODE_LIST:
                 try:
                     Sharer.objects.get(code = code)
                 except Sharer.DoesNotExist:
