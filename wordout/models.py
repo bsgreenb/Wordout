@@ -257,7 +257,7 @@ class Sharer(models.Model):
 
 class Click(models.Model):
     sharer = models.ForeignKey(Sharer)
-    redirect_link = models.ForeignKey(Full_Link) # it could be different from sharers' redirect link because sharer's link can be changed.
+    redirect_link = models.ForeignKey(Full_Link, related_name='click_redirect_link') # have to give it a related_name to avoid name clashes
     referrer = models.ForeignKey(Full_Link, blank=True, null=True)
     IP = models.ForeignKey(IP, blank=True, null=True)
     Agent = models.ForeignKey(User_Agent, blank=True, null=True)
