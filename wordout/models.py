@@ -50,7 +50,7 @@ class Customer(models.Model):
     user = models.OneToOneField(User)
     client_key = models.CharField(max_length = 9, unique=True)
     api_key = models.CharField(max_length = 30, unique=True)
-    redirect_link = models.ForeignKey(Full_Link, related_name='customer_default_redirect_link', null=True, blank=True)
+    redirect_link = models.ForeignKey(Full_Link, related_name='customer_default_redirect_link', null=True, blank=True) #A default redirect_link.  Link that new sharers will redirect to when initialized, but individual sharers can be created or modified to use different ones.
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
     customer_group = models.ForeignKey(Customer_Group,default=1)
@@ -162,8 +162,6 @@ class Customer(models.Model):
 
     def display_referrers_for_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
-        #TODO: Proly test this out
-        #TODO: Go through Rui's new commits
         try:
             sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
         except DoesNotExist:
@@ -206,8 +204,8 @@ class Customer(models.Model):
             sharers = sharers.filter(customer_sharer_identifier__in = sharer_ls)
         sharers.update(enabled = boolean)
     
-    def update_program(self, redirect_link, message_title, message_body):
-        self.redirect_link=redirect_link
+    def update_program(self, default_redirect_link, message_title, message_body):
+        self.default_redirect_link=default_redirect_link
         self.message_title=message_title
         self.message_body=message_body
         self.save()
@@ -252,17 +250,20 @@ class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
     customer_sharer_identifier = models.CharField(max_length = 50)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
-    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link') #QSTN: (Hmm, first need to figure out our rules on changes/defaults). {This is the link that is used on the "Sharer Page", "Deal JS", and .  It is also used by *default* on the API, but can be overridden there.}
+    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link') #This is the link that is used on the "Sharer Page", "Deal JS", and the API by -default-.  Note that the default can be overriden when modifying/creating sharers through the dashboard or API.
     enabled = models.BooleanField(default = True)
     modified = models.DateTimeField(auto_now = True)
     created = models.DateTimeField(auto_now_add = True)
+
+    class Meta:
+        unique_together = ('customer', 'customer_sharer_identifier') #Ensure that a given customer never repeats a customer_sharer_identifier.  Note: If we let them add multiple sites this might change in the future.
 
     def __unicode__(self):
         return unicode(self.id)
 
 class Click(models.Model):
     sharer = models.ForeignKey(Sharer)
-    redirect_link = models.ForeignKey(Full_Link, related_name='click_redirect_link') # it could be different from sharers' redirect link because sharer's link can be changed.
+    redirect_link = models.ForeignKey(Full_Link, related_name='click_redirect_link') # have to give it a related_name to avoid name clashes
     referrer = models.ForeignKey(Full_Link, blank=True, null=True)
     IP = models.ForeignKey(IP, blank=True, null=True)
     Agent = models.ForeignKey(User_Agent, blank=True, null=True)
