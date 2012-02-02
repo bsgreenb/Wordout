@@ -24,27 +24,27 @@ class Test_Create_Sharer(TestCase):
 
     # variables' validation is dealt in views.
 
-    # requirement 1: end_total_count is equal to end
+    # requirement 1: accept valid identifiers. reject invalid identifiers
     # requirement 2: the code is not in EXCLUE_CODE_LIST = ('sharer', 'apidoc').  TODO how to test out this case?
-    # requirement 3: redirect link is right for the inserted sharers.
+    # requirement 3: redirect link, identifier are right for the inserted sharers.
+    # requirement 4: code length is matching the length of the code.
 
     def setUp(self):
         self.customer = Customer.objects.get(pk=1)
-        self.link = "http://www.facebook.com"
         self.count = self.customer.sharer_set.count()
+        self.length_of_code = 6
+        self.valid_identifiers = ['aaa', 'ccc', '12354', 'fdasf1', 'hgfhggfh521321', '!!!!', '#$#@%$3']
 
-    def test_total_number_and_link(self):
-        start = self.count + 1
-        end = self.count + 10
-        self.customer.create_sharer(start, end, self.link)
-        new_count = self.customer.sharer_set.count()
+    def test_create_sharer(self):
+        for identifier in self.valid_identifiers:
+            current_count = self.customer.sharer_set.count()
+            sharer = self.customer.create_sharer(customer_sharer_identifier = identifier)
 
-        self.assertEqual(new_count, end)
+            self.assertEqual(current_count + 1, self.customer.sharer_set.count())
+            self.assertEqual(sharer.customer_sharer_identifier, identifier)
+            self.assertEqual(sharer.redirect_link, self.customer.redirect_link)
+            self.assertEqual(len(sharer.code), self.length_of_code)
 
-        inserted_sharers = Sharer.objects.filter(customer=self.customer).order_by('-customer_sharer_identifier')[:end-start+1]
-        for sharer in inserted_sharers:
-            inserted_link = sharer.redirect_link.host.host_name + sharer.redirect_link.path
-            self.assertEqual(self.link, inserted_link)
 
 class Test_Change_Redirect_Link(TestCase):
     fixtures = ['test_data.json']
@@ -103,7 +103,7 @@ class Test_Update_Title_And_Body(TestCase):
         self.title = 'Hello. This is the title'
 
     def test_title_and_body_save(self):
-        self.customer.update_program(self.title, self.body)
+        self.customer.update_program(self.customer.redirect_link, self.title, self.body)
         self.assertEqual(self.body, self.customer.message_body)
         self.assertEqual(self.title, self.customer.message_title)
 

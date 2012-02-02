@@ -3,7 +3,6 @@ from django.template import RequestContext
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson
-from django.db.models import Max
 
 from wordout.forms import *
 from wordout.models import *
@@ -124,6 +123,8 @@ def api_do_action_page(request, api_key):
 
 
 def api_get_sharer_page(request, api_key):
+    #TODO do we allow them to send customized url or just use the default one?
+
     status = 'failed'
     sharer_identifier = request.GET.get('sharer_identifier', '')
     if not sharer_identifier:
@@ -145,7 +146,7 @@ def api_get_sharer_page(request, api_key):
             status = 'OK'
             message = 'get the sharer info'
         except: #TODO not sure what catch error should be here. DoesNotExist is not working.
-            sharer = customer.create_sharer(customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier'], redirect_link = customer.redirect_link)
+            sharer = customer.create_sharer(customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier'])
             status = 'OK'
             message = 'The new sharer is added'
 

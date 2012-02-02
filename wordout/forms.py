@@ -98,52 +98,6 @@ class DisplaySharerForm(forms.Form):
             return self.cleaned_data['customer_sharer_identifier']
         raise forms.ValidationError('customer sharer identifier is invalid')
 
-class CreateSharerForm(forms.Form):
-    start = forms.IntegerField(error_messages={'required':'', 'invalid':''})
-    end = forms.IntegerField(error_messages={'required':'', 'invalid':''})
-    redirect_link = forms.URLField(error_messages={'required':'', 'invalid':''})
-
-    def __init__(self, user=None, *args, **kwargs):
-        super(CreateSharerForm, self).__init__(*args, **kwargs)
-        self._user = user
-    
-    def clean_redirect_link(self):
-        if 'redirect_link' in self.cleaned_data:
-            redirect_link = self.cleaned_data['redirect_link']
-            if force_url_format(redirect_link):
-                #regular expression testing out the format
-               return redirect_link
-        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
-
-    def clean_start(self):
-        #make sure the start is 1 bigger than the last numeric identifier
-        if 'start' in self.cleaned_data:
-            start = self.cleaned_data['start']
-            try:
-                last = Sharer.objects.filter(customer = self._user).order_by('-created')[0]
-                last = int(last.customer_sharer_identifier)
-            except IndexError:
-                last = 0
-            if last < start:
-                return start
-        raise forms.ValidationError('Sharers have been added since this page loaded.  Please try again.')
-    
-    def clean_end(self):
-        if 'start' in self.cleaned_data and 'end' in self.cleaned_data:
-            start = self.cleaned_data['start']
-            end = self.cleaned_data['end']
-            
-            #limit the number of identifiers. current is 1000
-            total = Sharer.objects.filter(customer = self._user).count()
-            num_created = end - start + 1
-            max_users = Customer.objects.get(user = self._user).customer_group.max_users
-            if (total + num_created) > max_users:
-                raise forms.ValidationError('The amount of sharer is limited to %s' % max_users)
-
-            if end >= start:
-                return end
-        raise forms.ValidationError('The end number should be bigger than the start number.')
-
 class ChangeLinkForm(forms.Form):
     redirect_link = forms.URLField(error_messages={'required':'', 'invalid':''})
 
@@ -200,10 +154,10 @@ class DoActionForm(forms.Form):
     extra_data = forms.CharField(max_length=500, required=False)
 
 class AddSharerForm(forms.Form):
-    customer_sharer_identifier = forms.CharField(max_length=2000)
+    customer_sharer_identifier = forms.CharField(max_length=50)
 
 class ToggleSharerForm(forms.Form):
-    customer_sharer_identifier = forms.CharField(max_length=2000)
+    customer_sharer_identifier = forms.CharField(max_length=50)
     enabled = forms.BooleanField(required=False)
 
 

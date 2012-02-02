@@ -180,21 +180,6 @@ def show_referrer_by_sharer(request, customer_sharer_identifier): #show where th
     else:
         results['success'] = False
     return HttpResponse(simplejson.dumps(results), 'application/javascript')
-    
-@login_required
-@transaction.commit_on_success
-def create_sharer_page(request):
-    if request.method == 'POST':
-        form = CreateSharerForm(user=request.user, data=request.POST)
-        if form.is_valid():
-            start = form.cleaned_data['start']
-            end = form.cleaned_data['end']
-            redirect_link = form.cleaned_data['redirect_link']
-            customer = Customer.objects.get(user = request.user) #this has to be changed in version 2 when we combine User and Customer
-            customer.create_sharer(start, end, redirect_link)
-        else:
-            request.session['form'] = form
-    return HttpResponseRedirect('/')
 
 @login_required
 def change_redirect_link_page(request):
@@ -308,7 +293,7 @@ def display_sharer_plugin_page(request, client_key, customer_sharer_identifier):
             try:
                 sharer = customer.sharer_set.select_related().get(customer_sharer_identifier=form.cleaned_data['customer_sharer_identifier'])
             except: #TODO not sure what catch error should be here. DoesNotExist is not working.
-                sharer = customer.create_sharer(customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier'], redirect_link = customer.redirect_link)
+                sharer = customer.create_sharer(customer_sharer_identifier = form.cleaned_data['customer_sharer_identifier'])
         else:  # not a valid sharer identifier
            return HttpResponse('customer sharer identifier needs to be integer or characters.')
 
