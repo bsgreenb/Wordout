@@ -1,8 +1,9 @@
-from wordout.models import *
-from django import forms
 import re
+from django import forms
 from django.contrib.auth.models import User
+
 from wordout.lib import valid_wordout_url
+from wordout.models import *
 
 # customize each error messages and all ValidationError
 
@@ -133,10 +134,32 @@ class SetProgramForm(forms.Form):
             if valid_wordout_url(redirect_link):
             #regular expression testing out the format
                 return redirect_link
-        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com(path) (brackets means optional)".')
+        raise forms.ValidationError('The URL need match the format: "http(s)://subdomain.example.com/(path) (brackets means optional)".')
 
 class ValidateReferrer(forms.Form):
     referrer = forms.URLField(error_messages={'required':'', 'invalid':''})
+
+    def clean_referrer(self): # i need modify the referrer to match our format: "http(s)://subdomain.example.com/(path)"
+
+        case = re.compile(r'^(https?\://)?([a-zA-Z0-9\-\.]+\.)?([a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(/\S*)?)$')
+        match = case.search(self.cleaned_data['referrer'])
+        if match:
+            s = ''
+            if match.group(1): # http://
+                s += match.group(1)
+            else:
+                s += 'http://'
+
+            if match.group(2): # www.
+                s += match.group(2)
+            else:
+                s += 'www.'
+
+            s += match.group(3)
+            return s
+
+        else:
+            return referrer  # this is not necessary but in case we fucked up the previous cases.
 
 class ValidateIP(forms.Form):
     ip = forms.IPAddressField(error_messages={'required':'', 'invalid':''})

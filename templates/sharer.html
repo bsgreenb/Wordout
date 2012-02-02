@@ -1,5 +1,45 @@
 {% extends 'backbone/base.html' %}
 
+{% block css %}
+
+input[type="checkbox"]{
+margin-right: 15px;
+}
+
+div#action{
+padding-bottom: 10px;
+border-bottom: 1px solid #EEEEEE;
+}
+
+div#action button{
+margin-left: 10px;
+}
+
+div#action button.first{
+margin-left: 0px;
+}
+
+span#pagination{
+float: right;
+}
+
+span#pagination #next{
+margin-left: 5px;
+}
+
+.help-block{
+margin-top: 5px;
+}
+
+#edit-link-error{
+background-color: #FFE4E1;
+border: 1px solid #DD3C10;
+padding: 6px;
+margin: 0 50px 10px;
+}
+
+{% endblock %}
+
 {% block js %}
 <script src="/static/js/plugin/bootstrap-modal.js"></script>
 <script src="/static/js/detail.js"></script>
@@ -119,34 +159,6 @@ $(function() {
 </script>
 {% endblock %}
 
-{% block css %}
-
-input[type="checkbox"]{
-	margin-right: 15px;
-}
-
-div#action{
-	padding-bottom: 10px;
-	border-bottom: 1px solid #EEEEEE;
-}
-
-div#action button{
-	margin-left: 10px;
-}
-
-div#action button.first{
-	margin-left: 0px;
-}
-
-span#pagination{
-    float: right;
-}
-
-span#pagination #next{
-    margin-left: 5px;
-}
-{% endblock %}
-
 {% block content %}
 {% include 'backbone/form_errors.html' %}
 {% if ls %}
@@ -258,11 +270,13 @@ span#pagination #next{
 
             <fieldset>
                 <div class="clearfix">
-                    <div class="alert-message error" style="display: none" id="edit-link-error">
-                    </div>
+
+                    <div id="edit-link-error"></div>
                     <label>Redirect link:</label>
                     <div class="input">
                         <input type="text" name="redirect_link" id="redirect-link">
+                        <div class="help-block">The URL need match the format: http(s)://subdomain.example.com</div>
+
                     </div>
                 </div>
             </fieldset>
