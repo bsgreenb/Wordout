@@ -57,7 +57,6 @@ def register_page(request):
 
 ##### SHARER #####
 
-#TODO: Probably make customer_sharer_identifier + customer_id unique_together (read docs on that first tho)
 def main_page(request):
 
     if request.user.is_authenticated():
@@ -170,9 +169,9 @@ def main_page(request):
         return render_to_response('landing_page.html', dict(form=form), context_instance=RequestContext(request))
 
 @login_required
-def show_referrer_by_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
+def show_referrers_for_sharer(request, customer_sharer_identifier): #show where the clicks come from by each sharer. we display this in a modal when the client clicks "detail"
     customer = Customer.objects.get(user = request.user)
-    data = customer.display_referrers_for_sharer(customer_sharer_identifier)
+    data = customer.get_referrers_for_sharer(customer_sharer_identifier)
     results = {}
     if data:
         results['success'] = True

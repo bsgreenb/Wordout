@@ -160,8 +160,10 @@ class Customer(models.Model):
 
             return results
 
-    def display_referrers_for_sharer(self, customer_sharer_identifier):
-        #show where the clicks come from by each sharer
+    def get_referrers_for_sharer(self, customer_sharer_identifier):
+        '''
+        Gets the numbers of clicks for a sharer, grouped by the referrer.
+        '''
         try:
             sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
         except DoesNotExist:
