@@ -55,7 +55,7 @@ urlpatterns = patterns('',
     
     #apicall I think this could go into a subdomain. decide later
     (r'^api/doAction/(?P<api_key>\w{30})/$', api_views.api_do_action_page),
-    (r'^api/getSharer/(?P<api_key>\w{30})/$', api_views.api_add_sharer_page),
+    (r'^api/getSharer/(?P<api_key>\w{30})/$', api_views.api_get_sharer_page),
     (r'^api/getAllSharers/(?P<api_key>\w{30})/$', api_views.api_get_all_sharers_page),
     (r'^api/toggleSharer/(?P<api_key>\w{30})/$', api_views.api_toggle_sharer_page),
     (r'^api/getActionTypes/(?P<api_key>\w{30})/$', api_views.api_get_action_type_page),

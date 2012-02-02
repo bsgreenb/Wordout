@@ -31,7 +31,7 @@ def apidoc_do_action_page(request):
 
 
 def apidoc_get_sharer_page(request):
-    return render_to_response('apidoc/apidoc_getsharerinfo.html', dict(), context_instance = RequestContext(request))
+    return render_to_response('apidoc/apidoc_getsharer.html', dict(), context_instance = RequestContext(request))
 
 
 def apidoc_get_all_sharers_page(request):
