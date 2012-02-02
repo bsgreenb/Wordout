@@ -163,8 +163,7 @@ class Customer(models.Model):
     def display_referrers_for_sharer(self, customer_sharer_identifier):
         #show where the clicks come from by each sharer
         #TODO: Proly test this out
-
-        #TODO: go through model code
+        #TODO: Go through Rui's new commits
         try:
             sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
         except DoesNotExist:
@@ -181,8 +180,6 @@ class Customer(models.Model):
                     referrer_url = None
                 data.append({'referrer': referrer_url, 'clicks': referrer.click_total})
         return data
-
-    #TODO: We need to handle the situation where customer sharer identifier is already there..
 
     def create_sharer(self, customer_sharer_identifier, redirect_link):
         EXCLUE_CODE_LIST = ('sharer', 'apidoc')
@@ -252,7 +249,7 @@ class Sharer(models.Model):
     customer = models.ForeignKey(Customer)
     customer_sharer_identifier = models.CharField(max_length = 2000)
     code = models.CharField(max_length = 8, unique = True, db_index = True)
-    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link')
+    redirect_link = models.ForeignKey(Full_Link, related_name='sharer_redirect_link') #QSTN: (Hmm, first need to figure out our rules on changes/defaults). {This is the link that is used on the "Sharer Page", "Deal JS", and .  It is also used by *default* on the API, but can be overridden there.}
     enabled = models.BooleanField(default = True)
     modified = models.DateTimeField(auto_now = True)
     created = models.DateTimeField(auto_now_add = True)
