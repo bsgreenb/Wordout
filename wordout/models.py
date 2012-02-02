@@ -212,8 +212,9 @@ class Customer(models.Model):
         self.message_body=message_body
         self.save()
 
-    def create_actiontype(self, customer_action_type_identifier, action_name, description):
-        entry = Action_Type(customer=self, customer_action_type_identifier=customer_action_type_identifier, action_name=action_name, description=description)
+    def create_actiontype(self, action_name, description):
+        next_customer_action_type_identifier = self.action_type_set.all().order_by('-created')[0].customer_action_type_identifier + 1
+        entry = Action_Type(customer=self, customer_action_type_identifier=next_customer_action_type_identifier, action_name=action_name, description=description)
         entry.save()
         
     def edit_actiontype(self, customer_action_type_identifier, action_name, description):

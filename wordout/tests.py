@@ -24,7 +24,7 @@ class Test_Create_Sharer(TestCase):
 
     # variables' validation is dealt in views.
 
-    # requirement 1: accept valid identifiers. reject invalid identifiers
+    # requirement 1: accept valid identifiers.
     # requirement 2: the code is not in EXCLUE_CODE_LIST = ('sharer', 'apidoc').  TODO how to test out this case?
     # requirement 3: redirect link, identifier are right for the inserted sharers.
     # requirement 4: code length is matching the length of the code.
@@ -46,6 +46,8 @@ class Test_Create_Sharer(TestCase):
             self.assertEqual(len(sharer.code), self.length_of_code)
 
 
+
+
 class Test_Change_Redirect_Link(TestCase):
     fixtures = ['test_data.json']
 
@@ -57,7 +59,9 @@ class Test_Change_Redirect_Link(TestCase):
     def setUp(self):
         self.customer = Customer.objects.get(pk=1)
         self.link = 'http://www.twitter.com'
-        self.sharer_ls_list = ['ALL', [10, 9, 8, 7]]
+
+        self.part_sharer_ls = [sharer.customer_sharer_identifier for sharer in self.customer.sharer_set.all()[:4]] # build the partial sharer identifier ls
+        self.sharer_ls_list = ['ALL', self.part_sharer_ls]
 
     def test_change_link(self):
         for case in self.sharer_ls_list: # loop through two cases.
@@ -65,10 +69,11 @@ class Test_Change_Redirect_Link(TestCase):
             sharers = Sharer.objects.filter(customer=self.customer)
             if case != 'ALL':
                 sharers = sharers.filter(customer_sharer_identifier__in = case)
-
             for sharer in sharers:
                 changed_link = sharer.redirect_link.host.host_name + sharer.redirect_link.path
                 self.assertEqual(self.link, changed_link)
+
+
 
 
 class Test_Disabled_Or_Enable_Sharer(TestCase):
@@ -79,7 +84,8 @@ class Test_Disabled_Or_Enable_Sharer(TestCase):
     def setUp(self):
         self.customer = Customer.objects.get(pk=1)
         self.enable_or_disable = [True, False]
-        self.sharer_ls_list = ['ALL', [10, 9, 8, 7]]
+        self.part_sharer_ls = [sharer.customer_sharer_identifier for sharer in self.customer.sharer_set.all()[:4]] # build the partial sharer identifier ls
+        self.sharer_ls_list = ['ALL', self.part_sharer_ls]
 
     def test_disable_enable(self):
         for case in self.sharer_ls_list:
@@ -91,6 +97,8 @@ class Test_Disabled_Or_Enable_Sharer(TestCase):
 
                 for sharer in sharers:
                     self.assertIs(sharer.enabled, boolean)
+
+
 
 class Test_Update_Title_And_Body(TestCase):
     fixtures = ['test_data.json']
@@ -107,6 +115,8 @@ class Test_Update_Title_And_Body(TestCase):
         self.assertEqual(self.body, self.customer.message_body)
         self.assertEqual(self.title, self.customer.message_title)
 
+
+
 class Test_Create_ActionType(TestCase):
     fixtures = ['test_data.json']
 
@@ -118,11 +128,10 @@ class Test_Create_ActionType(TestCase):
         self.customer = Customer.objects.get(pk=1)
         self.action_name = 'test'
         self.description = 'test out'
-        self.count = Action_Type.objects.filter(customer=self.customer).count()
-        self.next_action_type = Action_Type.objects.filter(customer=self.customer).order_by('-created')[0].customer_action_type_identifier + 1
+        self.count = Action_Types.objects.filter(customer=self.customer).count()
 
     def test_create_action_type(self):
-        self.customer.create_actiontype(self.next_action_type, self.action_name, self.description)
+        self.customer.create_actiontype(self.action_name, self.description)
         current_action_types = Action_Type.objects.filter(customer=self.customer)
 
         self.assertEqual(self.count+1, current_action_types.count())
