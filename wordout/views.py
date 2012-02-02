@@ -316,27 +316,18 @@ def display_sharer_plugin_page(request, client_key, customer_sharer_identifier):
 ##### ACTION #####
 @login_required
 def action_type_page(request):
-    customer = Customer.objects.get(user=request.user)
-    action_type_ls = customer.action_type_set.all()
-    api_key = customer.api_key
-
-    current_number_actions = customer.action_type_set.all().count()
-    if current_number_actions == 0:
-        new_action_type_identifier = 1
-    else:
-        new_action_type_identifier = customer.action_type_set.aggregate(last_customer_action_type_identifier=Max('customer_action_type_identifier'))['last_customer_action_type_identifier'] + 1
-
+    action_type_ls = Customer.objects.get(user=request.user).action_type_set.all()
     form = get_previous_form(request)
-    return render_to_response('action_type_page.html', dict(action_type_ls=action_type_ls, api_key=api_key, new_action_type_identifier = new_action_type_identifier, form=form), context_instance=RequestContext(request))
+
+    return render_to_response('action_type_page.html', dict(action_type_ls=action_type_ls, form=form), context_instance=RequestContext(request))
 
 @login_required
 def create_action_type_page(request):
     if request.method == 'POST':
         customer = Customer.objects.select_related().get(user=request.user)
-        next_customer_action_type_identifier = customer.action_type_set.count() + 1
         form  = ActionTypeForm(user=customer, data=request.POST)
         if form.is_valid():
-            customer.create_actiontype(next_customer_action_type_identifier, form.cleaned_data['action_name'], form.cleaned_data['action_description'])
+            customer.create_actiontype(form.cleaned_data['action_name'], form.cleaned_data['action_description'])
         else:
             request.session['form'] = form
     return HttpResponseRedirect('/actiontype')

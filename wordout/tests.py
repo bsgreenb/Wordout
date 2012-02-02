@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.db import IntegrityError # Exception raised when the relational integrity of the database is affected, e.g. a foreign key check fails, duplicate key, etc.
 from wordout.models import *
 
 # test
@@ -24,16 +25,17 @@ class Test_Create_Sharer(TestCase):
 
     # variables' validation is dealt in views.
 
-    # requirement 1: accept valid identifiers. reject invalid identifiers
+    # requirement 1: accept valid identifiers.
     # requirement 2: the code is not in EXCLUE_CODE_LIST = ('sharer', 'apidoc').  TODO how to test out this case?
     # requirement 3: redirect link, identifier are right for the inserted sharers.
     # requirement 4: code length is matching the length of the code.
+    # requirement 5: customer id and customer_sharer identifier has to be unique
 
     def setUp(self):
         self.customer = Customer.objects.get(pk=1)
         self.count = self.customer.sharer_set.count()
         self.length_of_code = 6
-        self.valid_identifiers = ['aaa', 'ccc', '12354', 'fdasf1', 'hgfhggfh521321', '!!!!', '#$#@%$3']
+        self.valid_identifiers = ['aaa', 'bbb', '12354', 'fdasf1', 'hgfhggfh521321', '!!!!', '#$#@%$3']
 
     def test_create_sharer(self):
         for identifier in self.valid_identifiers:
@@ -44,6 +46,16 @@ class Test_Create_Sharer(TestCase):
             self.assertEqual(sharer.customer_sharer_identifier, identifier)
             self.assertEqual(sharer.redirect_link, self.customer.redirect_link)
             self.assertEqual(len(sharer.code), self.length_of_code)
+
+
+    def test_unique_customer_id_and_identifier(self):
+        duplicate_identifier = self.customer.sharer_set.all()[0].customer_sharer_identifier
+
+        with self.assertRaises(IntegrityError):
+            self.customer.create_sharer(customer_sharer_identifier = duplicate_identifier)
+
+
+
 
 
 class Test_Change_Redirect_Link(TestCase):
@@ -57,7 +69,9 @@ class Test_Change_Redirect_Link(TestCase):
     def setUp(self):
         self.customer = Customer.objects.get(pk=1)
         self.link = 'http://www.twitter.com'
-        self.sharer_ls_list = ['ALL', [10, 9, 8, 7]]
+
+        self.part_sharer_ls = [sharer.customer_sharer_identifier for sharer in self.customer.sharer_set.all()[:4]] # build the partial sharer identifier ls
+        self.sharer_ls_list = ['ALL', self.part_sharer_ls]
 
     def test_change_link(self):
         for case in self.sharer_ls_list: # loop through two cases.
@@ -65,10 +79,11 @@ class Test_Change_Redirect_Link(TestCase):
             sharers = Sharer.objects.filter(customer=self.customer)
             if case != 'ALL':
                 sharers = sharers.filter(customer_sharer_identifier__in = case)
-
             for sharer in sharers:
                 changed_link = sharer.redirect_link.host.host_name + sharer.redirect_link.path
                 self.assertEqual(self.link, changed_link)
+
+
 
 
 class Test_Disabled_Or_Enable_Sharer(TestCase):
@@ -79,7 +94,8 @@ class Test_Disabled_Or_Enable_Sharer(TestCase):
     def setUp(self):
         self.customer = Customer.objects.get(pk=1)
         self.enable_or_disable = [True, False]
-        self.sharer_ls_list = ['ALL', [10, 9, 8, 7]]
+        self.part_sharer_ls = [sharer.customer_sharer_identifier for sharer in self.customer.sharer_set.all()[:4]] # build the partial sharer identifier ls
+        self.sharer_ls_list = ['ALL', self.part_sharer_ls]
 
     def test_disable_enable(self):
         for case in self.sharer_ls_list:
@@ -91,6 +107,8 @@ class Test_Disabled_Or_Enable_Sharer(TestCase):
 
                 for sharer in sharers:
                     self.assertIs(sharer.enabled, boolean)
+
+
 
 class Test_Update_Title_And_Body(TestCase):
     fixtures = ['test_data.json']
@@ -107,6 +125,8 @@ class Test_Update_Title_And_Body(TestCase):
         self.assertEqual(self.body, self.customer.message_body)
         self.assertEqual(self.title, self.customer.message_title)
 
+
+
 class Test_Create_ActionType(TestCase):
     fixtures = ['test_data.json']
 
@@ -119,10 +139,9 @@ class Test_Create_ActionType(TestCase):
         self.action_name = 'test'
         self.description = 'test out'
         self.count = Action_Type.objects.filter(customer=self.customer).count()
-        self.next_action_type = Action_Type.objects.filter(customer=self.customer).order_by('-created')[0].customer_action_type_identifier + 1
 
     def test_create_action_type(self):
-        self.customer.create_actiontype(self.next_action_type, self.action_name, self.description)
+        self.customer.create_actiontype(self.action_name, self.description)
         current_action_types = Action_Type.objects.filter(customer=self.customer)
 
         self.assertEqual(self.count+1, current_action_types.count())
@@ -156,8 +175,22 @@ class Test_Edit_ActionType(TestCase):
 class Test_Disable_Or_Enable_Action(TestCase):
     fixtures = ['test_data.json']
 
-    # requirement 1. [[1], [1,2], [1,2,3]] / disable and enable. the code should work for all six cases
-    pass
+    def setUp(self):
+        self.customer = Customer.objects.get(pk=1)
+        self.enable_or_disable = [True, False]
+        self.part_action_ls = [action_type.customer_action_type_identifier for action_type in self.customer.action_type_set.all()[:4]]
+
+
+    def test_disable_or_enable_action(self):
+        for boolean in self.enable_or_disable:
+            self.customer.disable_or_enable_action(self.part_action_ls, boolean)
+
+            action_types = self.customer.action_type_set.filter(customer_action_type_identifier__in = self.part_action_ls)
+
+            for action_type in action_types:
+                self.assertIs(action_type.enabled, boolean)
+
+
 
 
 

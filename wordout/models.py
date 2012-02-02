@@ -218,8 +218,9 @@ class Customer(models.Model):
         self.message_body=message_body
         self.save()
 
-    def create_actiontype(self, customer_action_type_identifier, action_name, description):
-        entry = Action_Type(customer=self, customer_action_type_identifier=customer_action_type_identifier, action_name=action_name, description=description)
+    def create_actiontype(self, action_name, description):
+        next_customer_action_type_identifier = self.action_type_set.all().order_by('-created')[0].customer_action_type_identifier + 1
+        entry = Action_Type(customer=self, customer_action_type_identifier=next_customer_action_type_identifier, action_name=action_name, description=description)
         entry.save()
         
     def edit_actiontype(self, customer_action_type_identifier, action_name, description):
@@ -231,7 +232,7 @@ class Customer(models.Model):
     def disable_or_enable_action(self, action_type_identifier_ls, boolean):
         Action_Type.objects.filter(customer=self, customer_action_type_identifier__in = action_type_identifier_ls).update(enabled = boolean)
     
-   
+   #TODO display_referrer and display_path are not used in any page yet.
     def display_referrer(self):
         ls = Full_Link.objects.filter(click__sharer__in = self.sharer_set.all()).annotate(clicks=Count('click__id')).order_by('clicks')
         return ls
