@@ -169,19 +169,19 @@ class Customer(models.Model):
         '''
         try:
             sharer = Sharer.objects.get(customer = self, customer_sharer_identifier=customer_sharer_identifier)
-        except DoesNotExist:
+        except Sharer.DoesNotExist:
             return []
         #Now we get the clicks, grouped by the referrers
-        referrers = Click.objects.select_related().filter(sharer=sharer).annotate(click_total=Count('referrer')).order_by('click_total') #We select related so we can get the referrer link
+        clicks = Click.objects.filter(sharer=sharer).values('referrer__host__host_name','referrer__path').annotate(click_total=Count('id')).order_by('click_total') #We select related so we can get the referrer link
         #haven't gotten the official way to serialization models. need replace the code below in the future
         data = []
-        if referrers:
-            for referrer in referrers:
-                if referrer.host.host_name and referrer.path:
-                    referrer_url = referrer.host.host_name + referrer.path
+        if clicks:
+            for click in clicks:
+                if click['referrer__host__host_name'] and click['referrer__path']:
+                    referrer_url = click['referrer__host__host_name'] + click['referrer__path']
                 else:
                     referrer_url = None
-                data.append({'referrer': referrer_url, 'clicks': referrer.click_total})
+                data.append({'referrer': referrer_url, 'clicks': click['click_total']})
         return data
 
 
@@ -301,5 +301,5 @@ class Action(models.Model):
 
     def __unicode__(self):
         return '%s on %s' % (self.action_type, self.created)
-    
+
 

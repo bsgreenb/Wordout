@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     #sharer
-    (r'^sharer/([0-9]+)/$', views.show_referrers_for_sharer),
+    (r'^sharer/(\w+)/$', views.show_referrers_for_sharer),
     (r'^changelink/$', views.change_redirect_link_page),
     (r'^disablesharer/$', views.disable_or_enable_page, {'action':'disable', 'function':'disable_or_enable_sharer'}),
     (r'^enablesharer/$', views.disable_or_enable_page, {'action':'enable','function':'disable_or_enable_sharer'}),

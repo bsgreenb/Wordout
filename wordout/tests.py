@@ -191,6 +191,18 @@ class Test_Disable_Or_Enable_Action(TestCase):
                 self.assertIs(action_type.enabled, boolean)
 
 
+class Test_Display_Referrer(TestCase):
+    # this function is not used yet.
+    pass
+
+
+class Test_Display_Path(TestCase):
+    # this function is not used yet.
+    pass
+
+
+
+
 
 
 
