@@ -1,11 +1,8 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout  #We want to avoid overriding our own login function
 from django.contrib.auth.decorators import login_required
-from django.db.models import Max
-from django.db import transaction #commit_on_success to create sharer view so it runs query only once.
 from django.utils import simplejson
 
 from wordout.forms import *

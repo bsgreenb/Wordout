@@ -45,7 +45,7 @@ def get_or_create_link(url):
     """
     result = valid_wordout_url(url) #regular expression forcing http(s)://subdomain.example.extension
     host_name, path = result.group(1), result.group(2)
-    host, created = HOST.objects.get_or_create(host_name = netloc)
+    host, created = HOST.objects.get_or_create(host_name = host_name)
     link, created = Full_Link.objects.get_or_create(host = host, path = path)
     return link
 
