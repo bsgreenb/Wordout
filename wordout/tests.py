@@ -1,7 +1,13 @@
 from urlparse import urlparse
 from django.test import TestCase
 from django.db import IntegrityError # Exception raised when the relational integrity of the database is affected, e.g. a foreign key check fails, duplicate key, etc.
+from django.db.models import Count
+
 from wordout.models import *
+
+
+
+
 
 # test
 class SimpleTest(TestCase):
@@ -14,8 +20,32 @@ class SimpleTest(TestCase):
 # TODO I need also add clicks and referrers for display_referrer_by_sharer function
 # i leave display_sharers at the end because it's the most complex one.
 
+
+
 class Test_Display_Sharers(TestCase):
-    pass
+    pass  # figure out the flow first.
+
+    # requirement 1. test when customer_sharer_identifier is given. (click_total, action_type_set)
+    # requirement 2. test the order by is right at not oder by 'action_count' case
+
+    '''
+    def test_sharer_data(self, sharer, sharer_dict):
+        # sharer data matches sharer_dict
+        self.assertEqual(sharer.customer_sharer_identifier, sharer_dict['sharer_identifier'])
+        self.assertEqual(sharer.code, sharer_dict['code'])
+        self.assertEqual(sharer.redirect_link, sharer_dict['redirect_link'])
+        self.assertEqual(Click.objects.filter(sharer=sharer).count(), sharer_dict['click_total']
+        self.assertEqual(sharer.enabled, sharer_dict['enabled'])
+
+        sharer_action_counts = Action.objects.filter(click__sharer = sharer).values('click__sharer_id','action_type_id', 'action_type__action_name').annotate(action_count=Count('id'))
+
+        for action_count in sharer_action_counts:
+            for action_count_in_set in sharer_dict['action_type_set']:
+                if action_count['action_type_id']  == action_count_in_set['action_type_id']:
+                    self.assertEqual(action_count['action_count'], action_count_in_set['action_count'])
+
+    # Now I am able to check out the sharer and sharer_dict. I can start to write all the cases.
+    '''
 
 class Test_Display_Referrer_By_Sharer(TestCase):
     fixtures = ['test_data.json']
@@ -232,6 +262,22 @@ class Test_Display_Referrer(TestCase):
 class Test_Display_Path(TestCase):
     # this function is not used yet.
     pass
+
+
+
+#############  unittest for the forms ##############
+# I think we only need test out the customized validation, but not the default validation for the django fields. Like RegistrationForm, I only need test out clean_password2, clean_username, clean_email
+
+class Test_RegistrationForm(TestCase):
+    fixtures = ['test_data.json']
+
+    # setUp the
+    def setUp(self):
+        self.username = 'testcase'
+        self.email = 'testcase@gmail.com'
+        self.password = 'mopyard1'
+        self.password2 = 'mopyard1'
+
 
 
 
