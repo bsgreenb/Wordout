@@ -1,3 +1,4 @@
+from urlparse import urlparse
 from django.test import TestCase
 from django.db import IntegrityError # Exception raised when the relational integrity of the database is affected, e.g. a foreign key check fails, duplicate key, etc.
 from wordout.models import *
@@ -17,7 +18,39 @@ class Test_Display_Sharers(TestCase):
     pass
 
 class Test_Display_Referrer_By_Sharer(TestCase):
-    pass
+    fixtures = ['test_data.json']
+
+    # requirement 1. invalidate customer sharer identifier should return empty ls
+    # requirement 2. when the referrer is not None. the referrer has to be one of the full link and the total clicks should be right.
+    # requirement 3. when the referrer is None. the total clicks have to match.
+    def setUp(self):
+        self.customer = Customer.objects.get(pk=1)
+        self.clicks = Click.objects.filter(sharer__customer=self.customer)
+
+    def test_invalid_sharer_identifier(self):
+
+        # invalid sharer identifier will return None
+        invalid_sharer_ident_ls = ['aaa', 'bbb', 'ccc', 'ddd', 'eee123', 'fff', 'ggg0983', '9751']
+        sharer_ident_ls = [sharer['customer_sharer_identifier'] for sharer in Sharer.objects.filter(customer=self.customer).values('customer_sharer_identifier')]
+        for invalid_sharer_ident in invalid_sharer_ident_ls:
+            if invalid_sharer_ident not in sharer_ident_ls:
+                self.assertEqual(self.customer.get_referrers_for_sharer(invalid_sharer_ident), list())
+
+    # loop through the user's sharers. send the referrer and customer sharer id back to the click model. check whether the click total matches.
+
+    def test_get_referrers_for_sharer(self):
+        for sharer in self.customer.sharer_set.all():
+            data = self.customer.get_referrers_for_sharer(sharer.customer_sharer_identifier)
+            if data != []:
+                for referrer_and_click in data:
+                    if referrer_and_click.get('referrer', ''):
+                        url = urlparse(referrer_and_click['referrer'])
+                        host_name, path = url.scheme + '://' + url.netloc, url.path
+                        # referrer is not empty and has host_name and path
+                        self.assertEqual(referrer_and_click['clicks'], Click.objects.filter(sharer__customer=self.customer, referrer__host__host_name=host_name, referrer__path=path, sharer__customer_sharer_identifier = sharer.customer_sharer_identifier).count())
+                    else:
+                        # referrer is empty
+                        self.assertEqual(referrer_and_click['clicks'], Click.objects.filter(sharer__customer=self.customer, referrer=None, sharer__customer_sharer_identifier = sharer.customer_sharer_identifier).count())
 
 
 class Test_Create_Sharer(TestCase):

@@ -172,7 +172,7 @@ class Customer(models.Model):
         except Sharer.DoesNotExist:
             return []
         #Now we get the clicks, grouped by the referrers
-        clicks = Click.objects.filter(sharer=sharer).values('referrer__host__host_name','referrer__path').annotate(click_total=Count('id')).order_by('click_total') #We select related so we can get the referrer link
+        clicks = Click.objects.filter(sharer=sharer).values('referrer__host__host_name','referrer__path').annotate(click_total=Count('id')).order_by('-click_total') #We select related so we can get the referrer link
         #haven't gotten the official way to serialization models. need replace the code below in the future
         data = []
         if clicks:
