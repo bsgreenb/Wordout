@@ -56,7 +56,7 @@ class Customer(models.Model):
     redirect_link = models.ForeignKey(Full_Link, related_name='customer_default_redirect_link', null=True, blank=True) #A default redirect_link.  Link that new sharers will redirect to when initialized, but individual sharers can be created or modified to use different ones.
     message_title = models.CharField(max_length = 200, null=True, blank=True)
     message_body = models.TextField(null=True, blank=True)
-    customer_group = models.ForeignKey(Customer_Group,default=1)
+    customer_group = models.ForeignKey(Customer_Group)
 
     def __unicode__(self):
         return str(self.user)

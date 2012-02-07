@@ -33,12 +33,14 @@ def register_page(request):
                 client_key = code_generator(9)
                 api_key = code_generator(30)
                 try:
-                    Customer.objects.get(client_key = client_key)
-                    Customer.objects.get(api_key = api_key)
+                    Customer.objects.get(client_key = client_key) # try and catch both cases.
                 except Customer.DoesNotExist:
-                    break
+                    try:
+                        Customer.objects.get(api_key = api_key)
+                    except Customer.DoesNotExist:
+                        break
 
-            FREE_GROUP = 1 #ID of the Free Users group.  This is what everyone will be during private beta.
+            FREE_GROUP = Customer_Group.objects.get(pk=1) # Free Users group instance.  This is what everyone will be during private beta.
             Customer.objects.create(user=user, client_key = client_key, api_key = api_key, customer_group=FREE_GROUP)
             new_user = authenticate(username=request.POST['username'], password=request.POST['password1'])
 

@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     (r'^$', views.main_page),
     (r'^accounts/login/$', anonymous_required(login)),
     (r'^logout/$', views.logout_page),
-    (r'^register/$', anonymous_required(views.register_page)),
+    (r'^register/$', anonymous_required(views.register_page, '/')),
     
     #django plugin for change password and reset password
     (r'^password/change/$', password_change),

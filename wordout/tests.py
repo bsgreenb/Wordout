@@ -1,9 +1,11 @@
 from urlparse import urlparse
+
 from django.test import TestCase
 from django.db import IntegrityError # Exception raised when the relational integrity of the database is affected, e.g. a foreign key check fails, duplicate key, etc.
-from django.db.models import Count
+from django.contrib.auth.models import User
 
 from wordout.models import *
+from wordout.forms import *
 
 
 
@@ -273,10 +275,134 @@ class Test_RegistrationForm(TestCase):
 
     # setUp the
     def setUp(self):
-        self.username = 'testcase'
-        self.email = 'testcase@gmail.com'
-        self.password = 'mopyard1'
-        self.password2 = 'mopyard1'
+        self.data = {
+            'username':'testcase',
+            'email':'testcase@gmail.com',
+            'password1':'mopyard1',
+            'password2':'mopyard1'
+        }
+
+    def test_valid_case(self):
+        self.assertTrue(RegistrationForm(data).is_valid())
+
+    def test_invalid_cases(self):
+        user = User.objects.get(pk=1)
+        existing_username = user.username
+        existing_email = user.email
+
+        cases = {
+            # cover clean_password2, clean_username and clean_email casess
+            'password2':'mopyard111',
+            'username':existing_username,
+            'email':existing_email
+        }
+
+        for case in cases:
+            if case == 'password2':
+                self.data['password2'] = case['password2']
+            elif case == 'username':
+                self.data['username'] = case['username']
+            elif case == 'email':
+                self.data['email'] = case['email']
+
+        f = RegistrationForm(data)
+        self.assertFalse(f.is_valid())
+        self.assertIsNotNone(f.errors[case])
+
+class Test_ChangeLinkForm(TestCase):
+    # have cases in a dictionary. key is the actual url. value is True of False as indicator for valid and invalid.
+
+    def test_clean_redirect_link(self):
+        cases = [
+            {'link': 'http://www.wordout.me', 'valid': True},
+            {'link': 'http://www.wordout.me/abc', 'valid':True},
+            {'link': 'https://www.twitter.com/api', 'valid': True},
+            {'link': 'www.wordout.me', 'valid': False},
+            {'link': 'http://wordout.me', 'valid': False},
+            {'link': 'https://twitter.com', 'valid': False},
+            {'link': 'http://www.me', 'valid': False}
+        ]
+
+        for case in cases:
+            f = ChangeLinkForm({'redirect_link':case['link']})
+            if case['valid']:
+                self.assertTrue(f.is_valid())
+            else:
+                self.assertFalse(f.is_valid())
+
+class Test_ValidateReferrer(TestCase):
+    # the form should always return a valid referrer that
+    def test_clean_referrer(self):
+
+        cases = [
+                {'link': 'http://www.wordout.me', 'test': None},
+                {'link': 'http://www.wordout.me/abc', 'test':None},
+                {'link': 'https://www.twitter.com/api', 'test': None},
+                {'link': 'www.wordout.me', 'test': 'scheme'},
+                {'link': 'http://wordout.me', 'test': 'subdomain'},
+                {'link': 'https://twitter.com', 'test': 'subdomain'},
+                {'link': 'http://www.me/aapi', 'test': 'subdomain'}
+        ]
+
+        for case in cases:
+            f = ValidateReferer({'referrer':case['link']})
+            self.assertTrue(f.is_valid())
+
+            if not case['test']:
+                self.assertEqual(case['link'], f.cleaned_data['referrer'])
+            elif case['test'] == 'scheme':
+                self.assertEqual('http://' + case['link'], f.cleaned_data['referrer'])
+            elif case['test'] == 'subdomain':
+                parse = urlparse(case['link'])
+                link = parse.scheme + '://' + 'www.' + parse.netloc + parse.path
+                self.assertEqual(link, f.cleaned_data['referrer'])
+
+
+
+from django.test.client import RequestFactory
+####### start to write unittest for the views ########
+class Test_Logout_Page(TestCase):
+    fixtures = ['test_data.json']
+
+    def test_logout_page(self):
+        # requirement 1. a logged in user can be logged out.
+        user = User.objects.create_user('fakename', 'fake@gmail.com', 'wangshi')
+
+        login = self.client.login(username = user.username, password='wangshi') # can't use user.password because it's hashed
+
+        self.assertTrue(login) # logged in user.
+        response = self.client.get('/logout/', follow=True)
+        #todo how I can test out the user is anonymous now.
+        self.assertTemplateUsed(response, 'landing_page.html')
+
+
+class Test_Register_Page(TestCase):
+    fixtures = ['test_data.json']
+
+    def setUp(self):
+        self.data = {'username':'test', 'password1':'mopyard1', 'password2':'mopyard2', 'email':'test@gmail.com'} # it's invalid data. the password is different
+
+    def test_get(self):
+        response = self.client.get('/register/')
+        self.assertTemplateUsed(response, 'registration/register.html')
+
+    def test_post_invalid_data(self):
+        #todo Do I only need test one invalid case since i already tested out most invalid cases in the form and knew the form will be invalid.
+
+        response = self.client.post('/register/', self.data)
+        self.assertTemplateUsed(response, 'registration/register.html') # invalid data.
+
+    def test_post_valid_data(self):
+
+        self.data['password2'] = 'mopyard1'  # now, the data is valid
+        response = self.client.post('/register/', self.data, follow=True)
+        last_user = User.objects.all().order_by('-date_joined')[0]
+        last_customer = Customer.objects.get(user=last_user)
+        self.assertEqual(last_user.username, self.data['username'])
+        self.assertEqual(last_customer.customer_group.id, 1) # free group id
+        self.assertRedirects(response, '/pluginpage/') # first time user is redirected to the sharer page config.
+
+
 
 
 

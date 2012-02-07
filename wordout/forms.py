@@ -159,7 +159,7 @@ class ValidateReferrer(forms.Form):
             return s
 
         else:
-            return referrer  # this is not necessary but in case we fucked up the previous cases.
+            return self.cleaned_data['referrer']  # this is not necessary but in case we fucked up the previous cases.
 
 class ValidateIP(forms.Form):
     ip = forms.IPAddressField(error_messages={'required':'', 'invalid':''})
